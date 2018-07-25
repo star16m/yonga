@@ -1,0 +1,14 @@
+<html>
+<body>
+  <form>
+    <th:block th:fragment="select (label, selectName, items)">
+        <label class="col-sm-2 control-label" th:text="${label}">Label</label>
+        <div class="col-sm-10">
+          <select>
+            <option th:each="item : ${items}" th:value="${item}" th:text="${item}">dog</option>
+          </select>
+        </div>
+    </th:block>
+  </form>
+</body>
+</html>
