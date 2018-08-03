@@ -1,55 +1,33 @@
 package com.yonga.auc.data.product;
 
 import java.util.List;
-import java.util.Objects;
-
-import javax.transaction.Transactional;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import com.yonga.auc.data.category.Category;
-import com.yonga.auc.data.product.image.ProductImageRepository;
 
 @Service
 public class ProductService {
 
 	@Autowired
 	private ProductRepository productRepository;
-	@Autowired
-	private ProductImageRepository productImageRepository;
-	public List<Product> findProductByCategory(Category category) {
-		Objects.requireNonNull(category);
-		return this.productRepository.findProductByCategoryIdOrderByProductNo(category.getId());
+	@Cacheable("maker")
+	public List<Map<String, Object>> findProductMaker(Integer categoryId) {
+		return this.productRepository.findProductMaker(categoryId);
 	}
-	@Transactional
-	public void save(Product product) {
-		Objects.requireNonNull(product);
-		if (product.getId() == null) {
-			productRepository.save(product);
-		}
-		productImageRepository.deleteByProductId(product.getId());
-		if (!product.getImageList().isEmpty()) {
-			product.getImageList().stream().forEach(productImage -> {
-				productImage.setProduct(product);
-				productImageRepository.save(productImage);
-			});
-		}
-		productRepository.saveAndFlush(product);
+	@Cacheable("productType")
+	public List<Map<String, Object>> findProductType(Integer categoryId) {
+		return this.productRepository.findProductType(categoryId);
 	}
-	@Transactional
-	public void deleteByCategory(Category category) {
-		Objects.requireNonNull(category);
-		List<Product> productList = findProductByCategory(category);
-		if (productList != null && !productList.isEmpty()) {
-			productList.stream().forEach(product -> {
-				this.productImageRepository.deleteByProductId(product.getId());
-				this.productRepository.delete(product);
-			});
-		}
+	
+	public Page<Product> findProductList(Integer categoryId, List<String> selectsMakerList, List<String> selectsTypeList, Pageable pageable) {
+		return this.productRepository.findProductByCategoryIdAndMakerInAndTypeInOrderByMakerAscTypeAscRatingAscProductNoAsc(categoryId, selectsMakerList, selectsTypeList, pageable);
 	}
-	public void deleteAll() {
-		this.productImageRepository.deleteAll();
-		this.productRepository.deleteAll();
+
+	public Product findProductByUketsukeNo(String uketsukeNo) {
+		return this.productRepository.findProductByUketsukeNo(uketsukeNo);
 	}
 }

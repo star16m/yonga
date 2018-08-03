@@ -13,30 +13,95 @@ $(document).ready(function() {
     
     // disabled a tag
     $("a.disabled").bind('click', false);
+    // enable selectpicker
+    $('.selectpicker').selectpicker({
+    	width: '100%'
+    });
+    
+    // set image gallery
+    $('div.product-image').magnificPopup({
+    	delegate: 'a',
+    	type: 'image',
+    	gallery: {
+    		enabled:true
+    	}
+    });
+    // select event
+    $('#categorySelect').on('changed.bs.select', function(e) {
+    	var data = {};
+    	var categoryId = $(this).val();
+    	$.ajax({
+            url: "/selects/options",
+            type: "patch",
+            contentType: "application/json",
+            cache: false,
+            data: JSON.stringify(data),
+            //dataType: 'json',
+            success: function (data,status,xhr) {
+            	if (data != "success") {
+            		alert(data);
+            	} else {
+            		window.location.href = "/product/" + categoryId;
+            	}
+            }
+    	});
+    });
+    $('#makerSelect,#typeSelect').on('changed.bs.select', function(e) {
+    	$(this).data('targetchanged', true);
+    });
+    $('#makerSelect,#typeSelect').on('hide.bs.select', function (e) {
+    	if (!$(this).data('targetchanged')) {
+    		return;
+    	}
+    	var categoryId = $('#makerSelect').data('currentCategory');
+    	var data = {};
+    	data["selectsMaker"] = $('#makerSelect').val();
+    	data["selectsType"] = $('#typeSelect').val();
+    	$.ajax({
+            url: "/selects/options",
+            type: "patch",
+            contentType: "application/json",
+            cache: false,
+            data: JSON.stringify(data),
+            //dataType: 'json',
+            success: function (data,status,xhr) {
+            	if (data != "success") {
+            		alert(data);
+            	} else {
+            		window.location.href = "/product/" + categoryId;
+            	}
+            }
+    	});
+	});
 });
 function initialCategory(categoryId, status) {
 	var message = '';
 	var data = {};
 	if (categoryId == null) {
+		if ($('#exportPassword').val() == '') {
+			alert('초기화 패스워드를 입력해 주세요.');
+			return;
+		}
 		if (!confirm("전체 카테고리를 초기화 하시겠습니까?")) {
 			return false;
 		}
 		data["id"] = 0;
-		message = '초기화를 진행 합니다.';
-	} else {
-		data["id"] = categoryId;
-		message = '카테고리를 추출 합니다.';
+		data["exportPassword"] = $("#exportPassword").val();
+	    return $.ajax({
+	        url: "/category/init",
+	        type: "patch",
+	        contentType: "application/json",
+	        cache: false,
+	        data: JSON.stringify(data),
+	        //dataType: 'json',
+	        success: function (data,status,xhr) {
+	        	if (data != "success") {
+	        		alert(data);
+	        	} else {
+	        		alert('초기화를 진행 합니다.');
+	        		location.reload();
+	        	}
+	        }
+	    });
 	}
-    return $.ajax({
-        url: "/category/init",
-        type: "patch",
-        contentType: "application/json",
-        cache: false,
-        data: JSON.stringify(data),
-        dataType: 'json',
-        success: function (data,status,xhr) {
-        	alert(message);
-    		location.reload();
-        }
-    });
 }

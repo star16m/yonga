@@ -18,6 +18,8 @@ public class CacheConfig {
 		return cm -> {
 			Configuration<Object, Object> cacheConfiguration = createCacheConfiguration();
 			cm.createCache("category", cacheConfiguration);
+			cm.createCache("maker", cacheConfiguration);
+			cm.createCache("productType", cacheConfiguration);
 		};
 	}
 

@@ -52,7 +52,7 @@ public class DataExtractWorker implements Runnable {
 		this.productRepository.deleteAllInBatch();
 		
 		// get all category
-		final List<Category> allCategoryList = this.categoryRepository.findAll();
+		List<Category> allCategoryList = this.categoryRepository.findAll();
 		// set status to PROGRESS
 		allCategoryList.parallelStream().forEach(category -> {
 			category.setModifiedDate(new Date());

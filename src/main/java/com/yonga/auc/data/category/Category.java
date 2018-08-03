@@ -3,6 +3,7 @@ package com.yonga.auc.data.category;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.yonga.auc.data.common.CommonBaseData;
 
@@ -30,5 +31,8 @@ public class Category extends CommonBaseData {
 	
 	@Column(name = "ext_product_num")
 	private Integer extProductNum;
+	
+	@Transient
+	private String exportPassword;
 	
 }

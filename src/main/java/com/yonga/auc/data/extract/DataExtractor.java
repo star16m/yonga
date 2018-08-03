@@ -22,7 +22,6 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.select.Elements;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
@@ -67,7 +66,8 @@ public class DataExtractor {
 		String executor = initializeInfoMap.get("executor");
 		System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, StringUtils.defaultString(executor, "driver/chromedriver.exe"));
 		Configuration.browser = WebDriverRunner.CHROME;
-		Configuration.reportsFolder = "build/reports";
+		Configuration.savePageSource = false;
+		Configuration.screenshots = false;
 		Configuration.timeout = 10000;
 		ChromeOptions options = new ChromeOptions();
 //		options.setHeadless(true);

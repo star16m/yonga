@@ -48,6 +48,9 @@ public class PageWrapper<T> {
         }
     }
 
+    public Long getTotalElements() {
+    	return this.page.getTotalElements();
+    }
     public List<PageItem> getItems(){
         return items;
     }
