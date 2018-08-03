@@ -77,7 +77,7 @@
 			<tbody>
 				<tr th:each="category : ${categoryList}">
 					<td class="text-center">
-						<a th:href="@{/product/__${category.id}__}" th:text="${category.korean}"></a>
+						<a th:href="@{/product/__${category.id}__}" th:text="${category.korean + ' (' + category.japanese + ')'}"></a>
 					</td>
 					<td class="text-center" th:text="#{'category.status.' + ${category.status}}">상태</td>
 					<td class="text-right" th:text="${category.extProductNum + ' / ' + category.totalProductNum}"></td>
