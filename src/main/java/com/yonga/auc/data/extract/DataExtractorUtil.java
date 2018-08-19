@@ -1,13 +1,17 @@
 package com.yonga.auc.data.extract;
 
 import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Selenide.$;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
@@ -40,12 +44,20 @@ public class DataExtractorUtil {
 			HttpURLConnection.setFollowRedirects(false);
 		    HttpURLConnection con = (HttpURLConnection) new URL(urlString).openConnection();
 		    con.setRequestMethod("HEAD");
-		    if (con.getResponseCode() == HttpURLConnection.HTTP_OK) {
-		    	return true;
-		    }
+		    return con.getResponseCode() == HttpURLConnection.HTTP_OK;
 		} catch (IOException e) {
 			return false;
 		}
-	    return false;
+	}
+	public static void waitLoading() {
+		$("div.ext-el-mask-msg.x-mask-loading").shouldNotBe(Condition.visible);
+	}
+	public static Document getJsoupDocument(File file) {
+		try {
+			return Jsoup.parse(file, "UTF-8");
+		} catch (IOException e) {
+			log.warn("error occurred while parse jsoup document using file [{}]", file);
+			return null;
+		}
 	}
 }

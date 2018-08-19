@@ -1,8 +1,13 @@
+DROP TABLE dual IF EXISTS;
+DROP TABLE product_image IF EXISTS;
+DROP TABLE product IF EXISTS;
+DROP TABLE category IF EXISTS;
+DROP TABLE work_log IF EXISTS;
+
 -- dual
 CREATE TABLE dual (
 	dummy varchar(1)
 );
-
 
 -- 카테고리
 CREATE TABLE category (
@@ -13,6 +18,7 @@ CREATE TABLE category (
     status VARCHAR(80) NOT NULL,
     total_product_num INTEGER,
     ext_product_num INTEGER,
+    ext_product_detail_num INTEGER,
     create_date TIMESTAMP,
     modified_date TIMESTAMP
 );
@@ -49,10 +55,18 @@ CREATE TABLE product (
 
 -- 제품 이미지
 CREATE TABLE product_image (
-    id           INTEGER IDENTITY PRIMARY KEY,
-    name         VARCHAR(255),
-    product_id   INTEGER NOT NULL,
-    create_date TIMESTAMP,
+    id            INTEGER IDENTITY PRIMARY KEY,
+    name          VARCHAR(255),
+    product_id    INTEGER NOT NULL,
+    create_date   TIMESTAMP,
     modified_date TIMESTAMP
 );
 ALTER TABLE product_image ADD CONSTRAINT fk_product_image FOREIGN KEY (product_id) REFERENCES product (id);
+
+
+-- LOG
+CREATE TABLE WORK_LOG (
+    id           INTEGER IDENTITY PRIMARY KEY,
+    message      VARCHAR(255),
+    create_date  TIMESTAMP,
+);

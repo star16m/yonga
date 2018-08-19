@@ -1,5 +1,6 @@
 package com.yonga.auc.data.product;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +21,8 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.yonga.auc.common.PageWrapper;
 import com.yonga.auc.data.category.CategoryRepository;
+import com.yonga.auc.data.log.LogService;
+import com.yonga.auc.data.product.image.ProductImage;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,10 +34,12 @@ class ProductController {
 	private ProductService productService;
 	@Autowired
 	private CategoryRepository categoryRepository;
-
+	@Autowired
+	private LogService logService;
 	@PatchMapping("/selects/options")
 	public @ResponseBody String selectsMaker(HttpSession session, @RequestBody Map<String, Object> optionMap) {
 		log.info("selects maker {}, type {}", optionMap.get("selectsMaker"), optionMap.get("selectsType"));
+		logService.addLog("selects maker [" + optionMap.get("selectsMaker") + "], type[" + optionMap.get("selectsType") + "]");
 		session.setAttribute("selectsMaker", optionMap.get("selectsMaker"));
 		session.setAttribute("selectsType", optionMap.get("selectsType"));
 		return "success";
@@ -59,6 +64,7 @@ class ProductController {
     	// find product value
     	if (uketsukeNo != null) {
     		Product product = this.productService.findProductByUketsukeNo(uketsukeNo);
+    		product.setImageList(product.getImageList().stream().sorted(Comparator.comparing(ProductImage::getName)).collect(Collectors.toList()));
     		model.put("product", product);
     	}
         return "product/product";
@@ -85,6 +91,9 @@ class ProductController {
     		List<Map<String, Object>> typeInfo = this.productService.findProductType(categoryId.get());
     		List<String> selectsTypeList = null;
     		model.put("typeList", typeInfo);
+    		typeInfo.stream().forEach(e-> {
+    			log.info("Type for Category[{}], [{}]", categoryId.get(), e.get("type"));
+    		});
     		if (!session.isNew() && session.getAttribute("selectsType") != null) {
     			log.debug("maker is {}", session.getAttribute("selectsType"));
     			selectsTypeList = (List<String>) session.getAttribute("selectsType");

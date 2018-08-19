@@ -40,8 +40,20 @@
 				<td th:text="*{openDate}" /></td>
 			</tr>
 			<tr>
-				<th class="text-center">특이사항</th>
-				<td th:text="*{note}" /></td>
+				<th class="text-center media-middle">특이사항</th>
+				<td th:utext="${#strings.replace(product.note,', ','&lt;br&gt;')}" /></td>
+			</tr>
+			<tr>
+				<th class="text-center media-middle">SalesPoint</th>
+				<td th:utext="${#strings.replace(product.salesPoint,', ','&lt;br&gt;')}" /></td>
+			</tr>
+			<tr>
+				<th class="text-center media-middle">SalesPoint2</th>
+				<td th:utext="${#strings.replace(product.salesPoint2,', ','&lt;br&gt;')}" /></td>
+			</tr>
+			<tr>
+				<th class="text-center media-middle">Accessories</th>
+				<td th:utext="${#strings.replace(product.accessories,', ','&lt;br&gt;')}" /></td>
 			</tr>
 			<tr>
 				<th class="text-center">시작</th>
@@ -72,6 +84,7 @@
 					<th>카테고리</th>
 					<th>진행</th>
 					<th>상태</th>
+					<th>추출일시</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -81,6 +94,7 @@
 					</td>
 					<td class="text-center" th:text="#{'category.status.' + ${category.status}}">상태</td>
 					<td class="text-right" th:text="${category.extProductNum + ' / ' + category.totalProductNum}"></td>
+					<td th:text="${#dates.format(category.modifiedDate, 'MM월 dd일 (E) HH:mm:ss')}" class="text-center"></td>
 				</tr>
 			</tbody>
 		</table>

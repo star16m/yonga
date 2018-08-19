@@ -6,37 +6,49 @@
 <body>
 
 	<div class="text-right">
-		<input type="password" value="" id="exportPassword" name="exportPassword" placeholder="초기화 패스워드"/> <a class="btn btn-default"
-			href="javascript:void(0);"
-			th:onclick="|javascript:initialCategory();|">전체초기화</a>
+		<select id="extractCategorySelect" name="extractCategorySelect" class="selectpicker" data-style="btn-success" data-width="400px" data-size="10" data-selected-text-format="count > 3" data-count-selected-text="{0} 개의 카테고리 선택중" th:title="${#lists.size(categoryList) + '개  Category가 있습니다'}" multiple data-actions-box="true">
+			<option th:each="category : ${categoryList}" th:text="${category.korean}" th:value="${category.id}" th:attr="data-subtext=${category.japanese}" selected="selected">
+				category
+			</option>
+		</select>
+		<input type="password" value="" id="extractPassword" name="extractPassword" placeholder="초기화 패스워드"/>
+		<a class="btn btn-default" href="javascript:void(0);" th:onclick="|javascript:initialCategory();|">전체초기화</a>
 	</div>
 	<h2>Category</h2>
 	<table id="category" class="table table-striped">
 		<thead>
 			<tr>
-				<th>이름</th>
-				<th>한글명</th>
-				<th>일본어명</th>
+				<th>카테고리</th>
+				<th>한글(일본어)</th>
 				<th>상태</th>
 				<th>Total</th>
-				<th>ext</th>
+				<th>list</th>
+				<th>detail</th>
 				<th>수정일</th>
 			</tr>
 		</thead>
 		<tbody>
 			<tr th:each="category : ${categoryList}">
 				<td th:text="${category.name}" class="text-center"></td>
-				<td th:text="${category.korean}" class="text-center"></td>
-				<td th:text="${category.japanese}" class="text-center"></td>
+				<td th:text="${category.korean + '(' + category.japanese + ')'}" class="text-center"></td>
 				<td th:text="#{'category.status.' + ${category.status}}"
 					class="text-center"></td>
 				<td th:text="${category.totalProductNum}" class="text-right"></td>
 				<td th:text="${category.extProductNum}" class="text-right"></td>
-				<td th:text="${#dates.format(category.modifiedDate, 'MM월 dd일 (E)')}"
+				<td th:text="${category.extProductDetailNum}" class="text-right"></td>
+				<td th:text="${#dates.format(category.modifiedDate, 'MM월 dd일 (E) HH:mm:ss')}"
 					class="text-center"></td>
 			</tr>
 		</tbody>
 	</table>
+
+	<br /><br />
+	<h2>작업 로그</h2>
+	<div class="log-contain">
+		<ul th:each="log : ${logList}">
+			<li th:text="${'[' + #dates.format(log.createDate, 'yyyy/MM/dd HH:mm') + '] ' + log.message}">log</li>
+		</ul>
+	</div>
 
 </body>
 </html>

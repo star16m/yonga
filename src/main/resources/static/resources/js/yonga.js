@@ -14,7 +14,7 @@ $(document).ready(function() {
     // disabled a tag
     $("a.disabled").bind('click', false);
     // enable selectpicker
-    $('.selectpicker').selectpicker({
+    $('#categorySelect,#makerSelect,#typeSelect').selectpicker({
     	width: '100%'
     });
     
@@ -78,15 +78,19 @@ function initialCategory(categoryId, status) {
 	var message = '';
 	var data = {};
 	if (categoryId == null) {
-		if ($('#exportPassword').val() == '') {
+		if ($("#extractCategorySelect").val() == null || $("#extractCategorySelect").val() == "") {
+			alert("초기화할 카테고리를 선택해 주세요.");
+			return;
+		}
+		if ($('#extractPassword').val() == '') {
 			alert('초기화 패스워드를 입력해 주세요.');
 			return;
 		}
-		if (!confirm("전체 카테고리를 초기화 하시겠습니까?")) {
+		if (!confirm("선택한 [" + $("#extractCategorySelect").val().length + "] 개 카테고리를 초기화 하시겠습니까?")) {
 			return false;
 		}
-		data["id"] = 0;
-		data["exportPassword"] = $("#exportPassword").val();
+		data["categoryIdList"] = $("#extractCategorySelect").val();
+		data["extractPassword"] = $("#extractPassword").val();
 	    return $.ajax({
 	        url: "/category/init",
 	        type: "patch",

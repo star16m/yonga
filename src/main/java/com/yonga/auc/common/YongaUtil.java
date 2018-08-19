@@ -1,8 +1,12 @@
 package com.yonga.auc.common;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Path;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
 public class YongaUtil {
@@ -22,6 +26,9 @@ public class YongaUtil {
 		return StringUtils.isNotEmpty(string);
 	}
 
+	public static boolean isEmpty(Object object) {
+		return object == null || isEmpty(object.toString());
+	}
 	public static boolean isEmpty(String string) {
 		return StringUtils.isEmpty(string);
 	}
@@ -36,5 +43,25 @@ public class YongaUtil {
 			}
 		}
 		return replaceString;
+	}
+
+	public static void cleanDirectory(Path path) {
+		File targetDirectory = path.toFile();
+		if (!targetDirectory.isDirectory()) {
+			throw new IllegalArgumentException();
+		}
+		try {
+			if (targetDirectory.exists()) {
+				FileUtils.cleanDirectory(targetDirectory);
+			} else {
+				FileUtils.forceMkdir(targetDirectory);
+			}
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static int calculateTotalPage(int totalItem, int pageSize) {
+		return (totalItem + pageSize - 1) / pageSize;
 	}
 }

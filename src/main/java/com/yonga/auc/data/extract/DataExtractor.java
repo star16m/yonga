@@ -8,20 +8,22 @@ import static com.codeborne.selenide.Selenide.open;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.openqa.selenium.Alert;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
@@ -29,42 +31,27 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.CollectionCondition;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.SelenideElement;
 import com.codeborne.selenide.WebDriverRunner;
 import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.data.category.Category;
+import com.yonga.auc.data.extract.DataExtractException.ExtractExceptionMessage;
 import com.yonga.auc.data.product.Product;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class DataExtractor {
 
-	private String uid;
-	private String pwd;
-	private String targetProtocol;
-	private String targetHost;
-	private String workPath;
-	public DataExtractor(Map<String, String> initializeInfoMap) {
-		initialize(initializeInfoMap);
-	}
-	private String getTargetURL() {
-		return getTargetURL("");
-	}
-	private String getTargetURL(String path) {
-		return String.format("%s://%s/%s", this.targetProtocol, this.targetHost, path);
-	}
-	private void initialize(Map<String, String> initializeInfoMap) {
-		if (!initializeInfoMap.containsKey("uid") || !initializeInfoMap.containsKey("pwd") || !initializeInfoMap.containsKey("targetProtocol") || !initializeInfoMap.containsKey("targetHost")) {
-			throw new IllegalArgumentException("uid and pwd is required parameter");
-		}
-		this.uid = initializeInfoMap.get("uid");
-		this.pwd = initializeInfoMap.get("pwd");
-		this.targetProtocol = initializeInfoMap.get("targetProtocol");
-		this.targetHost = initializeInfoMap.get("targetHost");
-		this.workPath = initializeInfoMap.get("work.dir");
-		String executor = initializeInfoMap.get("executor");
-		System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, StringUtils.defaultString(executor, "driver/chromedriver.exe"));
+	private static final int PAGE_SIZE = 100;
+	private ExtractSiteInfo siteInfo;
+	public DataExtractor(ExtractSiteInfo siteInfo) {
+		this.siteInfo = siteInfo;
+
+		System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, StringUtils.defaultString(this.siteInfo.getExecutor(), "driver/chromedriver.exe"));
 		Configuration.browser = WebDriverRunner.CHROME;
 		Configuration.savePageSource = false;
 		Configuration.screenshots = false;
@@ -78,27 +65,33 @@ public class DataExtractor {
 		WebDriverRunner.setWebDriver(driver);
 	}
 	private boolean login() {
-		open(getTargetURL());
-		$("input[name=uid]").setValue(uid);
-		$("input[name=pwd]").setValue(pwd);
+		open(this.siteInfo.getTargetURL());
+		$("input[name=uid]").setValue(this.siteInfo.getUid());
+		$("input[name=pwd]").setValue(this.siteInfo.getPwd());
 		$("input[name=imageField]").click();
 		try {
 			Alert alert = WebDriverRunner.getWebDriver().switchTo().alert();
+			String alertText = alert.getText();
+			if (alertText.contains("すでにログインされているか")) {
+				alert.accept();
+				return false;
+			}
 			alert.accept();
 			SelenideElement loginInfoElement = $("div#divUserData");
-			loginInfoElement.shouldHave(text(this.uid));
+			loginInfoElement.shouldHave(text(this.siteInfo.getUid()));
 			loginInfoElement.shouldHave(text("様"));
 			$("div#navigation ul li a span").shouldHave(text("下見検索"));
 		} catch (final NoAlertPresentException e) {
 			return true;
 		} catch (Exception e) {
+			log.warn(e.getMessage());
 			return false;
 		}
 		return true;
 	}
 	private void loadMainMenu(Category category) {
 		// select category
-		open(getTargetURL("ba_menu.aspx?ud=0"));
+		open(this.siteInfo.getTargetURL("ba_menu.aspx?ud=0"));
 		// main menu check
 		SelenideElement loginInfoElement = $("div#divUserData");
 		SelenideElement menuElement = loginInfoElement.parent().parent();
@@ -120,94 +113,154 @@ public class DataExtractor {
 		SelenideElement titleElement = $("div#mainPanel div span.x-panel-header-text");
 		titleElement.shouldHave(text("出品一覧"));
 	}
+	private boolean hasProductDetail() {
+		DataExtractorUtil.waitLoading();
+		ElementsCollection productCollection = $$("div.x-grid3-cell-inner.x-grid3-col-clmUketsukeNo");
+		productCollection.shouldBe(CollectionCondition.sizeGreaterThanOrEqual(0));
+		if (productCollection != null && productCollection.size() > 0) {
+			productCollection.get(0).click();
+			DataExtractorUtil.waitLoading();
+			SelenideElement titleElement = $("span.x-panel-header-text");
+			titleElement.shouldHave(text("出品詳細"));
+			return true;
+		}
+		return false;
+	}
 	private void logout() {
-		$("a#exitlink").click();
+		SelenideElement exitLink = $("a#exitlink");
+		if (exitLink.exists()) {
+			exitLink.click();
+		}
 		WebDriverRunner.getWebDriver().close();
 	}
-	public void extractAll(List<Category> targetCategoryList, BiConsumer<Category, List<Product>> extractConsumer) {
+	public boolean extractProductList(List<Category> targetCategoryList, Consumer<Category> foundCategoryProductConsumer, BiConsumer<Category, List<Product>> extractConsumer, Consumer<Category> extractedCategoryConsumer) throws DataExtractException {
 		Objects.requireNonNull(targetCategoryList);
 		Objects.requireNonNull(extractConsumer);
-		boolean loginSuccess = login();
-		if (loginSuccess) {
+		try {
+			if (!login()) {
+				throw new DataExtractException(ExtractExceptionMessage.LOGIN_FAIL);
+			}
 			targetCategoryList.stream().forEach(category -> {
 				loadMainMenu(category);
 				
-				AtomicInteger currentPageNo = new AtomicInteger(1);
-				AtomicInteger productNo = new AtomicInteger(1);
 				$("input#list-view-count").click();
-				SelenideElement pageSizeCombo = $$("div.x-combo-list-inner div.x-combo-list-item").stream().filter(d->d.getText().equals("100")).findFirst().orElse(null);
+				SelenideElement pageSizeCombo = $$("div.x-combo-list-inner div.x-combo-list-item").stream().filter(d->d.getText().equals(String.valueOf(PAGE_SIZE))).findFirst().orElse(null);
 				if (pageSizeCombo != null) {
 					pageSizeCombo.click();
 				}
-				// clean directory
-				cleanHtmlFiles();
-				List<Product> productList;
-				do {
+				DataExtractorUtil.waitLoading();
+				AtomicInteger productNo = new AtomicInteger(1);
+				int foundProductPageNums = foundTotalProductNum(category, foundCategoryProductConsumer);
+				IntStream.rangeClosed(1, foundProductPageNums).boxed().map(String::valueOf).forEach(pageNo-> {
 					long start = System.currentTimeMillis();
 					// move page
 					SelenideElement currentProductPage = $("input.x-tbar-page-number");
-					String currentPage = String.valueOf(currentPageNo.getAndIncrement());
-					currentProductPage.setValue(currentPage).pressEnter();
-					$("div.ext-el-mask-msg.x-mask-loading").shouldNotBe(Condition.visible);
+					currentProductPage.setValue(pageNo).pressEnter();
+					DataExtractorUtil.waitLoading();
+					log.info("1. move page [{}]", (System.currentTimeMillis() - start)); start = System.currentTimeMillis();
 					
 					// export html file
-					File htmlFile = exportHtmlFiles(category, productNo, currentPage);
-					productList = extractAll(category, productNo, htmlFile);
-					extractConsumer.accept(category, productList);
-					System.out.println(String.format("extract %s %s", category.getKorean(), (System.currentTimeMillis()-start)));
-				} while(hasMoreProducts(category));
+					File htmlFile = exportHtmlFiles(Paths.get(this.siteInfo.getWorkRoot(), this.siteInfo.getWorkPathList(), String.format("%s_%s_%s.html", category.getId(), category.getKorean(), pageNo)));
+					log.info("2. export html file [{}]", (System.currentTimeMillis() - start)); start = System.currentTimeMillis();
+					extractConsumer.accept(category, extractProductList(category, productNo, htmlFile));
+					log.info("4. extraction consumer [{}]", (System.currentTimeMillis() - start)); start = System.currentTimeMillis();
+				});
+				extractedCategoryConsumer.accept(category);
 			});
+			return true;
+		} finally {
+			logout();
 		}
-		logout();
 	}
-	
-	public boolean hasMoreProducts(Category category) {
+	public boolean extractProductDetail(List<Category> targetCategoryList, BiConsumer<Category, Product> extractConsumer) throws DataExtractException {
+		Objects.requireNonNull(targetCategoryList);
+		Objects.requireNonNull(extractConsumer);
+		try {
+			if (!login()) {
+				throw new DataExtractException(ExtractExceptionMessage.LOGIN_FAIL);
+			}
+			targetCategoryList.stream().forEach(category -> {
+				loadMainMenu(category);
+				
+				if (hasProductDetail()) {
+					int foundProductPageNums = category.getTotalProductNum();
+					IntStream.rangeClosed(1, foundProductPageNums).boxed().map(String::valueOf).forEach(productNo -> {
+						long start = System.currentTimeMillis();
+						// move product page
+						SelenideElement currentProductPage = $("input.x-tbar-page-number");
+						currentProductPage.setValue(productNo).pressEnter();
+						DataExtractorUtil.waitLoading();
+						// export html file
+						File htmlFile = exportHtmlFiles(Paths.get(this.siteInfo.getWorkRoot(), this.siteInfo.getWorkPathDetail(), String.format("%s_%s_%s.html", category.getId(), category.getKorean(), productNo)));
+						extractConsumer.accept(category, extractProduct(category, htmlFile));
+						log.info(String.format("extract Product %s %s %s", category.getKorean(), productNo, (System.currentTimeMillis()-start)));
+					});
+				}
+			});
+			return true;
+		} finally {
+			logout();
+		}
+	}
+	public int foundTotalProductNum(Category category, Consumer<Category> foundCategoryProductConsumer) {
 		String pageInfo = DataExtractorUtil.getText($("div.x-paging-info"));
 		Objects.requireNonNull(pageInfo);
 		if (pageInfo.contains("下見情報が見つかりませんでした")) {
 			category.setTotalProductNum(0);
+		} else if (pageInfo.contains("件中")) {
+			Integer totalProductNum = Integer.valueOf(YongaUtil.getMatchedGroup(pageInfo, "(\\d+)件中"));
+			category.setTotalProductNum(totalProductNum);
+		}
+		foundCategoryProductConsumer.accept(category);
+		return YongaUtil.calculateTotalPage(category.getTotalProductNum(), PAGE_SIZE);
+	}
+
+	public boolean hasProducts(Category category) {
+		String pageInfo = DataExtractorUtil.getText($("div.x-paging-info"));
+		Objects.requireNonNull(pageInfo);
+		if (pageInfo.contains("下見情報が見つかりませんでした")) {
 			return false;
 		}
 		if (pageInfo.contains("件中")) {
 			Integer totalProductNum = Integer.valueOf(YongaUtil.getMatchedGroup(pageInfo, "(\\d+)件中"));
-			Integer currentProductNum = Integer.valueOf(YongaUtil.getMatchedGroup(pageInfo, "(\\d+)件を表示"));
-			category.setTotalProductNum(totalProductNum);
-			category.setExtProductNum(currentProductNum);
+			Integer currentProductNum = Integer.valueOf(YongaUtil.getMatchedGroup(pageInfo, "(\\d+)件目?を表示"));
 			return totalProductNum > currentProductNum;
 		}
 		return false;
 	}
-	private boolean cleanHtmlFiles() {
-		File htmlFile = Paths.get(this.workPath).toFile();
-		try {
-			if (htmlFile.exists()) {
-				FileUtils.cleanDirectory(htmlFile);
-			} else {
-				FileUtils.forceMkdir(htmlFile);
-			}
-			return true;
-		} catch (IOException e) {
-			return false;
-		}
-	}
 	
-	private File exportHtmlFiles(Category category, AtomicInteger productNo, String pageNo) {
-		File htmlFile = Paths.get(this.workPath, String.format("%s(%s)_%s.html", category.getKorean(), category.getId(), pageNo)).toFile();
+	private File exportHtmlFiles(Path targetFilePath) {
+		File htmlFile = targetFilePath.toFile();
 		try {
 			FileUtils.write(htmlFile, WebDriverRunner.getWebDriver().getPageSource(), Charset.forName("UTF-8"));
 		} catch (IOException e) {
+			e.printStackTrace();
 			return null;
 		}
 		return htmlFile;
 	}
-	private List<Product> extractAll(Category category, AtomicInteger productNo, File htmlFile) {
-		List<Product> extractedProductList = new ArrayList<Product>();
-		Document doc = null;
-		try {
-			doc = Jsoup.parse(htmlFile, "UTF-8");
-		} catch (IOException e) {
-			return null;
-		}
+	private Product extractProduct(Category category, File htmlFile) {
+		Document doc = DataExtractorUtil.getJsoupDocument(htmlFile);
+		String uketsukeNo = doc.select("span#desc-uketsuke-no").first().text();
+		String salesPoint = doc.select("span#desc-sales-point").first().text().replaceAll("[\n　 ]+", ", ");
+		String salesPoint2 = doc.select("span#desc-sales-point2").first().text().replaceAll("[\n　 ]+", ", ");
+		String accessories = doc.select("span#desc-accessories").first().text().replaceAll("[\n　 ]+", ", ");
+		String bikoInfo = doc.select("span#desc-note table tbody td.bikoTd").stream()
+				.map(Element::text)
+				.map(StringUtils::trim)
+				.map(t->StringUtils.replaceAll(t, "[ 　\r\n]", ""))
+				.filter(t->!t.isEmpty())
+				.collect(Collectors.joining(", "));
+		Product extractedProduct = new Product();
+		extractedProduct.setUketsukeNo(uketsukeNo);
+		extractedProduct.setSalesPoint(salesPoint);
+		extractedProduct.setSalesPoint2(salesPoint2);
+		extractedProduct.setAccessories(accessories);
+		extractedProduct.setNote(bikoInfo);
+		return extractedProduct;
+	}
+	private List<Product> extractProductList(Category category, AtomicInteger productNo, File htmlFile) {
+		Document doc = DataExtractorUtil.getJsoupDocument(htmlFile);
 		
 		// 접수번호
 		List<String> uketsukeNoList = doc.select("div.x-grid3-body div.x-grid3-row table.x-grid3-row-table tbody tr div.x-grid3-col-clmUketsukeNo").stream().map(e->e.text()).collect(Collectors.toList());
@@ -227,6 +280,8 @@ public class DataExtractor {
 		List<String> startList =      doc.select("div.x-grid3-body div.x-grid3-row table.x-grid3-row-table tbody tr div.x-grid3-col-clmFlwNum").stream().map(e->e.text()).collect(Collectors.toList());
 		// action 결과
 		List<String> resultList =     doc.select("div.x-grid3-body div.x-grid3-row table.x-grid3-row-table tbody tr div.x-grid3-col-clmProdPlc").stream().map(e->e.text()).collect(Collectors.toList());
+
+		List<Product> extractedProductList = new ArrayList<Product>();
 		for(int i = 0; i< uketsukeNoList.size(); i++) {
 			Product product = new Product();
 			product.setUketsukeNo(uketsukeNoList.get(i).replaceAll("[^\\d\\-]", ""));
