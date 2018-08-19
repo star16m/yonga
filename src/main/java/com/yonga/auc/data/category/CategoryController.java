@@ -36,7 +36,6 @@ class CategoryController {
     @GetMapping("/category")
     public String getCategoryList(Map<String, Object> model) {
         model.put("categoryList", this.categoryService.findAll());
-        model.put("logList", logService.getLatestLogList());
         return "category/category";
     }
     

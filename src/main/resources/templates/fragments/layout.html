@@ -39,14 +39,18 @@
           <div class="navbar-collapse collapse" id="main-navbar">
               <ul class="nav navbar-nav navbar-right">
 
-                  <li th:replace="fragments/fragments :: menuItem ('/','home','home page','home','Home')">
+                  <li th:replace="fragments/fragments :: menuItem ('/','home','home page','home',#{menu.home})">
                   </li>
 
-                  <li th:replace="fragments/fragments :: menuItem ('/product','product','find product','search','Find product')">
+                  <li th:replace="fragments/fragments :: menuItem ('/product','product','find product','search',#{menu.product})">
                   </li>
 
-                  <li th:replace="fragments/fragments :: menuItem ('/category','category','Category','th-list','Category')">
+                  <li th:replace="fragments/fragments :: menuItem ('/category','category','Category','th-list',#{menu.category})">
                   </li>
+
+                  <th:block th:if="${#httpServletRequest.serverName == 'localhost'}">
+                      <li th:replace="fragments/fragments :: menuItem ('/log', 'log', 'Log', 'bell', #{menu.log})"></li>
+                  </th:block>
 
               </ul>
           </div>
@@ -72,14 +76,12 @@
       </div>
   </div>
 
-
   <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
   <script th:src="@{/webjars/jquery-ui/jquery-ui.min.js}"></script>
   <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
   <script th:src="@{/webjars/bootstrap-select/js/bootstrap-select.min.js}"></script>
   <script th:src="@{/webjars/Magnific-Popup/1.1.0/jquery.magnific-popup.min.js}"></script>
   <script th:src="@{/resources/js/yonga.js}"></script>
-
 <div class="loader" style="display:none;"></div>
 </body>
 

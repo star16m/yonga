@@ -42,13 +42,5 @@
 		</tbody>
 	</table>
 
-	<br /><br />
-	<h2>작업 로그</h2>
-	<div class="log-contain">
-		<ul th:each="log : ${logList}">
-			<li th:text="${'[' + #dates.format(log.createDate, 'yyyy/MM/dd HH:mm') + '] ' + log.message}">log</li>
-		</ul>
-	</div>
-
 </body>
 </html>
