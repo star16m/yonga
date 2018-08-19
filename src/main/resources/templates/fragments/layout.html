@@ -1,5 +1,5 @@
 <!doctype html>
-<html th:fragment="layout (template, menu)">
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="layout (template, menu)">
 
   <head>
 
@@ -39,26 +39,13 @@
           <div class="navbar-collapse collapse" id="main-navbar">
               <ul class="nav navbar-nav navbar-right">
 
-                  <li th:fragment="menuItem (path,active,title,glyph,text)" class="active" th:class="${active==menu ? 'active' : ''}">
-                      <a th:href="@{__${path}__}" th:title="${title}">
-                        <span th:class="'glyphicon  glyphicon-'+${glyph}" class="glyphicon glyphicon-home" aria-hidden="true"></span>
-                        <span th:text="${text}">Template</span>
-                      </a>
+                  <li th:replace="fragments/fragments :: menuItem ('/','home','home page','home','Home')">
                   </li>
 
-                  <li th:replace="::menuItem ('/','home','home page','home','Home')">
-                      <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
-                      <span>Home</span>
+                  <li th:replace="fragments/fragments :: menuItem ('/product','product','find product','search','Find product')">
                   </li>
 
-                  <li th:replace="::menuItem ('/product','product','find product','search','Find product')">
-                      <span class="glyphicon glyphicon-search" aria-hidden="true"></span>
-                      <span>Find product</span>
-                  </li>
-
-                  <li th:replace="::menuItem ('/category','category','Category','th-list','Category')">
-                      <span class="glyphicon glyphicon-th-list" aria-hidden="true"></span>
-                      <span>Category</span>
+                  <li th:replace="fragments/fragments :: menuItem ('/category','category','Category','th-list','Category')">
                   </li>
 
               </ul>

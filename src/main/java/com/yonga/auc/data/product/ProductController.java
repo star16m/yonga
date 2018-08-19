@@ -39,7 +39,6 @@ class ProductController {
 	@PatchMapping("/selects/options")
 	public @ResponseBody String selectsMaker(HttpSession session, @RequestBody Map<String, Object> optionMap) {
 		log.info("selects maker {}, type {}", optionMap.get("selectsMaker"), optionMap.get("selectsType"));
-		logService.addLog("selects maker [" + optionMap.get("selectsMaker") + "], type[" + optionMap.get("selectsType") + "]");
 		session.setAttribute("selectsMaker", optionMap.get("selectsMaker"));
 		session.setAttribute("selectsType", optionMap.get("selectsType"));
 		return "success";
@@ -76,7 +75,7 @@ class ProductController {
     	model.put("categoryList", this.categoryRepository.findCategory());
     	if (categoryId.isPresent() && categoryId.get() > 0) {
     		// currentCategory value
-    		model.put("currentcategory", this.categoryRepository.getOne(categoryId.get()));
+    		model.put("currentCategory", this.categoryRepository.getOne(categoryId.get()));
     		// maker list
     		List<Map<String, Object>> makerInfo = this.productService.findProductMaker(categoryId.get());
     		List<String> selectsMakerList = null;

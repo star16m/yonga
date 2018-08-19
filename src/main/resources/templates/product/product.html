@@ -76,7 +76,7 @@
 		<br />
 	</div>
 	
-	<th:block th:if="${page == null || currentcategory == null}">
+	<th:block th:if="${page == null || currentCategory == null}">
 		<h2>Category</h2>
 		<table id="category" class="table table-striped">
 			<thead>
@@ -99,12 +99,12 @@
 			</tbody>
 		</table>
 	</th:block>
-	<th:block th:if="${currentcategory != null}">
+	<th:block th:if="${currentCategory != null}">
 		<h2>Category</h2>
 		<div class="row">
 			<div class="col-xs-12">
 				<select id="categorySelect" name="categorySelect" class="selectpicker" data-style="btn-success" data-size="10">
-					<option th:each="category : ${categoryList}" th:text="${category.korean}" th:value="${category.id}" th:attr="data-subtext=${category.japanese}" th:selected="${category.id == currentcategory.id}">category</option>
+					<option th:each="category : ${categoryList}" th:text="${category.korean}" th:value="${category.id}" th:attr="data-subtext=${category.japanese}" th:selected="${category.id == currentCategory.id}">category</option>
 				</select>
 			</div>
 		</div>
@@ -114,7 +114,7 @@
 		<h2 th:text="${'Maker [' + (session.selectsMaker != null ? #lists.size(session.selectsMaker) + '개 선택중' : 'All') + ']'}">Maker</h2>
 		<div class="row">
 			<div class="col-xs-12">
-				<select id="makerSelect" name="makerSelect" class="selectpicker" data-style="btn-primary" data-selected-text-format="count > 3" data-count-selected-text="{0} 개의 메이커 선택중" multiple th:attr="data-current-category=${currentcategory.id}" th:title="${#lists.size(makerList) + '개  maker가 있습니다.'}" data-size="10">
+				<select id="makerSelect" name="makerSelect" class="selectpicker" data-style="btn-primary" data-selected-text-format="count > 3" data-count-selected-text="{0} 개의 메이커 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(makerList) + '개  maker가 있습니다.'}" data-size="10">
 					<option th:each="maker : ${makerList}" th:value="${maker.maker}" th:text="${maker.maker}" th:selected="${session.selectsMaker != null and #lists.contains(session.selectsMaker, maker.maker)}" th:attr="data-subtext=${maker.makerCount}">maker</option>
 				</select>
 			</div>
@@ -124,7 +124,7 @@
 		<h2 th:text="${'Type' + (session.selectsType != null ? ' [' + #lists.size(session.selectsType) + '개 선택중]' : '')}">Type</h2>
 		<div class="row">
 			<div class="col-xs-12">
-				<select id="typeSelect" name="typeSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 타입  선택중" multiple th:attr="data-current-category=${currentcategory.id}" th:title="${#lists.size(typeList) + '개  type이 있습니다.'}" data-size="10">
+				<select id="typeSelect" name="typeSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 타입  선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(typeList) + '개  type이 있습니다.'}" data-size="10">
 					<option th:each="type : ${typeList}" th:value="${type.type}" th:text="${type.type}" th:selected="${session.selectsType != null and #lists.contains(session.selectsType, type.type)}" th:attr="data-subtext=${type.typeCount}">type</option>
 				</select>
 			</div>
