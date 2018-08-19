@@ -90,9 +90,6 @@ class ProductController {
     		List<Map<String, Object>> typeInfo = this.productService.findProductType(categoryId.get());
     		List<String> selectsTypeList = null;
     		model.put("typeList", typeInfo);
-    		typeInfo.stream().forEach(e-> {
-    			log.info("Type for Category[{}], [{}]", categoryId.get(), e.get("type"));
-    		});
     		if (!session.isNew() && session.getAttribute("selectsType") != null) {
     			log.debug("maker is {}", session.getAttribute("selectsType"));
     			selectsTypeList = (List<String>) session.getAttribute("selectsType");
