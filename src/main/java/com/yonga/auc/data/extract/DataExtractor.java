@@ -245,6 +245,11 @@ public class DataExtractor {
 		String salesPoint = doc.select("span#desc-sales-point").first().text().replaceAll("[\n　 ]+", ", ");
 		String salesPoint2 = doc.select("span#desc-sales-point2").first().text().replaceAll("[\n　 ]+", ", ");
 		String accessories = doc.select("span#desc-accessories").first().text().replaceAll("[\n　 ]+", ", ");
+		String seriBng = doc.select("span#desc-seri-bng").first().text();
+		String openCount = doc.select("span#desc-open-count").first().text();
+		String openDate = doc.select("span#desc-open-date").first().text();
+		String start = doc.select("span#desc-start").first().text();
+		String result = doc.select("span#desc-result").first().text();
 		String bikoInfo = doc.select("span#desc-note table tbody td.bikoTd").stream()
 				.map(Element::text)
 				.map(StringUtils::trim)
@@ -256,6 +261,11 @@ public class DataExtractor {
 		extractedProduct.setSalesPoint(salesPoint);
 		extractedProduct.setSalesPoint2(salesPoint2);
 		extractedProduct.setAccessories(accessories);
+		extractedProduct.setSeriBng(seriBng);
+		extractedProduct.setOpenCount(openCount);
+		extractedProduct.setOpenDate(openDate);
+		extractedProduct.setStart(start);
+		extractedProduct.setResult(result);
 		extractedProduct.setNote(bikoInfo);
 		return extractedProduct;
 	}
@@ -272,14 +282,8 @@ public class DataExtractor {
 		List<String> typeList =       doc.select("div.x-grid3-body div.x-grid3-row table.x-grid3-row-table tbody tr div.x-grid3-col-clmTypeNm").stream().map(e->e.text()).collect(Collectors.toList());
 		// 상품명
 		List<String> itemList =       doc.select("div.x-grid3-body div.x-grid3-row table.x-grid3-row-table tbody tr div.x-grid3-col-clmItemNm").stream().map(e->e.text()).collect(Collectors.toList());
-		// 개최정보
-		List<String> openInfoList =   doc.select("div.x-grid3-body div.x-grid3-row table.x-grid3-row-table tbody tr div.x-grid3-col-clmTrd").stream().map(e->e.text()).collect(Collectors.toList());
 		// 평가
 		List<String> ratingList =     doc.select("div.x-grid3-body div.x-grid3-row table.x-grid3-row-table tbody tr div.x-grid3-col-clmclass").stream().map(e->e.text()).collect(Collectors.toList());
-		// 스타트
-		List<String> startList =      doc.select("div.x-grid3-body div.x-grid3-row table.x-grid3-row-table tbody tr div.x-grid3-col-clmFlwNum").stream().map(e->e.text()).collect(Collectors.toList());
-		// action 결과
-		List<String> resultList =     doc.select("div.x-grid3-body div.x-grid3-row table.x-grid3-row-table tbody tr div.x-grid3-col-clmProdPlc").stream().map(e->e.text()).collect(Collectors.toList());
 
 		List<Product> extractedProductList = new ArrayList<Product>();
 		for(int i = 0; i< uketsukeNoList.size(); i++) {
@@ -292,14 +296,7 @@ public class DataExtractor {
 			product.setKeijo(keijoList.get(i));
 			product.setType(typeList.get(i));
 			product.setItemName(itemList.get(i));
-			String openInfo = openInfoList.get(i);
-			String openCount = YongaUtil.getMatchedGroup(openInfo, "(.+)\n");
-			String openDate = YongaUtil.getMatchedGroup(openInfo, "\n(.+)");
-			product.setOpenCount(openCount);
-			product.setOpenDate(openDate);
 			product.setRating(ratingList.get(i));
-			product.setStart(startList.get(i));
-			product.setResult(resultList.get(i));
 			product.setCategory(category);
 			product.setCreateDate(new Date());
 			extractedProductList.add(product);

@@ -81,6 +81,11 @@ public class DataExtractWorker implements Callable<Boolean> {
 					prod.setSalesPoint(product.getSalesPoint());
 					prod.setSalesPoint2(product.getSalesPoint2());
 					prod.setAccessories(product.getAccessories());
+					prod.setOpenCount(product.getOpenCount());
+					prod.setOpenDate(product.getOpenDate());
+					prod.setStart(product.getStart());
+					prod.setResult(product.getResult());
+					prod.setSeriBng(product.getSeriBng());
 					prod.setNote(product.getNote());
 					prod.setModifiedDate(new Date());
 					this.productService.save(prod);

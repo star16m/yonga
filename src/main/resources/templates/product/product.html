@@ -16,6 +16,10 @@
 				<td><b th:text="*{uketsukeNo}"></b></td>
 			</tr>
 			<tr>
+				<th class="text-center">세리순</th>
+				<td><b th:text="*{seriBng}"></b></td>
+			</tr>
+			<tr>
 				<th class="text-center">메이커</th>
 				<td th:text="*{maker}" /></td>
 			</tr>
@@ -36,6 +40,10 @@
 				<td th:text="*{keijo}" /></td>
 			</tr>
 			<tr>
+				<th class="text-center">개최횟수</th>
+				<td th:text="*{openCount}" /></td>
+			</tr>
+			<tr>
 				<th class="text-center">개최일</th>
 				<td th:text="*{openDate}" /></td>
 			</tr>
@@ -52,7 +60,7 @@
 				<td th:utext="${#strings.replace(product.salesPoint2,', ','&lt;br&gt;')}" /></td>
 			</tr>
 			<tr>
-				<th class="text-center media-middle">Accessories</th>
+				<th class="text-center media-middle">부속품</th>
 				<td th:utext="${#strings.replace(product.accessories,', ','&lt;br&gt;')}" /></td>
 			</tr>
 			<tr>
@@ -139,7 +147,7 @@
 				<tr>
 					<th>카테고리</th>
 					<th>접수번호</th>
-					<th>제품번호</th>
+					<th>세리순</th>
 					<th>메이커</th>
 					<th>타입</th>
 					<th>평가</th>
@@ -155,7 +163,7 @@
 					<td><a
 						th:href="@{/product/__${p.category.id}__/__${p.uketsukeNo}__(page=${page.number-1},size=${page.size})}"
 						th:text="${p.uketsukeNo}" /></a></td>
-					<td th:text="${p.productNo}" class="text-center"></td>
+					<td th:text="${p.seriBng}" class="text-center"></td>
 					<td th:text="${p.maker}"></td>
 					<td th:text="${p.type}" class="text-center"></td>
 					<td th:text="${p.rating}" class="text-center"></td>
