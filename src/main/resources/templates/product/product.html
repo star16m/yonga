@@ -160,7 +160,7 @@
 					<td
 						th:text="${p.category.korean + '(' + p.category.japanese + ')'}"
 						class="text-center"></td>
-					<td><a
+					<td class="text-center"><a
 						th:href="@{/product/__${p.category.id}__/__${p.uketsukeNo}__(page=${page.number-1},size=${page.size})}"
 						th:text="${p.uketsukeNo}" /></a></td>
 					<td th:text="${p.seriBng}" class="text-center"></td>
