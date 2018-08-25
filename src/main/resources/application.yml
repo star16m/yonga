@@ -18,12 +18,17 @@ spring:
     #data: classpath*:db/data.sql
   thymeleaf:
     mode: HTML
+    cached: false
   jpa:
     hibernate:
       ddl-auto: none
     show-sql: false
   messages:
     basename: messages/messages
+  devtools:
+    livereload:
+      enabled: true
+
 
 management:
   endpoints:
