@@ -24,10 +24,10 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 			Integer categoryId, List<String> makerList, List<String> typeList, Pageable page);
 
 	@Query(value = "select new map(p.category.id as category_no, p.maker as maker, count(p.maker) as makerCount) from Product p where p.category.id = :categoryId group by p.category.id, p.maker order by count(p.maker) desc")
-	List<Map<String, Object>> findProductMaker(Integer categoryId);
+	List<Map<String, Object>> findProductMaker(@Param("categoryId") Integer categoryId);
 
 	@Query(value = "select new map(p.category.id as category_no, p.type as type, count(p.type) as typeCount) from Product p where p.category.id = :categoryId group by p.category.id, p.type order by count(p.type) desc")
-	List<Map<String, Object>> findProductType(Integer categoryId);
+	List<Map<String, Object>> findProductType(@Param("categoryId") Integer categoryId);
 
 	@Transactional
 	@Query(value = "delete from Product p where p.category.id = :categoryId")
