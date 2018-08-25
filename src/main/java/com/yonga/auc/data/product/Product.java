@@ -1,22 +1,15 @@
 package com.yonga.auc.data.product;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
-
 import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.common.CommonBaseData;
 import com.yonga.auc.data.product.image.ProductImage;
-
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @EqualsAndHashCode(callSuper = false)
 @Entity
@@ -104,4 +97,5 @@ public class Product extends CommonBaseData {
 		productImage.setProduct(null);
 		this.imageList.remove(productImage);
 	}
+
 }

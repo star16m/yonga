@@ -256,6 +256,7 @@ public class DataExtractor {
 				.map(t->StringUtils.replaceAll(t, "[ 　\r\n]", ""))
 				.filter(t->!t.isEmpty())
 				.collect(Collectors.joining(", "));
+
 		Product extractedProduct = new Product();
 		extractedProduct.setUketsukeNo(uketsukeNo);
 		extractedProduct.setSalesPoint(salesPoint);

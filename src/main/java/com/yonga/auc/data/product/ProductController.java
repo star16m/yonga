@@ -1,30 +1,23 @@
 package com.yonga.auc.data.product;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpSession;
-
+import com.yonga.auc.common.PageWrapper;
+import com.yonga.auc.data.category.CategoryRepository;
+import com.yonga.auc.data.log.LogService;
+import com.yonga.auc.data.product.image.ProductImage;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import com.yonga.auc.common.PageWrapper;
-import com.yonga.auc.data.category.CategoryRepository;
-import com.yonga.auc.data.log.LogService;
-import com.yonga.auc.data.product.image.ProductImage;
-
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpSession;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -58,15 +51,16 @@ class ProductController {
     }
     @GetMapping("/product/{categoryId}/{uketsukeNo}")
     public String showProductList(HttpSession session, @PathVariable("categoryId") Integer categoryId, @PathVariable(value="uketsukeNo", required = false) String uketsukeNo, Map<String, Object> model, Pageable pageable) {
-    	// find model value
-    	findModelValue(session, model, Optional.of(categoryId), pageable);
-    	// find product value
-    	if (uketsukeNo != null) {
-    		Product product = this.productService.findProductByUketsukeNo(uketsukeNo);
-    		product.setImageList(product.getImageList().stream().sorted(Comparator.comparing(ProductImage::getName)).collect(Collectors.toList()));
-    		model.put("product", product);
-    	}
-        return "product/product";
+		// find model value
+		findModelValue(session, model, Optional.of(categoryId), pageable);
+		if (uketsukeNo != null) {
+			// find product value
+			Product product = this.productService.findProductByUketsukeNo(uketsukeNo);
+			product.setImageList(product.getImageList().stream().sorted(Comparator.comparing(ProductImage::getName)).collect(Collectors.toList()));
+
+			model.put("product", product);
+		}
+		return "product/product";
     }
     
     @SuppressWarnings("unchecked")
@@ -97,8 +91,8 @@ class ProductController {
     			selectsTypeList = typeInfo.stream().map(i -> i.get("type").toString()).collect(Collectors.toList());
     		}
     		// product list
-    		Page<Product> productList = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, pageable);
-    		PageWrapper<Product> page = new PageWrapper<Product> (productList, "/product/" + categoryId.get());
+    		Page<Product> productPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, pageable);
+    		PageWrapper<Product> page = new PageWrapper<> (productPage, "/product/" + categoryId.get());
     		model.put("page", page);
     	}
     }
