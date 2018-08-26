@@ -18,7 +18,6 @@ CREATE TABLE category (
     status VARCHAR(80) NOT NULL,
     total_product_num INTEGER,
     ext_product_num INTEGER,
-    ext_product_detail_num INTEGER,
     create_date TIMESTAMP,
     modified_date TIMESTAMP
 );

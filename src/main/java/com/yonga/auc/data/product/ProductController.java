@@ -56,9 +56,10 @@ class ProductController {
 		if (uketsukeNo != null) {
 			// find product value
 			Product product = this.productService.findProductByUketsukeNo(uketsukeNo);
-			product.setImageList(product.getImageList().stream().sorted(Comparator.comparing(ProductImage::getName)).collect(Collectors.toList()));
-
-			model.put("product", product);
+			if (product != null) {
+				product.setImageList(product.getImageList().stream().sorted(Comparator.comparing(ProductImage::getName)).collect(Collectors.toList()));
+				model.put("product", product);
+			}
 		}
 		return "product/product";
     }

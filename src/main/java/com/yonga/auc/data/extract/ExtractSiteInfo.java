@@ -32,7 +32,4 @@ public class ExtractSiteInfo {
 	public String getTargetURL(String path) {
 		return String.format("%s://%s/%s", this.targetProtocol, this.targetHost, path);
 	}
-	public String getTargetPhotoFormat() {
-		return getTargetURL("ext_photos/SP/%s/%s/J%s_%s_0%dTN.jpg");
-	}
 }

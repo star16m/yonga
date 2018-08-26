@@ -88,14 +88,4 @@ public class Product extends CommonBaseData {
 	// @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", fetch = FetchType.EAGER, orphanRemoval = true)
 	@OneToMany(mappedBy = "product")
 	private List<ProductImage> imageList = new ArrayList<>();
-	
-	public void addImage(ProductImage productImage) {
-		this.imageList.add(productImage);
-		productImage.setProduct(this);
-	}
-	public void removeImage(ProductImage productImage) {
-		productImage.setProduct(null);
-		this.imageList.remove(productImage);
-	}
-
 }

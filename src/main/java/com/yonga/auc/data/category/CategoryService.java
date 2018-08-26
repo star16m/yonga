@@ -24,7 +24,6 @@ public class CategoryService {
 		category.setModifiedDate(new Date());
 		category.setTotalProductNum(0);
 		category.setExtProductNum(0);
-		category.setExtProductDetailNum(0);
 		category.setStatus("INIT");
 		return save(category);
 	}

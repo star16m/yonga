@@ -60,8 +60,4 @@ public class YongaUtil {
 			throw new RuntimeException(e);
 		}
 	}
-
-	public static int calculateTotalPage(int totalItem, int pageSize) {
-		return (totalItem + pageSize - 1) / pageSize;
-	}
 }

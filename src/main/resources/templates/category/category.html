@@ -21,9 +21,8 @@
 				<th>카테고리</th>
 				<th>한글(일본어)</th>
 				<th>상태</th>
-				<th>Total</th>
-				<th>list</th>
-				<th>detail</th>
+				<th>제품</th>
+				<th>완료</th>
 				<th>수정일</th>
 			</tr>
 		</thead>
@@ -35,7 +34,6 @@
 					class="text-center"></td>
 				<td th:text="${category.totalProductNum}" class="text-right"></td>
 				<td th:text="${category.extProductNum}" class="text-right"></td>
-				<td th:text="${category.extProductDetailNum}" class="text-right"></td>
 				<td th:text="${#dates.format(category.modifiedDate, 'MM월 dd일 (E) HH:mm:ss')}"
 					class="text-center"></td>
 			</tr>
