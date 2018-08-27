@@ -48,6 +48,7 @@ CREATE TABLE product (
     desc_accessories VARCHAR(255),
     desc_note VARCHAR(255),
     desc_correction VARCHAR(255),
+    thumbnail_image VARCHAR(255),
     create_date TIMESTAMP,
     modified_date TIMESTAMP
 );

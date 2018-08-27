@@ -12,6 +12,7 @@ import com.yonga.auc.data.product.ProductService;
 import com.yonga.auc.data.product.image.ProductImage;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -63,6 +64,8 @@ public class DataExtractWorker implements Callable<Boolean> {
                         Product product = productPair.getFirst();
                         List<String> productImagePathList = productPair.getSecond();
                         product.setProductNo(extractedProductNum);
+                        String thumbnailImage = productImagePathList.stream().sorted().findFirst().orElse(null);
+                        product.setThumbnailImage(thumbnailImage);
                         this.productService.save(product);
                         productImagePathList.parallelStream().forEach(imagePath -> {
                             ProductImage productImage = new ProductImage();

@@ -84,6 +84,9 @@ public class Product extends CommonBaseData {
 	// 개정
 	@Column(name = "desc_correction")
 	private String correction;
+	// 대표 이미지
+	@Column(name = "thumbnail_image")
+	private String thumbnailImage;
 	// 이미지 썸네일
 	// @OneToMany(cascade = CascadeType.ALL, mappedBy = "product", fetch = FetchType.EAGER, orphanRemoval = true)
 	@OneToMany(mappedBy = "product")

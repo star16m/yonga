@@ -151,6 +151,7 @@
 					<th>메이커</th>
 					<th>타입</th>
 					<th>평가</th>
+					<th>image</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -160,16 +161,23 @@
 					<td
 						th:text="${p.category.korean + '(' + p.category.japanese + ')'}"
 						class="text-center"></td>
-					<td class="text-center"><a
-						th:href="@{/product/__${p.category.id}__/__${p.uketsukeNo}__(page=${page.number-1},size=${page.size})}"
-						th:text="${p.uketsukeNo}" /></a></td>
+					<td class="text-center">
+						<a th:href="@{/product/__${p.category.id}__/__${p.uketsukeNo}__(page=${page.number-1},size=${page.size})}"
+						   th:text="${p.uketsukeNo}" />
+						</a>
+					</td>
 					<td th:text="${p.seriBng}" class="text-center"></td>
-					<td th:text="${p.maker}"></td>
+					<td th:text="${p.maker}" class="text-center"></td>
 					<td th:text="${p.type}" class="text-center"></td>
 					<td th:text="${p.rating}" class="text-center"></td>
+					<td class="text-center">
+						<a th:href="@{/product/__${p.category.id}__/__${p.uketsukeNo}__(page=${page.number-1},size=${page.size})}">
+							<img th:src="@{${p.thumbnailImage}}" />
+						</a>
+					</td>
 				</tr>
 				<tr th:unless="${not #lists.isEmpty(page.content)}">
-					<td colspan="6">No data.</td>
+					<td class="text-center" colspan="6">No data.</td>
 				</tr>
 			</tbody>
 		</table>
