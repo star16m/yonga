@@ -44,8 +44,10 @@
                   <li th:replace="fragments/fragments :: menuItem ('/product','product','find product','search',#{menu.product})">
                   </li>
 
-                  <li th:replace="fragments/fragments :: menuItem ('/category','category','Category','th-list',#{menu.category})">
-                  </li>
+                  <th:block th:if="${#httpServletRequest.serverName == 'localhost'}">
+                      <li th:replace="fragments/fragments :: menuItem ('/category','category','Category','th-list',#{menu.category})">
+                      </li>
+                  </th:block>
 
                   <th:block th:if="${#httpServletRequest.serverName == 'localhost'}">
                       <li th:replace="fragments/fragments :: menuItem ('/log', 'log', 'Log', 'bell', #{menu.log})"></li>

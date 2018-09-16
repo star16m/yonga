@@ -28,6 +28,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -105,6 +106,11 @@ public class DataExtractor {
         $("a#seachlink").click();
         SelenideElement titleElement = $("div#mainPanel div span.x-panel-header-text");
         titleElement.shouldHave(text("出品一覧"));
+
+        // 검색 순서 변경
+        $("div.x-grid3-hd-inner.x-grid3-hd-clmUketsukeNo").hover();
+        $(".x-grid3-hd-clmUketsukeNo a").click();
+        $(".x-menu-item.xg-hmenu-sort-asc").click();
     }
 
     private boolean hasProductDetail() {
@@ -131,7 +137,7 @@ public class DataExtractor {
 
     public boolean extractProductDetail(
             List<Category> targetCategoryList,
-            BiConsumer<Category, Integer> foundTotalCategoryProductConsumer,
+            BiFunction<Category, Integer, Integer> foundTotalCategoryProductConsumer,
             BiConsumer<Category, Pair<Product, List<String>>> extractConsumer,
             BiConsumer<Category, Integer> extractedProductConsumer
     ) throws DataExtractException {
@@ -147,8 +153,8 @@ public class DataExtractor {
                 Integer foundProductNums = 0;
                 if (hasProductDetail()) {
                     foundProductNums = foundTotalProductNum();
-                    foundTotalCategoryProductConsumer.accept(category, foundProductNums);
-                    IntStream.rangeClosed(1, foundProductNums).boxed().map(String::valueOf).forEach(productNo -> {
+                    Integer startAt = foundTotalCategoryProductConsumer.apply(category, foundProductNums);
+                    IntStream.rangeClosed(startAt, foundProductNums).boxed().map(String::valueOf).forEach(productNo -> {
                         long start = System.currentTimeMillis();
                         // move product page
                         SelenideElement currentProductPage = $("input.x-tbar-page-number");
@@ -168,10 +174,10 @@ public class DataExtractor {
         } catch (Throwable e) {
             log.warn(e.getMessage());
             Arrays.asList(e.getStackTrace()).stream().forEach(s -> log.warn(s.toString()));
+            throw new DataExtractException(ExtractExceptionMessage.UNKNOWN);
         } finally {
             logout();
         }
-        return false;
     }
 
     public Integer foundTotalProductNum() {

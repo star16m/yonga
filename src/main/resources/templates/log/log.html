@@ -3,12 +3,23 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'log')}">
 
   <body>
-  <h2>작업 로그</h2>
-  <div class="log-contain">
-      <ul th:each="log : ${logList}">
+      <h2>전체 작업 진행 상태</h2>
+        <ul>
+            <li th:text="#{'executor.status.' + ${executorStatus}}">작업 진행 상태</li>
+            <li th:if="${executorStatus} == 'FAIL'" th:text="${executorMessage}"></li>
+        </ul>
+      <h2>카테고리별 작업 진행 상태</h2>
+      <div class="log-contain">
+          <ul th:each="category : ${categoryList}">
+              <li th:text="${category.korean + ' [' + category.status + '] ' + category.extProductNum}">category</li>
+          </ul>
+      </div>
+      <h2>작업 로그</h2>
+      <div class="log-contain">
+          <ul th:each="log : ${logList}">
               <li th:text="${'[' + #dates.format(log.createDate, 'yyyy/MM/dd HH:mm') + '] ' + log.message}">log</li>
           </ul>
-  </div>
+      </div>
   </body>
 
 </html>

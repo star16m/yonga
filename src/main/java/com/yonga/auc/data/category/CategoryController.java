@@ -6,7 +6,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import com.yonga.auc.config.ConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -21,6 +23,8 @@ import com.yonga.auc.data.product.ProductService;
 
 import lombok.extern.slf4j.Slf4j;
 
+import javax.annotation.PostConstruct;
+
 @Controller
 @Slf4j
 class CategoryController {
@@ -33,12 +37,37 @@ class CategoryController {
 	private ExtractSiteInfo siteInfo;
 	@Autowired
 	private LogService logService;
+	@Autowired
+	private ConfigService configService;
+
     @GetMapping("/category")
     public String getCategoryList(Map<String, Object> model) {
         model.put("categoryList", this.categoryService.findAll());
         return "category/category";
     }
-    
+
+    @PostConstruct
+    private void initExtract() {
+    	this.configService.setConfigValue("EXECUTOR", "STATUS", "NONE");
+	}
+
+	// 기동 이후 3분 이후에 실행
+	// 이후 15분 마다 확인
+	@Scheduled(initialDelay = 3 * 60 * 1000, fixedDelay = 15 * 60 * 1000)
+    public void findNotCompleteCategory() {
+		String executorStatus = this.configService.getConfigValue("EXECUTOR", "STATUS");
+		if ("RUNNING".equals(executorStatus)) {
+			// 실행 중인 경우 skip
+			return;
+		}
+		List<Category> categoryList = this.categoryService.findNotCompleteCategory();
+		if (categoryList == null || categoryList.isEmpty()) {
+			// 대상 없음
+			return;
+		}
+		log.info("완료되지 않은 {} 개의 카테고리에 대해서 추출을 재시도 합니다.", categoryList.size());
+		extract(categoryList, ExtractMode.EXTRACT);
+	}
     @PatchMapping("/category/init")
     public @ResponseBody String extract(@RequestBody Map<String, Object> optionMap) {
     	if (!optionMap.containsKey("categoryIdList")) {
@@ -47,19 +76,37 @@ class CategoryController {
     	if (!optionMap.containsKey("extractPassword")) {
     		return "export password is empty";
     	}
-    	@SuppressWarnings("unchecked")
+		if (!optionMap.containsKey("extractMode") || optionMap.get("extractMode").toString().isEmpty()) {
+			return "extract mode is empty";
+		}
+
+		@SuppressWarnings("unchecked")
 		List<String> categoryIdList = (List<String>)optionMap.get("categoryIdList");
-    	String extractPassword = optionMap.get("extractPassword").toString();
-    	
+		String extractPassword = optionMap.get("extractPassword").toString();
+		String extractModeString = optionMap.get("extractMode").toString();
+		ExtractMode extractMode = ExtractMode.valueOf(extractModeString);
+
 		// check export password
 		if (!extractPassword.equals(this.siteInfo.getExportPassword())) {
 			return "different export password.";
 		}
 		log.info("try data execute");
+
+		String executorStatus = this.configService.getConfigValue("EXECUTOR", "STATUS");
+		if ("RUNNING".equals(executorStatus)) {
+			return "실행 중입니다.";
+		}
 		List<Category> targetCategoryList = this.categoryService.findAll().stream().filter(category -> categoryIdList.contains(String.valueOf(category.getId()))).collect(Collectors.toList());
-		EXECUTOR.submit(new DataCleanWorker(this.categoryService, this.productService, this.siteInfo, this.logService, targetCategoryList));
-		EXECUTOR.submit(new DataExtractWorker(this.categoryService, this.productService, this.siteInfo, this.logService, targetCategoryList));
-		
-    	return "success";
+		extract(targetCategoryList, extractMode);
+		return "success";
     }
+    private void extract(List<Category> categoryList, ExtractMode extractMode) {
+		categoryList.forEach(c -> {
+			c.setStatus("EXTRACT_INIT");
+			this.categoryService.save(c);
+		});
+		if (extractMode.isRequiredInitialize()) EXECUTOR.submit(new DataCleanWorker(this.categoryService, this.productService, this.siteInfo, this.logService, categoryList));
+		EXECUTOR.submit(new DataExtractWorker(this.categoryService, this.productService, this.siteInfo, this.logService, this.configService, categoryList, extractMode));
+		this.configService.setConfigValue("EXECUTOR", "STATUS", "RUNNING");
+	}
 }

@@ -17,6 +17,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -34,6 +36,7 @@ class ProductController {
 		log.info("selects maker {}, type {}", optionMap.get("selectsMaker"), optionMap.get("selectsType"));
 		session.setAttribute("selectsMaker", optionMap.get("selectsMaker"));
 		session.setAttribute("selectsType", optionMap.get("selectsType"));
+		session.setAttribute("viewProductImage", optionMap.get("viewProductImage"));
 		return "success";
 	}
 	@GetMapping("/product")
@@ -41,31 +44,38 @@ class ProductController {
 		// remove maker
 		session.removeAttribute("selectsMaker");
 		session.removeAttribute("selectsType");
+		session.removeAttribute("viewProductImage");
 		return showProductList(session, Optional.empty(), model, PageRequest.of(0, 10));
 	}
     @GetMapping("/product/{categoryId}")
     public String showProductList(HttpSession session, @PathVariable(value="categoryId", required=false) Optional<Integer> pathCategoryId, Map<String, Object> model, Pageable pageable) {
     	// find model value
-    	findModelValue(session, model, pathCategoryId, pageable);
+    	findModelValue(session, model, pathCategoryId, pageable, null);
+    	if (true && pathCategoryId.isPresent()) {
+    		log.info("전체 제품 갯수 : {}", this.productService.findAllProductNum());
+    		log.info("카테고리 없는 것 : {}", this.productService.findCategoryIdNull());
+    		log.info("제품 갯수 : {}", this.productService.findProductNum(pathCategoryId.get()));
+		}
         return "product/product";
     }
     @GetMapping("/product/{categoryId}/{uketsukeNo}")
     public String showProductList(HttpSession session, @PathVariable("categoryId") Integer categoryId, @PathVariable(value="uketsukeNo", required = false) String uketsukeNo, Map<String, Object> model, Pageable pageable) {
-		// find model value
-		findModelValue(session, model, Optional.of(categoryId), pageable);
+		Product product = null;
 		if (uketsukeNo != null) {
 			// find product value
-			Product product = this.productService.findProductByUketsukeNo(uketsukeNo);
+			product = this.productService.findProductByUketsukeNo(uketsukeNo);
 			if (product != null) {
 				product.setImageList(product.getImageList().stream().sorted(Comparator.comparing(ProductImage::getName)).collect(Collectors.toList()));
 				model.put("product", product);
 			}
 		}
+		// find model value
+		findModelValue(session, model, Optional.of(categoryId), pageable, product);
 		return "product/product";
     }
     
     @SuppressWarnings("unchecked")
-	private void findModelValue(HttpSession session, Map<String, Object> model, Optional<Integer> categoryId, Pageable pageable) {
+	private void findModelValue(HttpSession session, Map<String, Object> model, Optional<Integer> categoryId, Pageable pageable, Product product) {
     	// category list
     	model.put("categoryList", this.categoryRepository.findCategory());
     	if (categoryId.isPresent() && categoryId.get() > 0) {
@@ -95,6 +105,50 @@ class ProductController {
     		Page<Product> productPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, pageable);
     		PageWrapper<Product> page = new PageWrapper<> (productPage, "/product/" + categoryId.get());
     		model.put("page", page);
+    		// left & right product
+			if (product != null) {
+				List<Product> contents = productPage.getContent();
+				int currentProductIndex = -1;
+				for (int i = 0; i < contents.size(); i++) {
+					if (contents.get(i).getUketsukeNo().equals(product.getUketsukeNo())) {
+						currentProductIndex = i;
+						break;
+					}
+				}
+				if (currentProductIndex > -1) {
+					// founded product
+					String leftProduct = currentProductIndex == 0 ? null : contents.get(currentProductIndex - 1).getUketsukeNo();
+					String rightProduct = currentProductIndex == contents.size() - 1 ? null : contents.get(currentProductIndex + 1).getUketsukeNo();
+					Integer previousPage = productPage.getPageable().getPageNumber();
+					Integer nextPage = productPage.getPageable().getPageNumber();
+					// left 가 없는 경우
+					if (leftProduct == null) {
+						if (!productPage.getPageable().hasPrevious()) {
+							// first page
+						} else {
+							Page<Product> previousProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, pageable.previousOrFirst());
+							Product previousProduct = previousProductPage.getContent().get(pageable.getPageSize() - 1);
+							leftProduct = previousProduct.getUketsukeNo();
+							previousPage = previousProductPage.getPageable().getPageNumber();
+						}
+					}
+					// right 가 없는 경우
+					if (rightProduct == null) {
+						if (productPage.getTotalPages() <= productPage.getPageable().next().getPageNumber()) {
+							// last page
+						} else {
+							Page<Product> nextProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, productPage.getPageable().next());
+							Product nextProduct = nextProductPage.getContent().get(0);
+							rightProduct = nextProduct.getUketsukeNo();
+							nextPage = nextProductPage.getPageable().getPageNumber();
+						}
+					}
+					model.put("previousProduct", leftProduct);
+					model.put("nextProduct", rightProduct);
+					model.put("previousPage", previousPage);
+					model.put("nextPage", nextPage);
+				}
+			}
     	}
     }
 }

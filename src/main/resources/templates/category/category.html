@@ -11,8 +11,11 @@
 				category
 			</option>
 		</select>
-		<input type="password" value="" id="extractPassword" name="extractPassword" placeholder="초기화 패스워드"/>
-		<a class="btn btn-default" href="javascript:void(0);" th:onclick="|javascript:initialCategory();|">전체초기화</a>
+		<div class="checkbox">
+			<label><input type="checkbox" name="initialize" id="initialize" value="" checked="checked">초기화</label>
+		</div>
+		<input type="password" value="" id="extractPassword" name="extractPassword" placeholder="추출 패스워드"/>
+		<a class="btn btn-default" href="javascript:void(0);" th:onclick="|javascript:initialCategory();|">추출</a>
 	</div>
 	<h2>Category</h2>
 	<table id="category" class="table table-striped">
