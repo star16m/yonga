@@ -49,14 +49,12 @@ $(document).ready(function() {
     $('#makerSelect,#typeSelect').on('changed.bs.select', function(e) {
     	$(this).data('targetchanged', true);
     });
-    $('#makerSelect,#typeSelect').on('hide.bs.select', function (e) {
-    	if (!$(this).data('targetchanged')) {
-    		return;
-    	}
+    function changeOption() {
     	var categoryId = $('#makerSelect').data('currentCategory');
     	var data = {};
     	data["selectsMaker"] = $('#makerSelect').val();
     	data["selectsType"] = $('#typeSelect').val();
+    	data["viewProductImage"] = $('input#checkViewProductImage').is(":checked");
     	$.ajax({
             url: "/selects/options",
             type: "patch",
@@ -72,6 +70,15 @@ $(document).ready(function() {
             	}
             }
     	});
+    }
+    $('#makerSelect,#typeSelect').on('hide.bs.select', function (e) {
+    	if (!$(this).data('targetchanged')) {
+    		return;
+    	}
+    	changeOption();
+	});
+	$('input#checkViewProductImage').change(function(){
+	    changeOption();
 	});
 });
 function initialCategory(categoryId, status) {
@@ -91,6 +98,7 @@ function initialCategory(categoryId, status) {
 		}
 		data["categoryIdList"] = $("#extractCategorySelect").val();
 		data["extractPassword"] = $("#extractPassword").val();
+		data["extractMode"] = $("input:checkbox[id='initialize']").is(":checked") ? "INITIALIZE" : "EXTRACT"
 	    return $.ajax({
 	        url: "/category/init",
 	        type: "patch",

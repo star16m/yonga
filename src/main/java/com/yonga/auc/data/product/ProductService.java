@@ -23,6 +23,16 @@ public class ProductService {
 	private ProductRepository productRepository;
 	@Autowired
 	private ProductImageRepository productImageRepository;
+
+	public Integer findProductNum(Integer categoryId) {
+		return this.productRepository.countProductByCategoryId(categoryId);
+	}
+	public Integer findAllProductNum() {
+		return this.productRepository.findAll().size();
+	}
+	public List<Product> findCategoryIdNull() {
+		return this.productRepository.findProductByCategoryIdIsNull();
+	}
 	@Cacheable("maker")
 	public List<Map<String, Object>> findProductMaker(Integer categoryId) {
 		return this.productRepository.findProductMaker(categoryId);

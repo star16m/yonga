@@ -18,6 +18,8 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 
 	List<Product> findProductByCategoryId(Integer categoryId);
 
+	Integer countProductByCategoryId(Integer categoryId);
+	List<Product> findProductByCategoryIdIsNull();
 	List<Product> findProductByCategoryIdOrderByProductNo(Integer categoryId);
 
 	Page<Product> findProductByCategoryIdAndMakerInAndTypeInOrderByMakerAscTypeAscRatingAscProductNoAsc(

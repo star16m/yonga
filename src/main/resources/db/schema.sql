@@ -3,6 +3,7 @@ DROP TABLE product_image IF EXISTS;
 DROP TABLE product IF EXISTS;
 DROP TABLE category IF EXISTS;
 DROP TABLE work_log IF EXISTS;
+DROP TABLE config IF EXISTS;
 
 -- dual
 CREATE TABLE dual (
@@ -70,3 +71,11 @@ CREATE TABLE WORK_LOG (
     message      VARCHAR(255),
     create_date  TIMESTAMP,
 );
+
+-- STATUS
+CREATE TABLE CONFIG (
+    id             INTEGER IDENTITY PRIMARY KEY,
+    config_group   VARCHAR(255),
+    config_key     VARCHAR(255),
+    config_value   VARCHAR(255)
+)
