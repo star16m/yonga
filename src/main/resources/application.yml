@@ -14,8 +14,8 @@ spring:
   datasource:
     sql-script-encoding: UTF-8
     url: jdbc:hsqldb:${app.brand-auc.workhome}/data/data
-    #schema: classpath*:db/schema.sql
-    #data: classpath*:db/data.sql
+    # schema: classpath*:db/schema.sql
+    # data: classpath*:db/data.sql
   thymeleaf:
     mode: HTML
     cached: false

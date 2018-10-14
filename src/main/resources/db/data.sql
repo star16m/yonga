@@ -11,3 +11,6 @@ INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (8,
 
 -- CONFIG
 INSERT INTO config(id, config_group, config_key, config_value) VALUES (1, 'EXECUTOR', 'STATUS', 'NONE');
+
+INSERT INTO config(id, config_group, config_key, config_value) VALUES (2, 'CONFIG', 'TITLE', 'Yonga :: auc application');
+INSERT INTO config(id, config_group, config_key, config_value) VALUES (3, 'CONFIG', 'WELCOME', 'Welcome yonga mall');

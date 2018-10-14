@@ -1,6 +1,8 @@
 package com.yonga.auc.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,6 +22,7 @@ public class ConfigService {
         return this.configRepository.getConfig(group);
     }
 
+    @Cacheable("config")
     public String getConfigValue(String group, String key) {
         Config config = getConfig(group, key);
         if (config != null) {
@@ -28,6 +31,7 @@ public class ConfigService {
         return null;
     }
 
+    @CacheEvict(value = "config", allEntries = true)
     public void setConfigValue(String group, String key, String value) {
         Config config = getConfig(group, key);
         if (config == null) {

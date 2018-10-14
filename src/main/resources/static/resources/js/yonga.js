@@ -117,3 +117,28 @@ function initialCategory(categoryId, status) {
 	    });
 	}
 }
+function setConfig() {
+	var message = '';
+	var data = {};
+    if ($("#inputTitle").val() == null || $("#inputWelcome").val() == "") {
+        alert("설정값을 입력해 주세요.");
+        return;
+    }
+    data["title"] = $("#inputTitle").val();
+    data["welcome"] = $("#inputWelcome").val();
+    return $.ajax({
+        url: "/config",
+        type: "post",
+        contentType: "application/json",
+        cache: false,
+        data: JSON.stringify(data),
+        //dataType: 'json',
+        success: function (data,status,xhr) {
+            alert('저장되었습니다.');
+            location.reload();
+        },
+        error : function(error) {
+            alert('저장에 실패하였습니다.');
+        }
+    });
+}

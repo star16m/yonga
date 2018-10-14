@@ -21,6 +21,7 @@ public class CacheConfig {
 			cm.createCache("maker", cacheConfiguration);
 			cm.createCache("productType", cacheConfiguration);
 			cm.createCache("workLog", cacheConfiguration);
+			cm.createCache("config", cacheConfiguration);
 		};
 	}
 

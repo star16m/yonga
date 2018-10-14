@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'config')}">
+
+<body>
+<h2>설정</h2>
+<div>
+    <form class="form-horizontal">
+        <div class="form-group">
+            <label for="inputTitle" class="col-sm-2 control-label">타이틀</label>
+            <div class="col-sm-10">
+                <input type="input" class="form-control" id="inputTitle" placeholder="Title"
+                       th:value="${@configService.getConfigValue('CONFIG', 'TITLE')}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputTitle" class="col-sm-2 control-label">인사말</label>
+            <div class="col-sm-10">
+                <input type="input" class="form-control" id="inputWelcome" placeholder="인사말"
+                       th:value="${@configService.getConfigValue('CONFIG', 'WELCOME')}">
+            </div>
+        </div>
+        <a class="btn btn-default" href="javascript:void(0);" th:onclick="|javascript:setConfig();|">저장</a>
+    </form>
+</div>
+</body>
+
+</html>
