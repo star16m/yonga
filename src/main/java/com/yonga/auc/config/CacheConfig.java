@@ -19,6 +19,7 @@ public class CacheConfig {
 			Configuration<Object, Object> cacheConfiguration = createCacheConfiguration();
 			cm.createCache("category", cacheConfiguration);
 			cm.createCache("maker", cacheConfiguration);
+			cm.createCache("keijo", cacheConfiguration);
 			cm.createCache("productType", cacheConfiguration);
 			cm.createCache("workLog", cacheConfiguration);
 			cm.createCache("config", cacheConfiguration);

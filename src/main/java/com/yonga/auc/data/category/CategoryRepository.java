@@ -14,7 +14,7 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
 	List<Category> findCategory() throws DataAccessException;
 
     @SuppressWarnings("unchecked")
-    @CacheEvict(value = {"category", "maker", "productType"}, allEntries = true)
+    @CacheEvict(value = {"category", "maker", "productType", "keijo"}, allEntries = true)
     @Override
     Category save(Category entity);
 }

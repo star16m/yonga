@@ -33,9 +33,10 @@ class ProductController {
 	private LogService logService;
 	@PatchMapping("/selects/options")
 	public @ResponseBody String selectsMaker(HttpSession session, @RequestBody Map<String, Object> optionMap) {
-		log.info("selects maker {}, type {}", optionMap.get("selectsMaker"), optionMap.get("selectsType"));
+		log.info("selects maker [{}], type [{}], keijo [{}]", optionMap.get("selectsMaker"), optionMap.get("selectsType"), optionMap.get("selectsKeijo"));
 		session.setAttribute("selectsMaker", optionMap.get("selectsMaker"));
 		session.setAttribute("selectsType", optionMap.get("selectsType"));
+		session.setAttribute("selectsKeijo", optionMap.get("selectsKeijo"));
 		session.setAttribute("viewProductImage", optionMap.get("viewProductImage"));
 		return "success";
 	}
@@ -44,6 +45,7 @@ class ProductController {
 		// remove maker
 		session.removeAttribute("selectsMaker");
 		session.removeAttribute("selectsType");
+		session.removeAttribute("selectsKeijo");
 		session.removeAttribute("viewProductImage");
 		return showProductList(session, Optional.empty(), model, PageRequest.of(0, 10));
 	}
@@ -101,8 +103,18 @@ class ProductController {
     		} else {
     			selectsTypeList = typeInfo.stream().map(i -> i.get("type").toString()).collect(Collectors.toList());
     		}
+    		// keijo list
+			List<Map<String, Object>> keijoInfo = this.productService.findProductKeijo(categoryId.get());
+    		List<String> selectsKeijoList = null;
+			model.put("keijoList", keijoInfo);
+			if (!session.isNew() && session.getAttribute("selectsKeijo") != null) {
+				log.debug("keijo is {}", session.getAttribute("selectsKeijo"));
+				selectsKeijoList = (List<String>) session.getAttribute("selectsKeijo");
+			} else {
+				selectsKeijoList = keijoInfo.stream().map(i -> i.get("keijo").toString()).collect(Collectors.toList());
+			}
     		// product list
-    		Page<Product> productPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, pageable);
+    		Page<Product> productPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, selectsKeijoList, pageable);
     		PageWrapper<Product> page = new PageWrapper<> (productPage, "/product/" + categoryId.get());
     		model.put("page", page);
     		// left & right product
@@ -126,7 +138,7 @@ class ProductController {
 						if (!productPage.getPageable().hasPrevious()) {
 							// first page
 						} else {
-							Page<Product> previousProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, pageable.previousOrFirst());
+							Page<Product> previousProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, selectsKeijoList, pageable.previousOrFirst());
 							Product previousProduct = previousProductPage.getContent().get(pageable.getPageSize() - 1);
 							leftProduct = previousProduct.getUketsukeNo();
 							previousPage = previousProductPage.getPageable().getPageNumber();
@@ -137,7 +149,7 @@ class ProductController {
 						if (productPage.getTotalPages() <= productPage.getPageable().next().getPageNumber()) {
 							// last page
 						} else {
-							Page<Product> nextProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, productPage.getPageable().next());
+							Page<Product> nextProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, selectsKeijoList, productPage.getPageable().next());
 							Product nextProduct = nextProductPage.getContent().get(0);
 							rightProduct = nextProduct.getUketsukeNo();
 							nextPage = nextProductPage.getPageable().getPageNumber();

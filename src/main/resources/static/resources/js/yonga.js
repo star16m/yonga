@@ -14,7 +14,7 @@ $(document).ready(function() {
     // disabled a tag
     $("a.disabled").bind('click', false);
     // enable selectpicker
-    $('#categorySelect,#makerSelect,#typeSelect').selectpicker({
+    $('#categorySelect,#makerSelect,#typeSelect,#keijoSelect').selectpicker({
     	width: '100%'
     });
     
@@ -46,14 +46,14 @@ $(document).ready(function() {
             }
     	});
     });
-    $('#makerSelect,#typeSelect').on('changed.bs.select', function(e) {
+    $('#makerSelect,#typeSelect,#keijoSelect').on('changed.bs.select', function(e) {
     	$(this).data('targetchanged', true);
     });
     function changeOption() {
     	var categoryId = $('#makerSelect').data('currentCategory');
     	var data = {};
     	data["selectsMaker"] = $('#makerSelect').val();
-    	data["selectsType"] = $('#typeSelect').val();
+    	data["selectsKeijo"] = $('#keijoSelect').val();
     	data["viewProductImage"] = $('input#checkViewProductImage').is(":checked");
     	$.ajax({
             url: "/selects/options",
@@ -71,7 +71,7 @@ $(document).ready(function() {
             }
     	});
     }
-    $('#makerSelect,#typeSelect').on('hide.bs.select', function (e) {
+    $('#makerSelect,#keijoSelect').on('hide.bs.select', function (e) {
     	if (!$(this).data('targetchanged')) {
     		return;
     	}

@@ -22,14 +22,17 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
 	List<Product> findProductByCategoryIdIsNull();
 	List<Product> findProductByCategoryIdOrderByProductNo(Integer categoryId);
 
-	Page<Product> findProductByCategoryIdAndMakerInAndTypeInOrderByMakerAscTypeAscRatingAscProductNoAsc(
-			Integer categoryId, List<String> makerList, List<String> typeList, Pageable page);
+	Page<Product> findProductByCategoryIdAndMakerInAndTypeInAndKeijoInOrderByMakerAscKeijoAscRatingAscProductNoAsc(
+			Integer categoryId, List<String> makerList, List<String> typeList, List<String> keijoList, Pageable page);
 
 	@Query(value = "select new map(p.category.id as category_no, p.maker as maker, count(p.maker) as makerCount) from Product p where p.category.id = :categoryId group by p.category.id, p.maker order by count(p.maker) desc")
 	List<Map<String, Object>> findProductMaker(@Param("categoryId") Integer categoryId);
 
 	@Query(value = "select new map(p.category.id as category_no, p.type as type, count(p.type) as typeCount) from Product p where p.category.id = :categoryId group by p.category.id, p.type order by count(p.type) desc")
 	List<Map<String, Object>> findProductType(@Param("categoryId") Integer categoryId);
+	@Query(value = "select new map(p.category.id as category_no, p.keijo as keijo, count(p.keijo) as keijoCount) from Product p where p.category.id = :categoryId group by p.category.id, p.keijo order by count(p.keijo) desc")
+	List<Map<String, Object>> findProductKeijo(@Param("categoryId") Integer categoryId);
+
 
 	@Transactional
 	@Query(value = "delete from Product p where p.category.id = :categoryId")

@@ -41,9 +41,13 @@ public class ProductService {
 	public List<Map<String, Object>> findProductType(Integer categoryId) {
 		return this.productRepository.findProductType(categoryId);
 	}
+	@Cacheable("keijo")
+	public List<Map<String, Object>> findProductKeijo(Integer categoryId) {
+		return this.productRepository.findProductKeijo(categoryId);
+	}
 	
-	public Page<Product> findProductList(Integer categoryId, List<String> selectsMakerList, List<String> selectsTypeList, Pageable pageable) {
-		return this.productRepository.findProductByCategoryIdAndMakerInAndTypeInOrderByMakerAscTypeAscRatingAscProductNoAsc(categoryId, selectsMakerList, selectsTypeList, pageable);
+	public Page<Product> findProductList(Integer categoryId, List<String> selectsMakerList, List<String> selectsTypeList, List<String> selectsKeijoList, Pageable pageable) {
+		return this.productRepository.findProductByCategoryIdAndMakerInAndTypeInAndKeijoInOrderByMakerAscKeijoAscRatingAscProductNoAsc(categoryId, selectsMakerList, selectsTypeList, selectsKeijoList, pageable);
 	}
 
 	public Product findProductByUketsukeNo(String uketsukeNo) {
