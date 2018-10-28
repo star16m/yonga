@@ -53,11 +53,11 @@ class ProductController {
     public String showProductList(HttpSession session, @PathVariable(value="categoryId", required=false) Optional<Integer> pathCategoryId, Map<String, Object> model, Pageable pageable) {
     	// find model value
     	findModelValue(session, model, pathCategoryId, pageable, null);
-    	if (true && pathCategoryId.isPresent()) {
-    		log.info("전체 제품 갯수 : {}", this.productService.findAllProductNum());
-    		log.info("카테고리 없는 것 : {}", this.productService.findCategoryIdNull());
-    		log.info("제품 갯수 : {}", this.productService.findProductNum(pathCategoryId.get()));
-		}
+//    	if (true && pathCategoryId.isPresent()) {
+//    		log.info("전체 제품 갯수 : {}", this.productService.findAllProductNum());
+//    		log.info("카테고리 없는 것 : {}", this.productService.findCategoryIdNull());
+//    		log.info("제품 갯수 : {}", this.productService.findProductNum(pathCategoryId.get()));
+//		}
         return "product/product";
     }
     @GetMapping("/product/{categoryId}/{uketsukeNo}")
