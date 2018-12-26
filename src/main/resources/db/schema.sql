@@ -4,6 +4,7 @@ DROP TABLE product IF EXISTS;
 DROP TABLE category IF EXISTS;
 DROP TABLE work_log IF EXISTS;
 DROP TABLE config IF EXISTS;
+drop table customer if exists;
 
 -- dual
 CREATE TABLE dual (
@@ -78,4 +79,19 @@ CREATE TABLE CONFIG (
     config_group   VARCHAR(255),
     config_key     VARCHAR(255),
     config_value   VARCHAR(255)
-)
+);
+
+-- customer
+create table customer (
+    id              INTEGER IDENTITY PRIMARY KEY,
+    user_id         VARCHAR(255),
+    password        VARCHAR(255),
+    name            VARCHAR(255),
+    tel             VARCHAR(255),
+    email           VARCHAR(255),
+    description     VARCHAR(255),
+    privilege       VARCHAR(255),
+    enabled         boolean,
+    display         boolean,
+    last_login       TIMESTAMP
+);

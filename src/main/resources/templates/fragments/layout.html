@@ -1,7 +1,7 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" th:fragment="layout (template, menu)">
 
-  <head>
+<head>
 
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <meta charset="utf-8">
@@ -10,7 +10,7 @@
 
     <link rel="shortcut icon" type="image/x-icon" th:href="@{/resources/images/favicon.ico}">
 
-    <title th:text="${@configService.getConfigValue('CONFIG', 'TITLE')}">Yonga :: auc application</title>
+    <title th:text="${T(com.yonga.auc.config.ConfigConstants).APPLICATION_TITLE}">Yonga :: auc application</title>
 
     <!--[if lt IE 9]>
     <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
@@ -21,73 +21,79 @@
     <link rel="stylesheet" th:href="@{/webjars/Magnific-Popup/1.1.0/magnific-popup.css}"/>
     <link rel="stylesheet" th:href="@{/resources/css/yonga.css}"/>
 
-  </head>
+</head>
 
 <body>
 
-  <nav class="navbar navbar-default navbar-fixed-top" role="navigation">
-      <div class="container">
-          <div class="navbar-header">
-              <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
-                  <span class="sr-only"><os-p>Toggle navigation</os-p></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-                  <span class="icon-bar"></span>
-              </button>
-          </div>
-          <div class="navbar-collapse collapse" id="main-navbar">
-              <ul class="nav navbar-nav navbar-right">
+<nav class="navbar navbar-default navbar-fixed-top" role="navigation">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#main-navbar">
+                <span class="sr-only"><os-p>Toggle navigation</os-p></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+        </div>
+        <div class="navbar-collapse collapse" id="main-navbar">
+            <ul class="nav navbar-nav navbar-right">
 
-                  <li th:replace="fragments/fragments :: menuItem ('/','home','home page','home',#{menu.home})">
-                  </li>
+                <li th:replace="fragments/fragments :: menuItem ('/','home','home page','home',#{menu.home})">
+                </li>
 
-                  <li th:replace="fragments/fragments :: menuItem ('/product','product','find product','search',#{menu.product})">
-                  </li>
+                <li sec:authorize="hasRole('USER')" th:replace="fragments/fragments :: menuItem ('/product','product','find product','search',#{menu.product})">
+                </li>
 
-                  <th:block th:if="${#httpServletRequest.serverName == 'localhost'}">
-                      <li th:replace="fragments/fragments :: menuItem ('/category','category','Category','th-list',#{menu.category})">
-                      </li>
-                  </th:block>
+                <li sec:authorize="hasRole('ADMIN')" th:replace="fragments/fragments :: menuItem ('/category','category','Category','th-list',#{menu.category})">
+                </li>
 
-                  <th:block th:if="${#httpServletRequest.serverName == 'localhost'}">
-                      <li th:replace="fragments/fragments :: menuItem ('/config', 'config', 'Config', 'edit', #{menu.config})"></li>
-                  </th:block>
+                <li sec:authorize="hasRole('ADMIN')" th:replace="fragments/fragments :: menuItem ('/config', 'config', 'Config', 'edit', #{menu.config})"></li>
 
-                  <th:block th:if="${#httpServletRequest.serverName == 'localhost'}">
-                      <li th:replace="fragments/fragments :: menuItem ('/log', 'log', 'Log', 'bell', #{menu.log})"></li>
-                  </th:block>
+                <li sec:authorize="hasRole('ADMIN')" th:replace="fragments/fragments :: menuItem ('/log', 'log', 'Log', 'bell', #{menu.log})"></li>
 
-              </ul>
-          </div>
-      </div>
-  </nav>
-  <div class="container-fluid">
-      <div class="container xd-container">
-          <div th:replace="${template}"/>
-		<div class="pagination" th:if="${page != null and #lists.size(page.items) gt 0 }">
-			<a th:class="${page.firstPage} ? 'disabled' : ''" th:href="@{${page.url}(page=0,size=${page.size})}">← First</a>
-			<a th:class="${page.firstPage} ? 'disabled' : ''" th:href="@{${page.url}(page=${page.number-2},size=${page.size})}" >«</a>
-			<a th:each="item : ${page.items}" th:class="${item.current}? 'active' : ''" th:href="@{${page.url}(page=${item.number-1},size=${page.size})}" th:text="${item.number}"></a>
-			<a th:class="${page.lastPage} ? 'disabled' : ''" th:href="@{${page.url}(page=${page.number},size=${page.size})}">»</a>
-			<a th:class="${page.lastPage} ? 'disabled' : ''" th:href="@{${page.url}(page=${page.totalPages-1},size=${page.size})}">Last →</a>
-		</div>
+                <li sec:authorize="hasRole('ADMIN')" th:replace="fragments/fragments :: menuItem ('/customer', 'customer', 'Customer', 'user', #{menu.customer})"></li>
+                <li sec:authorize="isAuthenticated()" th:replace="fragments/fragments :: menuItem ('/modifyprofile', 'profile', 'Profile', 'wrench', #{menu.profile})"></li>
+                <li sec:authorize="!isAuthenticated()" th:replace="fragments/fragments :: menuItem ('/login', 'login', 'Login', 'log-in', #{menu.login})"></li>
+                <li sec:authorize="isAuthenticated()" th:replace="fragments/fragments :: menuItem ('/logout', 'logout', 'Logout', 'log-out', #{menu.logout})"></li>
+                <li sec:authorize="!isAuthenticated()" th:replace="fragments/fragments :: menuItem ('/signup', 'signup', 'SignUp', 'user', #{menu.signup})"></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<div class="container-fluid">
+    <div class="container xd-container">
+        <div th:replace="${template}"/>
+        <div class="pagination" th:if="${page != null and #lists.size(page.items) gt 0 }">
+            <a th:class="${page.firstPage} ? 'disabled' : ''" th:href="@{${page.url}(page=0,size=${page.size})}">←
+                First</a>
+            <a th:class="${page.firstPage} ? 'disabled' : ''"
+               th:href="@{${page.url}(page=${page.number-2},size=${page.size})}">«</a>
+            <a th:each="item : ${page.items}" th:class="${item.current}? 'active' : ''"
+               th:href="@{${page.url}(page=${item.number-1},size=${page.size})}" th:text="${item.number}"></a>
+            <a th:class="${page.lastPage} ? 'disabled' : ''"
+               th:href="@{${page.url}(page=${page.number},size=${page.size})}">»</a>
+            <a th:class="${page.lastPage} ? 'disabled' : ''"
+               th:href="@{${page.url}(page=${page.totalPages-1},size=${page.size})}">Last →</a>
+        </div>
         <br/>
         <br/>
         <div class="container">
-          <div class="row">
-            <div class="col-12 text-center">
-          </div>
+            <div class="row">
+                <div class="col-12 text-center">
+                </div>
+            </div>
         </div>
-      </div>
-  </div>
+    </div>
 
-  <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
-  <script th:src="@{/webjars/jquery-ui/jquery-ui.min.js}"></script>
-  <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
-  <script th:src="@{/webjars/bootstrap-select/js/bootstrap-select.min.js}"></script>
-  <script th:src="@{/webjars/Magnific-Popup/1.1.0/jquery.magnific-popup.min.js}"></script>
-  <script th:src="@{/resources/js/yonga.js}"></script>
-<div class="loader" style="display:none;"></div>
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/jquery-ui/jquery-ui.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap-select/js/bootstrap-select.min.js}"></script>
+    <script th:src="@{/webjars/Magnific-Popup/1.1.0/jquery.magnific-popup.min.js}"></script>
+    <script th:src="@{/resources/js/yonga.js}"></script>
+    <div class="loader" style="display:none;"></div>
+    <div id="is-authenticate" style="display:none;" th:text="${#authorization.getAuthentication() != null and #authorization.expression('isAuthenticated()')}"></div>
+    <div id="is-admin-role" style="display:none;" th:text="${#authorization.getAuthentication() != null and #authorization.expression('hasRole(''ADMIN'')')}"></div>
 </body>
 
 </html>

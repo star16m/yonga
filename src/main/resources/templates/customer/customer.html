@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'customer')}">
+
+  <body>
+      <h2>고객 관리</h2>
+      <div class="log-contain">
+          <table id="customer" class="table table-striped">
+              <thead>
+              <tr>
+                  <th>userId</th>
+                  <th>이름</th>
+                  <th>전화번호</th>
+                  <th>email</th>
+                  <th>최근로그인</th>
+                  <th>사용</th>
+                  <th>수정</th>
+                  <th>삭제</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr th:each="customer : ${customerList}" th:class="${customer.enabled}? '' : 'disabled-customer'">
+                  <td th:text="${customer.userId}" class="text-center"></td>
+                  <td th:text="${customer.name}" class="text-center"></td>
+                  <td th:text="${customer.tel}" class="text-center"></td>
+                  <td th:text="${customer.email}" class="text-center"></td>
+                  <td th:text="${#temporals.format(customer.lastLogin, 'yyyy/MM/dd HH:mm')}"></td>
+                  <td class="text-center"><a href="javascript:void(0);" th:text="${customer.enabled ? '비활성화' : '활성화'}" th:onclick="|javascript:enableCustomer('${customer.userId}', ${customer.enabled});|">사용</a></td>
+                  <td class="text-center"><a th:href="@{/customer/__${customer.userId}__}" th:text="수정">수정</a></td>
+                  <td class="text-center"><a href="javascript:void(0);" th:text="삭제" th:onclick="|javascript:deleteCustomer('${customer.userId}');|">삭제</a></td>
+              </tr>
+              </tbody>
+          </table>
+          <div class="text-right"><a class="btn btn-default" th:href="@{/customer/NEW}">유저생성</a></div>
+      </div>
+  </body>
+
+</html>

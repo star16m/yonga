@@ -3,7 +3,7 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'home')}">
 
   <body>
-    <h2 th:text="${@configService.getConfigValue('CONFIG', 'WELCOME')}">용아몰</h2>
+    <h2 th:text="${T(com.yonga.auc.config.ConfigConstants).APPLICATION_WELCOME}">용아몰</h2>
     <br /><br />
     <h2>Auction 스케줄</h2>
     <div class="row">

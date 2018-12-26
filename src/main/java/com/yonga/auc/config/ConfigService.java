@@ -5,6 +5,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import java.util.List;
 
 @Service
@@ -22,6 +23,13 @@ public class ConfigService {
         return this.configRepository.getConfig(group);
     }
 
+    @PostConstruct
+    public void setConstants() {
+        String title = getConfigValue("CONFIG", "TITLE");
+        String welcome = getConfigValue("CONFIG", "WELCOME");
+        ConfigConstants.APPLICATION_TITLE = title != null ? title : ConfigConstants.APPLICATION_TITLE;
+        ConfigConstants.APPLICATION_WELCOME = welcome != null ? welcome : ConfigConstants.APPLICATION_WELCOME;
+    }
     @Cacheable("config")
     public String getConfigValue(String group, String key) {
         Config config = getConfig(group, key);

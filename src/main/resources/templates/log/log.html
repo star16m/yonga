@@ -3,7 +3,7 @@
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'log')}">
 
   <body>
-      <h2>전체 작업 진행 상태</h2>
+      <h2>로그</h2>
         <ul>
             <li th:text="#{'executor.status.' + ${executorStatus}}">작업 진행 상태</li>
             <li th:if="${executorStatus} == 'FAIL'" th:text="${executorMessage}"></li>

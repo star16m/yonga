@@ -44,6 +44,8 @@ class ConfigController {
 		}
 		this.configService.setConfigValue("CONFIG", "TITLE", title);
 		this.configService.setConfigValue("CONFIG", "WELCOME", welcome);
+		ConfigConstants.APPLICATION_TITLE = title;
+		ConfigConstants.APPLICATION_WELCOME = welcome;
 		return ResponseEntity.ok().build();
 	}
 }

@@ -14,3 +14,40 @@ INSERT INTO config(id, config_group, config_key, config_value) VALUES (1, 'EXECU
 
 INSERT INTO config(id, config_group, config_key, config_value) VALUES (2, 'CONFIG', 'TITLE', 'Yonga :: auc application');
 INSERT INTO config(id, config_group, config_key, config_value) VALUES (3, 'CONFIG', 'WELCOME', 'Welcome yonga mall');
+
+INSERT INTO CUSTOMER(USER_ID, PASSWORD, NAME, TEL, EMAIL, DESCRIPTION, PRIVILEGE, ENABLED, DISPLAY) VALUES (
+'admin',
+'$2a$10$kCEWR8eamrvWB9yXX/WVT.C1rmhS2rRlugWr1MzhM4RR5KhSGM0xe',
+'관리자',
+'010-0000-0000',
+'yaglobal@naver.com',
+'관리자 입니다.',
+'ROLE_ADMIN',
+true,
+true
+)
+;
+INSERT INTO CUSTOMER(USER_ID, PASSWORD, NAME, TEL, EMAIL, DESCRIPTION, PRIVILEGE, ENABLED, DISPLAY) VALUES (
+'star16m',
+'$2a$10$kCEWR8eamrvWB9yXX/WVT.C1rmhS2rRlugWr1MzhM4RR5KhSGM0xe',
+'관리자',
+'010-0000-0000',
+'star16m@gmail.com',
+'관리자 입니다.',
+'ROLE_ADMIN',
+true,
+false
+)
+;
+INSERT INTO CUSTOMER(USER_ID, PASSWORD, NAME, TEL, EMAIL, DESCRIPTION, PRIVILEGE, ENABLED, DISPLAY) VALUES (
+'user',
+'$2a$10$lYeqaESfY9mbTQZqYy4qYuPni/7Y7dTEhoWMAGbd6smHg0Mi3JCGm',
+'일반사용자',
+'010-0000-0000',
+'yaglobal@naver.com',
+'일반 사용자 입니다.',
+'ROLE_USER',
+true,
+true
+)
+;

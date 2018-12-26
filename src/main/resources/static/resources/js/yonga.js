@@ -13,6 +13,23 @@ $(document).ready(function() {
     
     // disabled a tag
     $("a.disabled").bind('click', false);
+    // login button
+    $("a.login-btn").on("click", function(e) {
+        $("form.login-form").submit();
+    });
+    // userId 에서 enter key 가 눌려지면 다음 password 로 이동
+    $('#userId').keypress(function(event) {
+        if (event.keyCode == 13 || event.which == 13) {
+            $('#password').focus();
+            event.preventDefault();
+        }
+    });
+    // password 에서 enter key 가 눌려지면 로그인
+    $('#password').keypress(function(event) {
+        if (event.keyCode == 13 || event.which == 13) {
+            $("form.login-form").submit();
+        }
+    });
     // enable selectpicker
     $('#categorySelect,#makerSelect,#typeSelect,#keijoSelect').selectpicker({
     	width: '100%'
@@ -26,6 +43,8 @@ $(document).ready(function() {
     		enabled:true
     	}
     });
+    // focus input
+    $('div.form-group div input.form-control:enabled').first().focus().select();
     // select event
     $('#categorySelect').on('changed.bs.select', function(e) {
     	var data = {};
@@ -141,4 +160,77 @@ function setConfig() {
             alert('저장에 실패하였습니다.');
         }
     });
+}
+function modifyCustomer() {
+    // clear error
+    $('.custom-error').remove();
+    var isAdmin = $("#is-admin-role").text() == 'true';
+    var isModify = $("#ismodify").val() == 'true';
+    return $.ajax({
+        url: isModify ? "/customer/profile" : "/customer/join",
+        type: isModify ? "put" : "post",
+        contentType: "application/json",
+        cache: false,
+        data: JSON.stringify({
+            userId: $("#userId").val(),
+            name: $("#name").val(),
+            password: $("#password").val(),
+            tel: $("#tel").val(),
+            email: $("#email").val(),
+            description: $("#description").val()
+        }),
+        //dataType: 'json',
+        success: function (data,status,xhr) {
+            alert(isAdmin || isModify ? '저장되었습니다.' : '저장되었습니다.\n사용자 승인이 완료되기 까지는 로그인이 제한됩니다.');
+            window.location.href = isAdmin ? "/customer" : "/";
+        },
+        error : function(data,status,xhr) {
+            var result = eval("(" + data.responseText + ")");
+            if (result.error && result.error == 'Bad Request') {
+                $.each(result.errors,function(key,value){
+                    $('input#'+result.errors[key].field).after('<span class="custom-error">'+result.errors[key].defaultMessage+'</span>');
+                });
+            } else if (result.result) {
+                alert(result.result);
+            }
+        }
+    });
+}
+function enableCustomer(customerId, enabled) {
+    return $.ajax({
+        url: "/customer/enabled",
+        type: "patch",
+        contentType: "application/json",
+        cache: false,
+        data: JSON.stringify({
+            customerId: customerId,
+            enabled: !enabled
+        }),
+        //dataType: 'json',
+        success: function (data,status,xhr) {
+            alert("저장되었습니다.");
+            window.location.href = "/customer";
+        },
+        error : function(data,status,xhr) {
+            alert(data.responseJSON.result);
+        }
+    });
+}
+function deleteCustomer(customerId) {
+    if (confirm('유저[' + customerId + '] 를 삭제 하시겠습니까?')) {
+        return $.ajax({
+                url: "/customer/" + customerId,
+                type: "delete",
+                contentType: "application/json",
+                cache: false,
+                success: function (data,status,xhr) {
+                    window.location.href = "/customer";
+                },
+                error : function(data,status,xhr) {
+                    alert(data.responseJSON.result);
+                }
+            });
+    } else {
+        alert('취소');
+    }
 }

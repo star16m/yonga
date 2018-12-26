@@ -1,0 +1,11 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'error')}">
+
+  <body>
+    <h2>화면을 열람할 권한이 없습니다.</h2>
+    <div class="text-center"><img class="fullimage" th:src="@{/resources/images/403.png}"/></div>
+    <h3>권한을 획득하고 싶은 경우, 관리자에게 문의하세요.</h3>
+  </body>
+
+</html>

@@ -125,7 +125,7 @@
 	</th:block>
 
 	<th:block th:if="${page != null and page.content != null and makerList != null}">
-		<h2 th:text="${'메이커 [' + (session.selectsMaker != null ? #lists.size(session.selectsMaker) + '개 선택중' : 'All') + ']'}">Maker</h2>
+		<h2 th:text="${'메이커 [' + (session.selectsMaker != null ? #lists.size(session.selectsMaker) + '개 선택중' : 'ALL') + ']'}">Maker</h2>
 		<div class="row">
 			<div class="col-xs-12">
 				<select id="makerSelect" name="makerSelect" class="selectpicker" data-style="btn-primary" data-selected-text-format="count > 3" data-count-selected-text="{0} 개의 메이커 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(makerList) + '개  maker가 있습니다.'}" data-size="10">
@@ -135,7 +135,7 @@
 		</div>
 		<br />
 		
-		<h2 th:text="${'형상' + (session.selectsKeijo != null ? ' [' + #lists.size(session.selectsKeijo) + '개 선택중]' : '')}">Type</h2>
+		<h2 th:text="${'형상' + (session.selectsKeijo != null ? ' [' + #lists.size(session.selectsKeijo) + '개 선택중]' : 'ALL')}">Type</h2>
 		<div class="row">
 			<div class="col-xs-12">
 				<select id="keijoSelect" name="keijoSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 타입  선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(keijoList) + '개  형상이 있습니다.'}" data-size="10">
