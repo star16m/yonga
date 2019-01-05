@@ -1,5 +1,6 @@
 package com.yonga.auc.data.customer;
 
+import com.yonga.auc.data.log.LogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.DisabledException;
@@ -9,8 +10,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 
@@ -33,6 +32,6 @@ public class UserDetailServiceImpl implements UserDetailsService {
         }
         customer.setLastLogin(LocalDateTime.now());
         this.customerRepository.save(customer);
-        return new User(customer.getUserId(), customer.getPassword(), AuthorityUtils.createAuthorityList(customer.getPrivilege()));
+        return new User(customer.getUserId(), customer.getPassword(), AuthorityUtils.createAuthorityList(customer.getPrivilege().split(",")));
     }
 }

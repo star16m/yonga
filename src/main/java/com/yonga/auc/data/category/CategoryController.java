@@ -73,25 +73,16 @@ class CategoryController {
     	if (!optionMap.containsKey("categoryIdList")) {
     		return "categoryId is empty";
     	}
-    	if (!optionMap.containsKey("extractPassword")) {
-    		return "export password is empty";
-    	}
 		if (!optionMap.containsKey("extractMode") || optionMap.get("extractMode").toString().isEmpty()) {
 			return "extract mode is empty";
 		}
 
 		@SuppressWarnings("unchecked")
 		List<String> categoryIdList = (List<String>)optionMap.get("categoryIdList");
-		String extractPassword = optionMap.get("extractPassword").toString();
 		String extractModeString = optionMap.get("extractMode").toString();
 		ExtractMode extractMode = ExtractMode.valueOf(extractModeString);
 
-		// check export password
-		if (!extractPassword.equals(this.siteInfo.getExportPassword())) {
-			return "different export password.";
-		}
 		log.info("try data execute");
-
 		String executorStatus = this.configService.getConfigValue("EXECUTOR", "STATUS");
 		if ("RUNNING".equals(executorStatus)) {
 			return "실행 중입니다.";

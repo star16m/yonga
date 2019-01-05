@@ -46,7 +46,7 @@ class ProductController {
 		session.removeAttribute("selectsMaker");
 		session.removeAttribute("selectsType");
 		session.removeAttribute("selectsKeijo");
-		session.removeAttribute("viewProductImage");
+//		session.removeAttribute("viewProductImage");
 		return showProductList(session, Optional.empty(), model, PageRequest.of(0, 10));
 	}
     @GetMapping("/product/{categoryId}")

@@ -108,15 +108,10 @@ function initialCategory(categoryId, status) {
 			alert("초기화할 카테고리를 선택해 주세요.");
 			return;
 		}
-		if ($('#extractPassword').val() == '') {
-			alert('초기화 패스워드를 입력해 주세요.');
-			return;
-		}
 		if (!confirm("선택한 [" + $("#extractCategorySelect").val().length + "] 개 카테고리를 초기화 하시겠습니까?")) {
 			return false;
 		}
 		data["categoryIdList"] = $("#extractCategorySelect").val();
-		data["extractPassword"] = $("#extractPassword").val();
 		data["extractMode"] = $("input:checkbox[id='initialize']").is(":checked") ? "INITIALIZE" : "EXTRACT"
 	    return $.ajax({
 	        url: "/category/init",
@@ -188,7 +183,7 @@ function modifyCustomer() {
             var result = eval("(" + data.responseText + ")");
             if (result.error && result.error == 'Bad Request') {
                 $.each(result.errors,function(key,value){
-                    $('input#'+result.errors[key].field).after('<span class="custom-error">'+result.errors[key].defaultMessage+'</span>');
+                    $('input#'+result.errors[key].field).after('<span class="custom-error">'+result.errors[key].defaultMessage+'<br/></span>');
                 });
             } else if (result.result) {
                 alert(result.result);

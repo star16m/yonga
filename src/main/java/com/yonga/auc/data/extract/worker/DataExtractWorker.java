@@ -104,7 +104,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                         this.logService.addLog(String.format("[%s] 데이터 상세 추출을 완료 하였습니다.(%d)", category.getKorean(), extractedProductNum));
                     });
             this.logService.addLog("데이터 상세 추출을 완료하였습니다. Total[" + detailNum.get() + "]");
-            this.configService.setConfigValue("EXECUTOR", "STATUS", "SUCCESS");
+            this.configService.setConfigValue("EXECUTOR", "STATUS", "COMPLETE");
         } catch (DataExtractException e) {
             log.warn(e.getMessage());
             this.logService.addLog(e.getMessage());

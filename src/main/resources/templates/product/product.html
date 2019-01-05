@@ -4,7 +4,7 @@
   th:replace="~{fragments/layout :: layout (~{::body},'product')}">
 
 <body>
-	<div th:if="${product != null}" class="container xd-container">
+	<div th:if="${product != null}">
 		<ul class="pager">
 			<li class="previous" th:if="${previousProduct != null}"><a th:href="@{/product/__${currentCategory.id}__/__${previousProduct}__(page=${previousPage},size=${page.size})}">이전 상품</a></li>
 			<li class="next" th:if="${nextProduct != null}"><a th:href="@{/product/__${currentCategory.id}__/__${nextProduct}__(page=${nextPage},size=${page.size})}">다음 상품</a></li>

@@ -1,5 +1,6 @@
 package com.yonga.auc.data.customer;
 
+import com.yonga.auc.data.log.LogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,20 +17,21 @@ import java.util.Map;
 
 @Slf4j
 @Controller
-@RequestMapping("/customer")
 public class CustomerController {
     @Autowired
     private CustomerRepository customerRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
-    @GetMapping
+    @Autowired
+    private LogService logService;
+    @GetMapping("/customer")
     public String customer(Map<String, Object> model) {
         List<Customer> customerList = this.customerRepository.findCustonersByDisplayTrue();
         model.put("customerList", customerList);
         return "customer/customer";
     }
-    @PutMapping(value = "/profile")
-    public @ResponseBody ResponseEntity<String> updateCustomer(@RequestBody Customer customer) {
+    @PutMapping(value = "/customer/profile")
+    public @ResponseBody ResponseEntity<String> updateCustomer(@Valid @RequestBody Customer customer, HttpServletRequest request) {
         try {
             validateCustomer(customer);
         } catch (Exception e) {
@@ -39,14 +41,20 @@ public class CustomerController {
         if (oldCustomer == null) {
             return new ResponseEntity<>("not found customer", HttpStatus.NOT_FOUND);
         }
-        customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+        if (customer.getPassword() != null && !customer.getPassword().isEmpty()) {
+            customer.setPassword(passwordEncoder.encode(customer.getPassword()));
+        } else {
+            customer.setPassword(oldCustomer.getPassword());
+        }
         customer.setPrivilege(oldCustomer.getPrivilege());
         customer.setEnabled(oldCustomer.getEnabled());
         customer.setDisplay(oldCustomer.getDisplay());
         this.customerRepository.save(customer);
+        String updateUser = request.getUserPrincipal().getName();
+        this.logService.addLog("유저 [" + customer.getUserId() + "] 를 수정 하였습니다. by[" + updateUser + "]");
         return new ResponseEntity<>("success", HttpStatus.OK);
     }
-    @PostMapping({"/join"})
+    @PostMapping("/customer/join")
     public @ResponseBody ResponseEntity<Map<String, String>> createCustomer(@Valid @RequestBody Customer customer, HttpServletRequest request) {
         try {
             validateCustomer(customer);
@@ -62,7 +70,7 @@ public class CustomerController {
         this.customerRepository.save(customer);
         return new ResponseEntity<>(Collections.singletonMap("result", "success"), HttpStatus.OK);
     }
-    @PatchMapping(value = "/enabled")
+    @PatchMapping("/customer/enabled")
     public @ResponseBody ResponseEntity<Map<String, String>> updateCustomer(@RequestBody @Valid CustomerEnabled customerEnabled) {
 
         Customer customer = this.customerRepository.findByUserId(customerEnabled.getCustomerId());
@@ -76,7 +84,7 @@ public class CustomerController {
         this.customerRepository.save(customer);
         return new ResponseEntity<>(Collections.singletonMap("result", customerEnabled.getCustomerId()+ " is " + customerEnabled.getEnabled()), HttpStatus.OK);
     }
-    @DeleteMapping(value = "{customerId}")
+    @DeleteMapping(value = "/customer/{customerId}")
     public @ResponseBody ResponseEntity<Map<String, String>> deleteCustomer(@PathVariable String customerId) {
 
         Customer customer = this.customerRepository.findByUserId(customerId);
@@ -89,7 +97,14 @@ public class CustomerController {
         this.customerRepository.deleteById(customerId);
         return new ResponseEntity<>(Collections.singletonMap("result", customerId+ " is deleted!!!"), HttpStatus.OK);
     }
-    @GetMapping("{customerId}")
+    @GetMapping("/signup")
+    public String signup(Map<String, Object> model) {
+        Customer customer = new Customer();
+        model.put("customer", customer);
+        model.put("MODE", "SIGNUP");
+        return "/customer/modifyCustomer";
+    }
+    @GetMapping("/customer/{customerId}")
     public String getCustomerById(@PathVariable String customerId, Map<String, Object> model, HttpServletRequest request) {
         log.debug("this is getCustomerById [{}]", customerId);
         Customer customer = null;
@@ -108,7 +123,7 @@ public class CustomerController {
             model.put("customer", customer);
             model.put("MODE", "MODIFY");
         }
-        return "customer/modifyCustomer";
+        return "/customer/modifyCustomer";
     }
 
     private void validateCustomer(Customer customer) throws Exception {

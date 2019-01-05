@@ -20,13 +20,6 @@ class WelcomeController {
     public String login(Map<String, Object> model) {
         return "login";
     }
-    @GetMapping("/signup")
-    public String signup(Map<String, Object> model) {
-        Customer customer = new Customer();
-        model.put("customer", customer);
-        model.put("MODE", "SIGNUP");
-        return "customer/modifyCustomer";
-    }
 
     @GetMapping("modifyprofile")
     public String modifyProfile(Map<String, Object> model, HttpServletRequest request) {
