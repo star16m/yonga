@@ -20,7 +20,9 @@
                        th:value="${@configService.getConfigValue('CONFIG', 'WELCOME')}">
             </div>
         </div>
-        <a class="btn btn-default" href="javascript:void(0);" th:onclick="|javascript:setConfig();|">저장</a>
+        <div class="text-right">
+            <a class="btn btn-default" href="javascript:void(0);" th:onclick="|javascript:setConfig();|">저장</a>
+        </div>
     </form>
 </div>
 </body>

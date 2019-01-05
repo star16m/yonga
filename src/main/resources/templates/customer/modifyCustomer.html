@@ -51,8 +51,10 @@
                   </div>
               </div>
               <input type="hidden" id="ismodify" th:value="${customer.userId != null && !customer.userId.isEmpty()}"/>
-              <a class="btn btn-default" th:href="${#authorization.getAuthentication() != null and #authorization.expression('hasRole(''ADMIN'')')} ? '/customer' : '/'">취소</a>
-              <a class="btn btn-default" href="javascript:void(0);" th:onclick="|javascript:modifyCustomer();|">저장</a>
+              <div class="text-right">
+                  <a class="btn btn-default" th:href="${#authorization.getAuthentication() != null and #authorization.expression('hasRole(''ADMIN'')')} ? '/customer' : '/'">취소</a>
+                  <a class="btn btn-default" href="javascript:void(0);" th:onclick="|javascript:modifyCustomer();|">저장</a>
+              </div>
           </form>
       </div>
   </body>
