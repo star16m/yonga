@@ -1,0 +1,56 @@
+app:
+  brand-auc:
+    workhome: .
+    uid: K02134700
+    pwd: dyddk1309
+    targetProtocol: https
+    targetHost: www.brand-auc.com
+    executor: /Users/star16m/Downloads/chromedriver
+    work.path: ${app.brand-auc.workhome}/data/exportHtmlfiles
+    version: 1.0.0-nomoney
+    exportPassword: yongababo
+
+
+server:
+  port: 8888
+  tomcat:
+    uri-encoding: UTF-8
+  http:
+    encoding:
+      charset: UTF-8
+
+
+spring:
+  profiles:
+    active: production
+  datasource:
+    sql-script-encoding: UTF-8
+    url: jdbc:hsqldb:${app.brand-auc.workhome}/data/data
+    # schema: classpath*:db/schema.sql
+    # data: classpath*:db/data.sql
+  thymeleaf:
+    mode: HTML
+    cached: false
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+  messages:
+    basename: messages/messages
+  devtools:
+    livereload:
+      enabled: true
+
+
+management:
+  endpoints:
+    web:
+      base-path: /manage
+      exposure:
+        include: '*'
+
+logging:
+  level:
+    org.springframework: INFO
+    # org.springframework.web: DEBUG
+    # org.springframework.context.annotation: TRACE
