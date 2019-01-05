@@ -1,14 +1,3 @@
-app:
-  brand-auc:
-    workhome: .
-    uid: K02134700
-    pwd: dyddk1309
-    targetProtocol: https
-    targetHost: www.brand-auc.com
-    executor: /Users/star16m/Downloads/chromedriver
-    work.path: ${app.brand-auc.workhome}/data/exportHtmlfiles
-    version: 1.0.0-nomoney
-    exportPassword: yongababo
 
 
 server:
