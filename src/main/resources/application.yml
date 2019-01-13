@@ -43,3 +43,111 @@ logging:
     org.springframework: INFO
     # org.springframework.web: DEBUG
     # org.springframework.context.annotation: TRACE
+
+
+mail:
+  iconurl: http://yaglobal.iptime.org:8080/resources/images/newsletter.png
+  content:
+    line: >
+      <tr>
+          <td width="3%"></td>
+          <td width="94%" style="font-size:14px;line-height:22px">#line#</td>
+          <td width="3%"></td>
+      </tr>
+  body:
+    line: >
+      <tr>
+          <td width="6%"></td>
+          <td width="88%" style="font-size:14px;line-height:22px;font-family:Apple SD Gothic Neo,sans-serif,'\00b9d1\00c740\00ace0\00b515',Malgun Gothic,'\00ad74\00b9bc',gulim;letter-spacing:-1px;color:#1e1e1e">#line#</td>
+          <td width="6%"></td>
+      </tr>
+    template: >
+      <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#f4f4f4" style="border-collapse:collapse">
+      <tbody>
+      <tr>
+      <td>
+          <table width="100%" cellspacing="0" cellpadding="0" border="0" align="center" bgcolor="#ffffff" style="max-width:640px;margin:0 auto">
+              <tbody>
+                  <tr><td width="100%" height="44" colspan="3" bgcolor="#ffdc00"></td></tr>
+                  <tr>
+                      <td width="6%" height="36" bgcolor="#ffdc00"></td>
+                      <td width="88%" height="36" bgcolor="#ffdc00">
+                          <table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#ffdc00" style="line-height:22px;font-family:Apple SD Gothic Neo,sans-serif,'\00b9d1\00c740\00ace0\00b515',Malgun Gothic,'\00ad74\00b9bc',gulim;letter-spacing:-1px;color:#1e1e1e">
+                              <tbody>
+                                  <tr>
+                                      <td width="94%" style="font-size:35px;line-height:22px;font-family:Apple SD Gothic Neo,sans-serif,'\00b9d1\00c740\00ace0\00b515',Malgun Gothic,'\00ad74\00b9bc',gulim;letter-spacing:-1px;font-weight:bold;color:#1e1e1e">
+                                          #title#
+                                      </td>
+                                      <td width="6%">
+                                          <img src="#iconurl#" width="36" height="36" alt="뉴스레터" border="0" style="display:block">
+                                      </td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </td>
+                      <td width="6%" height="39" bgcolor="#ffdc00"></td>
+                  </tr>
+                  <tr><td width="100%" height="37" colspan="3" bgcolor="#ffdc00"></td></tr>
+                  <tr><td width="100%" height="34" colspan="3"></td></tr>
+                  <tr>
+                      <td width="6%"></td>
+                      <td width="88%" style="font-size:18px;line-height:22px;font-family:Apple SD Gothic Neo,sans-serif,'\00b9d1\00c740\00ace0\00b515',Malgun Gothic,'\00ad74\00b9bc',gulim;letter-spacing:-1px;font-weight:bold;color:#1e1e1e">
+                          #subTitle#
+                      </td>
+                      <td width="6%"></td>
+                  </tr>
+                  <tr><td width="100%" height="26" colspan="3"></td></tr>
+                  #contentprefix#
+                  <tr><td width="100%" height="20" colspan="3"></td></tr>
+                  <tr>
+                      <td width="6%"></td>
+                      <td width="88%">
+                          <table width="100%" cellspacing="0" cellpadding="0" border="0" bgcolor="#f8f8f8" style="line-height:22px;font-family:Apple SD Gothic Neo,sans-serif,'\00b9d1\00c740\00ace0\00b515',Malgun Gothic,'\00ad74\00b9bc',gulim;letter-spacing:-1px;color:#1e1e1e">
+                              <tbody>
+                                  <tr><td width="100%" height="11" colspan="3"></td></tr>
+                                  <tr>
+                                      <td width="3%"></td>
+                                      <td width="94%" style="font-size:14px;font-weight:bold"><contenttitle></td>
+                                      <td width="3%"></td>
+                                  </tr>
+                                  #contentbody#
+                                  <tr><td width="100%" height="10" colspan="3"></td></tr>
+                              </tbody>
+                          </table>
+                      </td>
+                      <td width="6%"></td>
+                  </tr>
+                  <tr><td width="100%" height="30" colspan="3"></td></tr>
+                  #contentpostfix#
+                  <tr><td width="100%" height="35" colspan="3"></td></tr>
+                  <tr>
+                      <td width="6%"></td>
+                      <td width="88%" height="24">
+                          <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                              <tbody>
+                                  <tr>
+                                      <td width="2%" style="font-size:12px;line-height:18px;font-family:Apple SD Gothic Neo,sans-serif,'\00b9d1\00c740\00ace0\00b515',Malgun Gothic,'\00b3cb\00c6c0',Dotum;letter-spacing:-1px;color:#7a7a7a;vertical-align:top">※</td>
+                                      <td width="98%" style="font-size:12px;line-height:18px;font-family:Apple SD Gothic Neo,sans-serif,'\00b9d1\00c740\00ace0\00b515',Malgun Gothic,'\00b3cb\00c6c0',Dotum;letter-spacing:-1px;color:#7a7a7a">본 메일은 yaglobal 시스템에서 발송되었습니다.</td>
+                                  </tr>
+                              </tbody>
+                          </table>
+                      </td>
+                      <td width="6%"></td>
+                  </tr>
+                  <tr><td width="100%" height="14" colspan="3"></td></tr>
+                  <tr>
+                      <td width="6%"></td>
+                      <td width="88%" style="font-size:12px;line-height:18px;font-family:Apple SD Gothic Neo,sans-serif,'\00b9d1\00c740\00ace0\00b515',Malgun Gothic,'\00b3cb\00c6c0',Dotum;letter-spacing:-1px;color:#7a7a7a">
+                          Copyright © <a href="http://yaglobal.iptime.org:8080" style="color:#7a7a7a;text-decoration:none" target="_blank">Yaglobal.</a> All rights reserved.
+                      </td>
+                      <td width="6%"></td>
+                  </tr>
+                  <tr><td width="100%" height="48" colspan="3"></td></tr>
+
+              </tbody>
+          </table>
+      </td>
+      </tr>
+      <tr><td width="100%" height="100"></td></tr>
+      </tbody>
+      </table>

@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 import com.yonga.auc.config.ConfigService;
+import com.yonga.auc.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
@@ -39,6 +40,8 @@ class CategoryController {
 	private LogService logService;
 	@Autowired
 	private ConfigService configService;
+	@Autowired
+	private MailService mailService;
 
     @GetMapping("/category")
     public String getCategoryList(Map<String, Object> model) {
@@ -97,7 +100,7 @@ class CategoryController {
 			this.categoryService.save(c);
 		});
 		if (extractMode.isRequiredInitialize()) EXECUTOR.submit(new DataCleanWorker(this.categoryService, this.productService, this.siteInfo, this.logService, categoryList));
-		EXECUTOR.submit(new DataExtractWorker(this.categoryService, this.productService, this.siteInfo, this.logService, this.configService, categoryList, extractMode));
+		EXECUTOR.submit(new DataExtractWorker(this.categoryService, this.productService, this.siteInfo, this.logService, this.configService, categoryList, extractMode, this.mailService));
 		this.configService.setConfigValue("EXECUTOR", "STATUS", "RUNNING");
 	}
 }

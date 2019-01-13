@@ -14,10 +14,45 @@
             </div>
         </div>
         <div class="form-group">
-            <label for="inputTitle" class="col-sm-2 control-label">인사말</label>
+            <label for="inputWelcome" class="col-sm-2 control-label">인사말</label>
             <div class="col-sm-10">
                 <input type="input" class="form-control" id="inputWelcome" placeholder="인사말"
                        th:value="${@configService.getConfigValue('CONFIG', 'WELCOME')}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputAdminEmail" class="col-sm-2 control-label">관리자 email</label>
+            <div class="col-sm-10">
+                <input type="input" class="form-control" id="inputAdminEmail" placeholder="abc@abc.com"
+                       th:value="${@configService.getConfigValue('CONFIG', 'ADMIN_EMAIL')}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputMailHost" class="col-sm-2 control-label">Mail host</label>
+            <div class="col-sm-10">
+                <input type="input" class="form-control" id="inputMailHost" placeholder="smtp.naver.com"
+                       th:value="${@configService.getConfigValue('CONFIG', 'MAIL_HOST')}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputMailPort" class="col-sm-2 control-label">Mail port</label>
+            <div class="col-sm-10">
+                <input type="input" class="form-control" id="inputMailPort" placeholder="587"
+                       th:value="${@configService.getConfigValue('CONFIG', 'MAIL_PORT')}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputMailId" class="col-sm-2 control-label">Mail ID</label>
+            <div class="col-sm-10">
+                <input type="input" class="form-control" id="inputMailId" placeholder="yaglobal"
+                       th:value="${@configService.getConfigValue('CONFIG', 'MAIL_ID')}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputMailPassword" class="col-sm-2 control-label">Mail password</label>
+            <div class="col-sm-10">
+                <input type="password" class="form-control" id="inputMailPassword"
+                       th:value="${@configService.getConfigValue('CONFIG', 'MAIL_PASSWORD')}">
             </div>
         </div>
         <div class="text-right">

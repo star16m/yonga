@@ -134,12 +134,18 @@ function initialCategory(categoryId, status) {
 function setConfig() {
 	var message = '';
 	var data = {};
-    if ($("#inputTitle").val() == null || $("#inputWelcome").val() == "") {
+    if (!$("#inputTitle").val() || !$("#inputWelcome").val() || !$("#inputAdminEmail").val() || !$("#inputMailHost").val() || !$("#inputMailPort").val() || !$("#inputMailId").val() || !$("#inputMailPassword").val()) {
         alert("설정값을 입력해 주세요.");
         return;
     }
     data["title"] = $("#inputTitle").val();
     data["welcome"] = $("#inputWelcome").val();
+    data["adminEmail"] = $("#inputAdminEmail").val();
+    data["mailHost"] = $("#inputMailHost").val();
+    data["mailPort"] = $("#inputMailPort").val();
+    data["mailId"] = $("#inputMailId").val();
+    data["mailPassword"] = $("#inputMailPassword").val();
+
     return $.ajax({
         url: "/config",
         type: "post",
@@ -152,7 +158,9 @@ function setConfig() {
             location.reload();
         },
         error : function(error) {
-            alert('저장에 실패하였습니다.');
+            console.log(error.responseText);
+            alert('저장에 실패하였습니다. [' + error.responseText + ']');
+
         }
     });
 }

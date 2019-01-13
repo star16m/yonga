@@ -1,5 +1,6 @@
 package com.yonga.auc.data.extract.worker;
 
+import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.config.Config;
 import com.yonga.auc.config.ConfigService;
 import com.yonga.auc.data.category.Category;
@@ -12,8 +13,12 @@ import com.yonga.auc.data.log.LogService;
 import com.yonga.auc.data.product.Product;
 import com.yonga.auc.data.product.ProductService;
 import com.yonga.auc.data.product.image.ProductImage;
+import com.yonga.auc.mail.MailContents;
+import com.yonga.auc.mail.MailService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StopWatch;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -32,8 +37,9 @@ public class DataExtractWorker implements Callable<Boolean> {
     private ConfigService configService;
     private List<Category> targetCategoryList;
     private ExtractMode extractMode;
+    private MailService mailService;
 
-    public DataExtractWorker(CategoryService categoryService, ProductService productService, ExtractSiteInfo siteInfo, LogService logService, ConfigService configService, List<Category> targetCategoryList, ExtractMode extractMode) {
+    public DataExtractWorker(CategoryService categoryService, ProductService productService, ExtractSiteInfo siteInfo, LogService logService, ConfigService configService, List<Category> targetCategoryList, ExtractMode extractMode, MailService mailService) {
         this.categoryService = categoryService;
         this.productService = productService;
         this.siteInfo = siteInfo;
@@ -41,6 +47,7 @@ public class DataExtractWorker implements Callable<Boolean> {
         this.configService = configService;
         this.targetCategoryList = targetCategoryList;
         this.extractMode = extractMode;
+        this.mailService = mailService;
     }
 
     @Override
@@ -48,6 +55,10 @@ public class DataExtractWorker implements Callable<Boolean> {
         this.dataExtractor = new DataExtractor(siteInfo);
         boolean extractedProductList = true;
         AtomicReference<Category> currentCategory = new AtomicReference<>();
+        Date startDate = new Date();
+        AtomicInteger totalExtractNum = new AtomicInteger(0);
+        StopWatch watch = new StopWatch();
+        watch.start();
         try {
             // extract
             this.logService.addLog("데이터 상세 추출을 시작합니다.");
@@ -76,6 +87,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                     },
                     (category, productPair) -> {
                         int extractedProductNum = detailNum.getAndIncrement();
+                        totalExtractNum.incrementAndGet();
                         Product product = productPair.getFirst();
                         List<String> productImagePathList = productPair.getSecond();
                         product.setProductNo(extractedProductNum);
@@ -103,8 +115,9 @@ public class DataExtractWorker implements Callable<Boolean> {
                         categoryService.save(category);
                         this.logService.addLog(String.format("[%s] 데이터 상세 추출을 완료 하였습니다.(%d)", category.getKorean(), extractedProductNum));
                     });
-            this.logService.addLog("데이터 상세 추출을 완료하였습니다. Total[" + detailNum.get() + "]");
+            this.logService.addLog("데이터 상세 추출을 완료하였습니다. Total[" + totalExtractNum.get() + "]");
             this.configService.setConfigValue("EXECUTOR", "STATUS", "COMPLETE");
+            this.configService.setConfigValue("EXECUTOR", "MESSAGE", "완료");
         } catch (DataExtractException e) {
             log.warn(e.getMessage());
             this.logService.addLog(e.getMessage());
@@ -116,6 +129,23 @@ public class DataExtractWorker implements Callable<Boolean> {
                 Integer categoryProductNum = this.productService.findProductNum(category.getId());
                 category.setExtProductNum(categoryProductNum);
                 this.categoryService.save(category);
+            }
+        } finally {
+            watch.stop();
+            String adminEmail = this.configService.getConfigValue("CONFIG", "ADMIN_EMAIL");
+            if (YongaUtil.isNotEmpty(adminEmail)) {
+                try {
+                    this.mailService.sendEmail(new MailContents("제품 추출 완료", "데이터 추출을 완료 하였습니다.",
+                            Arrays.asList("시작시간 : " + startDate, "종료시간 : " + new Date()),
+                            Arrays.asList("추출 시간 : [" + watch.getTotalTimeSeconds() + "] 초"),
+                            Arrays.asList("카테고리 : " + this.targetCategoryList.size() + "개",
+                                    "상태 : " + this.configService.getConfigValue("EXECUTOR", "STATUS"),
+                                    "메세지 : " + this.configService.getConfigValue("EXECUTOR", "MESSAGE"),
+                                    "추출 제품 수 : " + totalExtractNum)
+                    ), adminEmail);
+                } catch (Exception e) {
+                    this.logService.addLog("메일 발송 중 에러가 발생하였습니다. error [" + e.getMessage() + "]");
+                }
             }
         }
         return extractedProductList;

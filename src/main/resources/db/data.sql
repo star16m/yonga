@@ -14,6 +14,8 @@ INSERT INTO config(id, config_group, config_key, config_value) VALUES (1, 'EXECU
 
 INSERT INTO config(id, config_group, config_key, config_value) VALUES (2, 'CONFIG', 'TITLE', 'Yonga :: auc application');
 INSERT INTO config(id, config_group, config_key, config_value) VALUES (3, 'CONFIG', 'WELCOME', 'Welcome yonga mall');
+INSERT INTO config(id, config_group, config_key, config_value) VALUES (4, 'CONFIG', 'ADMIN_EMAIL', 'yaglobal@naver.com');
+
 
 INSERT INTO CUSTOMER(USER_ID, PASSWORD, NAME, TEL, EMAIL, DESCRIPTION, PRIVILEGE, ENABLED, DISPLAY) VALUES (
 'admin',

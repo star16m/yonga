@@ -1,6 +1,10 @@
 package com.yonga.auc.data.customer;
 
+import com.yonga.auc.common.YongaUtil;
+import com.yonga.auc.config.ConfigService;
 import com.yonga.auc.data.log.LogService;
+import com.yonga.auc.mail.MailContents;
+import com.yonga.auc.mail.MailService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -11,9 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Controller
@@ -24,6 +26,10 @@ public class CustomerController {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private LogService logService;
+    @Autowired
+    private ConfigService configService;
+    @Autowired
+    private MailService mailService;
     @GetMapping("/customer")
     public String customer(Map<String, Object> model) {
         List<Customer> customerList = this.customerRepository.findCustonersByDisplayTrue();
@@ -68,6 +74,20 @@ public class CustomerController {
         customer.setPrivilege("ROLE_USER");
         customer.setEnabled(request.isUserInRole("ADMIN"));
         this.customerRepository.save(customer);
+        String adminEmail = this.configService.getConfigValue("CONFIG", "ADMIN_EMAIL");
+        if (YongaUtil.isNotEmpty(adminEmail)) {
+            try {
+                this.mailService.sendEmail(new MailContents("고객 가입 승인 요청", "가입 승인 요청이 있습니다.",
+                        Arrays.asList("승인 요청 시간 : [" + new Date() + "]"),
+                        Arrays.asList(""),
+                        Arrays.asList("고객 ID : [" + customer.getUserId() + "]",
+                                "고객 이름 : [" + customer.getName() + "]",
+                                "고객 email : [" + customer.getEmail() + "]")
+                ), adminEmail);
+            } catch (Exception e) {
+                this.logService.addLog("메일 발송 중 에러가 발생하였습니다. error [" + e.getMessage() + "]");
+            }
+        }
         return new ResponseEntity<>(Collections.singletonMap("result", "success"), HttpStatus.OK);
     }
     @PatchMapping("/customer/enabled")

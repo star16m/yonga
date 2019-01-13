@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 public class Customer {
     @Id @NotNull @Size(min=4, max=30) @Pattern(regexp="^[\\w]+$")
     private String userId;
-    @NotNull @Pattern(regexp="(^$|.{6,255})")
+    @NotNull @Pattern(regexp="(^$|.{4,255})")
     private String password;
     @JsonIgnore
     private String privilege;
