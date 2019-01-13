@@ -122,7 +122,7 @@ public class CustomerController {
         Customer customer = new Customer();
         model.put("customer", customer);
         model.put("MODE", "SIGNUP");
-        return "/customer/modifyCustomer";
+        return "customer/modifyCustomer";
     }
     @GetMapping("/customer/{customerId}")
     public String getCustomerById(@PathVariable String customerId, Map<String, Object> model, HttpServletRequest request) {
@@ -143,7 +143,7 @@ public class CustomerController {
             model.put("customer", customer);
             model.put("MODE", "MODIFY");
         }
-        return "/customer/modifyCustomer";
+        return "customer/modifyCustomer";
     }
 
     private void validateCustomer(Customer customer) throws Exception {

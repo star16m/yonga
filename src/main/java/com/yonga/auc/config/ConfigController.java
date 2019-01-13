@@ -1,7 +1,6 @@
 package com.yonga.auc.config;
 
 import com.sun.mail.util.MailConnectException;
-import com.sun.tools.javac.util.List;
 import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.category.CategoryService;
@@ -17,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import javax.mail.AuthenticationFailedException;
+import java.util.Arrays;
 import java.util.Map;
 
 @Slf4j
@@ -70,9 +70,9 @@ class ConfigController {
 		if (!YongaUtil.isEmpty(adminEmail)) {
 			try {
 				mailService.sendEmailSync(new MailContents("메일 설정 변경 알림", "메일 설정을 변경하였습니다.",
-						List.of("테스트 메일 입니다."),
-						List.of("설정 정보를 확인해 주세요."),
-						List.of("host:" + mailHost, "port: " + mailPort, "id:" + mailId)), adminEmail);
+						Arrays.asList("테스트 메일 입니다."),
+						Arrays.asList("설정 정보를 확인해 주세요."),
+						Arrays.asList("host:" + mailHost, "port: " + mailPort, "id:" + mailId)), adminEmail);
 				sendMail = true;
 			} catch (MailConnectException e) {
 				log.error(e.getMessage(), e);

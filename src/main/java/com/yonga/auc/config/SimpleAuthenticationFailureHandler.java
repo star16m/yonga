@@ -1,6 +1,5 @@
 package com.yonga.auc.config;
 
-import com.sun.tools.javac.util.List;
 import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.data.log.LogService;
 import com.yonga.auc.mail.MailContents;
