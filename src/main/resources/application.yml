@@ -19,7 +19,6 @@ spring:
     # data: classpath*:db/data.sql
   thymeleaf:
     mode: HTML
-    cached: false
   jpa:
     hibernate:
       ddl-auto: none
