@@ -1,7 +1,7 @@
 package com.yonga.auc.common;
 
-import com.yonga.auc.data.product2.ProductDto;
-import com.yonga.auc.data.product2.image.NewProductImage;
+import com.yonga.auc.data.product.ProductDto;
+import com.yonga.auc.data.product.image.ProductImage;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -94,15 +94,15 @@ public final class YongaUtil {
         return LocalDateTime.ofInstant(Instant.ofEpochMilli(epochMilli), ZoneId.of("Asia/Tokyo"));
     }
 
-    public static List<NewProductImage> getAllProductImageList(final ProductDto product) {
-        List<NewProductImage> normalProductImageList = convert(product, product.getFileZoomList(), product.getFileList(), 0);
-        List<NewProductImage> adminProductImageList = convert(product, product.getFileZoomListAdmin(), product.getFileListAdmin(), 100);
-        List<NewProductImage> allProductImageList = new ArrayList<>();
+    public static List<ProductImage> getAllProductImageList(final ProductDto product) {
+        List<ProductImage> normalProductImageList = convert(product, product.getFileZoomList(), product.getFileList(), 0);
+        List<ProductImage> adminProductImageList = convert(product, product.getFileZoomListAdmin(), product.getFileListAdmin(), 100);
+        List<ProductImage> allProductImageList = new ArrayList<>();
         allProductImageList.addAll(normalProductImageList);
         allProductImageList.addAll(adminProductImageList);
         return allProductImageList;
     }
-    private static List<NewProductImage> convert(final ProductDto product, final List<String> fileZoomList, final List<String> fileList, final Integer displayOrderPrefix) {
+    private static List<ProductImage> convert(final ProductDto product, final List<String> fileZoomList, final List<String> fileList, final Integer displayOrderPrefix) {
         Objects.requireNonNull(product);
         if (fileZoomList == null || fileZoomList.isEmpty() || fileList == null || fileList.isEmpty() || fileZoomList.size() != fileList.size()) {
             return Collections.emptyList();
@@ -121,13 +121,13 @@ public final class YongaUtil {
         return fileMap.keySet().stream()
                 .map(fileName -> {
                     String imageUrl = fileZoomMap.get(fileName);
-                    NewProductImage newProductImage = new NewProductImage();
-                    newProductImage.setGenreCd(product.getGenreCd());
-                    newProductImage.setUketsukeBng(product.getUketsukeBng());
-                    newProductImage.setImageUrl(imageUrl);
-                    newProductImage.setThumbnailImageUrl(fileMap.get(fileName));
-                    newProductImage.setDisplayOrder(displayOrderPrefix + Integer.valueOf(YongaUtil.getMatchedGroup(imageUrl, "(\\d\\d)L?\\.jpg")));
-                    return newProductImage;
+                    ProductImage productImage = new ProductImage();
+                    productImage.setGenreCd(product.getGenreCd());
+                    productImage.setUketsukeBng(product.getUketsukeBng());
+                    productImage.setImageUrl(imageUrl);
+                    productImage.setThumbnailImageUrl(fileMap.get(fileName));
+                    productImage.setDisplayOrder(displayOrderPrefix + Integer.valueOf(YongaUtil.getMatchedGroup(imageUrl, "(\\d\\d)L?\\.jpg")));
+                    return productImage;
                 })
                 .filter(productImage -> YongaUtil.isNotNull(productImage) && YongaUtil.isNotNull(productImage.getImageUrl()) && YongaUtil.isNotNull(productImage.getThumbnailImageUrl()))
                 .collect(Collectors.toList());

@@ -13,10 +13,9 @@ import com.yonga.auc.data.extract.DataExtractor;
 import com.yonga.auc.data.extract.ExtractSiteInfo;
 import com.yonga.auc.data.log.LogService;
 import com.yonga.auc.data.product.ExtractResult;
-import com.yonga.auc.data.product.ProductService;
-import com.yonga.auc.data.product2.NewProduct;
-import com.yonga.auc.data.product2.NewProductRepository;
-import com.yonga.auc.data.product2.image.NewProductImageRepository;
+import com.yonga.auc.data.product.Product;
+import com.yonga.auc.data.product.ProductRepository;
+import com.yonga.auc.data.product.image.ProductImageRepository;
 import com.yonga.auc.mail.MailContents;
 import com.yonga.auc.mail.MailService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,10 +33,9 @@ import java.util.stream.Collectors;
 public class DataExtractWorker implements Callable<Boolean> {
 
     private CategoryService categoryService;
-    private ProductService productService;
 
-    private NewProductRepository newProductRepository;
-    private NewProductImageRepository newProductImageRepository;
+    private ProductRepository productRepository;
+    private ProductImageRepository productImageRepository;
     private MakerRepository makerRepository;
     private BrandRepository brandRepository;
     private KeijoRepository keijoRepository;
@@ -52,23 +50,22 @@ public class DataExtractWorker implements Callable<Boolean> {
     private MailService mailService;
     private ObjectMapper objectMapper;
 
-    public DataExtractWorker(CategoryService categoryService, ProductService productService, ExtractSiteInfo siteInfo, LogService logService, ConfigService configService, List<Category> targetCategoryList, ExtractMode extractMode, MailService mailService,
-                             NewProductRepository newProductRepository,
-                             NewProductImageRepository newProductImageRepository,
+    public DataExtractWorker(CategoryService categoryService, ExtractSiteInfo siteInfo, LogService logService, ConfigService configService, List<Category> targetCategoryList, ExtractMode extractMode, MailService mailService,
+                             ProductRepository productRepository,
+                             ProductImageRepository productImageRepository,
                              MakerRepository makerRepository,
                              BrandRepository brandRepository,
                              KeijoRepository keijoRepository,
                              ObjectMapper objectMapper) {
         this.categoryService = categoryService;
-        this.productService = productService;
         this.siteInfo = siteInfo;
         this.logService = logService;
         this.configService = configService;
         this.targetCategoryList = targetCategoryList;
         this.extractMode = extractMode;
         this.mailService = mailService;
-        this.newProductRepository = newProductRepository;
-        this.newProductImageRepository = newProductImageRepository;
+        this.productRepository = productRepository;
+        this.productImageRepository = productImageRepository;
         this.makerRepository = makerRepository;
         this.brandRepository = brandRepository;
         this.keijoRepository = keijoRepository;
@@ -105,8 +102,8 @@ public class DataExtractWorker implements Callable<Boolean> {
                     (category, categoryDetailInfo) -> {
                         // 초기화 할 경우, 각 카테고리 상세 정보를 초기화 한다.
                         if (this.extractMode.isRequiredInitialize()) {
-                            this.newProductImageRepository.deleteByGenreCd(category.getId());
-                            this.newProductRepository.deleteByGenreCd(category.getId());
+                            this.productImageRepository.deleteByGenreCd(category.getId());
+                            this.productRepository.deleteByGenreCd(category.getId());
                             this.makerRepository.deleteByCategoryNo(category.getId());
                             this.brandRepository.deleteByCategoryNo(category.getId());
                             this.keijoRepository.deleteByCategoryNo(category.getId());
@@ -144,10 +141,10 @@ public class DataExtractWorker implements Callable<Boolean> {
                         log.info("extract category [{}], elements [{}]", category.getKorean(), productList.getSize());
                         // 그 외의 경우, 모든 제품에 대해서 상세 추출을 진행한다.
                         AtomicInteger extractProduct = new AtomicInteger(0);
-                        List<NewProduct> initializedProductList = productList.getContent().stream().map(p -> {
-                            NewProduct product = new NewProduct(p);
+                        List<Product> initializedProductList = productList.getContent().stream().map(p -> {
+                            Product product = new Product(p);
                             product.setExtractResult(ExtractResult.INITIALIZE);
-                            product = this.newProductRepository.save(product);
+                            product = this.productRepository.save(product);
                             extractProduct.incrementAndGet();
                             totalExtractNum.incrementAndGet();
                             return product;
@@ -158,7 +155,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                     }, (category, product) -> {
 
                         log.info("extracted product [{}]", product);
-                        this.newProductImageRepository.saveAll(product.getProductImage());
+                        this.productImageRepository.saveAll(product.getProductImage());
                         product.setExtractResult(ExtractResult.COMPLETE);
                         if (!this.brandRepository.existsById(product.getBrandTypeCd())) {
                             Brand brand = new Brand();
@@ -169,7 +166,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                             brand.setNameKr(product.getBrandType());
                             this.brandRepository.save(brand);
                         }
-                        this.newProductRepository.save(product);
+                        this.productRepository.save(product);
                     }, (category, product) -> {
                         this.logService.addLog(String.format("[%s] 제품 상세 추출에 실패하였습니다. 카테고리:[%s], 접수번호:[%s]", category.getKorean(), product.getUketsukeBng()));
                     }, (category, extractedProductNum) -> {

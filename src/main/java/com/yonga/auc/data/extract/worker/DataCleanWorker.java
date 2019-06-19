@@ -1,15 +1,15 @@
 package com.yonga.auc.data.extract.worker;
 
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.concurrent.Callable;
-
 import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.category.CategoryService;
 import com.yonga.auc.data.extract.ExtractSiteInfo;
 import com.yonga.auc.data.log.LogService;
 import com.yonga.auc.data.product.ProductService;
+
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.concurrent.Callable;
 
 public class DataCleanWorker implements Callable<Void> {
 	private CategoryService categoryService;

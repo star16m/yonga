@@ -1,10 +1,5 @@
 package com.yonga.auc.data.product;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.transaction.Transactional;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -12,22 +7,22 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ProductRepository extends JpaRepository<Product, Integer> {
+import javax.transaction.Transactional;
+import java.util.List;
 
-	Product findProductByUketsukeNo(String uketsukeNo);
+public interface ProductRepository extends JpaRepository<Product, String> {
+    Boolean existsByUketsukeBng(String uketsukeBng);
 
-	List<Product> findProductByCategoryId(Integer categoryId);
+    Page<Product> findNewProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(Integer genreCd, List<Integer> selectsMakerCdList, List<Integer> selectsBrandTypeList, List<Integer> selectsKeijoCdList, Pageable pageable);
 
-	Integer countProductByCategoryId(Integer categoryId);
-	List<Product> findProductByCategoryIdIsNull();
-	List<Product> findProductByCategoryIdOrderByProductNo(Integer categoryId);
+    Product findNewProductByUketsukeBng(String uketsukeBng);
 
-	Page<Product> findProductByCategoryIdAndMakerInAndTypeInAndKeijoInOrderByMakerAscKeijoAscRatingAscProductNoAsc(
-			Integer categoryId, List<String> makerList, List<String> typeList, List<String> keijoList, Pageable page);
+    @Transactional
+    void deleteByGenreCd(Integer genreCd);
 
+    @Transactional
+    @Query(value = "delete from Product p where p.genreCd = :categoryId")
+    @Modifying
+    int deleteByCategoryId(@Param("categoryId") Integer categoryId);
 
-	@Transactional
-	@Query(value = "delete from Product p where p.category.id = :categoryId")
-	@Modifying
-	int deleteByCategoryId(@Param("categoryId") Integer categoryId);
 }

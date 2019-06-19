@@ -1,4 +1,4 @@
-package com.yonga.auc.data.product2;
+package com.yonga.auc.data.product;
 
 import com.yonga.auc.data.common.PageResponse;
 import lombok.Data;

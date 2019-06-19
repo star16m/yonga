@@ -1,7 +1,6 @@
 package com.yonga.auc.data.extract;
 
 import com.codeborne.selenide.*;
-import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.yonga.auc.common.YongaUtil;
@@ -11,19 +10,15 @@ import com.yonga.auc.data.category.CategoryDetailInfo;
 import com.yonga.auc.data.category.CategoryInfo;
 import com.yonga.auc.data.extract.DataExtractException.ExtractExceptionMessage;
 import com.yonga.auc.data.product.Product;
-import com.yonga.auc.data.product2.NewProduct;
-import com.yonga.auc.data.product2.ProductDto;
-import com.yonga.auc.data.product2.ProductList;
+import com.yonga.auc.data.product.ProductDto;
+import com.yonga.auc.data.product.ProductList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.springframework.data.util.Pair;
 
 import java.io.File;
 import java.io.FileReader;
@@ -120,9 +115,9 @@ public class DataExtractor {
             Consumer<AuctionInfo> extractAuctionInfoConsumer,
             BiConsumer<Category, CategoryDetailInfo> extractCategoryDetailInfoConsumer,
             BiConsumer<Category, Integer> foundCategoryProductTotalNumConsumer,
-            BiFunction<Category, ProductList, List<NewProduct>> extractProductListFunction,
-            BiConsumer<Category, NewProduct> extractProductDetailConsumer,
-            BiConsumer<Category, NewProduct> failedExtractProductConsumer,
+            BiFunction<Category, ProductList, List<Product>> extractProductListFunction,
+            BiConsumer<Category, Product> extractProductDetailConsumer,
+            BiConsumer<Category, Product> failedExtractProductConsumer,
             BiConsumer<Category, Integer> completedCategoryProductConsumer
     ) throws DataExtractException {
         Objects.requireNonNull(targetCategoryList);
@@ -172,7 +167,7 @@ public class DataExtractor {
                         foundCategoryProductTotalNumConsumer.accept(category, productList.getTotalElements());
                     }
 
-                    List<NewProduct> initializedProductList = extractProductListFunction.apply(category, productList);
+                    List<Product> initializedProductList = extractProductListFunction.apply(category, productList);
                     if (YongaUtil.isNotEmpty(initializedProductList)) {
                         // extract product detail
                         initializedProductList.stream().forEach(product -> {
@@ -193,7 +188,7 @@ public class DataExtractor {
                             productDto.setHyokaGaiso(product.getHyokaGaiso());
                             productDto.setHyokaNaiso(product.getHyokaNaiso());
 
-                            NewProduct productDetail = new NewProduct(productDto);
+                            Product productDetail = new Product(productDto);
 
                             extractProductDetailConsumer.accept(category, productDetail);
                             currentProductDetailNum.incrementAndGet();

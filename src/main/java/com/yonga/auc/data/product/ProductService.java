@@ -1,79 +1,65 @@
 package com.yonga.auc.data.product;
 
-import java.util.List;
-import java.util.Map;
-
+import com.yonga.auc.data.category.Category;
+import com.yonga.auc.data.category.detail.*;
+import com.yonga.auc.data.product.image.ProductImageRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.yonga.auc.data.category.Category;
-import com.yonga.auc.data.product.image.ProductImage;
-import com.yonga.auc.data.product.image.ProductImageRepository;
+import java.util.List;
 
-import lombok.extern.slf4j.Slf4j;
-
-@Slf4j
 @Service
+@Slf4j
 public class ProductService {
+    @Autowired
+    private MakerRepository makerRepository;
+    @Autowired
+    private KeijoRepository keijoRepository;
+    @Autowired
+    private BrandRepository brandRepository;
+    @Autowired
+    private ProductRepository productRepository;
+    @Autowired
+    private ProductImageRepository productImageRepository;
+    public Page<Product> findProductList(Integer categoryId, List<Integer> selectsMakerList, List<Integer> selectsTypeList, List<Integer> selectsKeijoList, Pageable pageable) {
+        return this.productRepository.findNewProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(categoryId, selectsMakerList, selectsTypeList, selectsKeijoList, pageable);
+    }
 
-	@Autowired
-	private ProductRepository productRepository;
-	@Autowired
-	private ProductImageRepository productImageRepository;
+    public Product findNewProductByUketsukeNo(String uketsukeNo) {
+        Product product = this.productRepository.findNewProductByUketsukeBng(uketsukeNo);
+//        if (YongaUtil.isNotNull(product)) {
+//            product.setProductImageList(this.productImageRepository.findByUketsukeBngOrderByDisplayOrderAsc(uketsukeNo));
+//        }
+        return product;
+    }
 
-	public Integer findProductNum(Integer categoryId) {
-		return this.productRepository.countProductByCategoryId(categoryId);
-	}
-	public Integer findAllProductNum() {
-		return this.productRepository.findAll().size();
-	}
-	public List<Product> findCategoryIdNull() {
-		return this.productRepository.findProductByCategoryIdIsNull();
-	}
-//	@Cacheable("maker")
-//	public List<Map<String, Object>> findProductMaker(Integer categoryId) {
-//		return this.productRepository.findProductMaker(categoryId);
-//	}
-//	@Cacheable("productType")
-//	public List<Map<String, Object>> findProductType(Integer categoryId) {
-//		return this.productRepository.findProductType(categoryId);
-//	}
-//	@Cacheable("keijo")
-//	public List<Map<String, Object>> findProductKeijo(Integer categoryId) {
-//		return this.productRepository.findProductKeijo(categoryId);
-//	}
-	
-	public Page<Product> findProductList(Integer categoryId, List<String> selectsMakerList, List<String> selectsTypeList, List<String> selectsKeijoList, Pageable pageable) {
-		return this.productRepository.findProductByCategoryIdAndMakerInAndTypeInAndKeijoInOrderByMakerAscKeijoAscRatingAscProductNoAsc(categoryId, selectsMakerList, selectsTypeList, selectsKeijoList, pageable);
-	}
-
-	public Product findProductByUketsukeNo(String uketsukeNo) {
-		return this.productRepository.findProductByUketsukeNo(uketsukeNo);
-	}
-	public Product save(Product product) {
-		return this.productRepository.save(product);
-	}
-	public ProductImage save(ProductImage productImage) {
-		return this.productImageRepository.save(productImage);
-	}
-	public int deleteAll(Category category) {
-		log.info("try delete all with category [{}]", category);
-		int result = -1;
-		try {
-			result = this.productImageRepository.deleteByCategoryId(category.getId());
-			result = this.productRepository.deleteByCategoryId(category.getId());
-			log.info("success full delete product items [{}]", result);
-			return result;
-		} catch (Throwable e) {
-			log.error(e.getMessage());
-			throw e;
-		}
-	}
-	public void deleteAll() {
-		this.productImageRepository.deleteAllInBatch();
-		this.productRepository.deleteAllInBatch();
-	}
+    public List<Maker> findMaker(Category category) {
+        return this.makerRepository.findMaker(category.getId());
+    }
+    public List<Keijo> findKeijo(Category category) {
+        return this.keijoRepository.findKeijo(category.getId());
+    }
+    public List<Brand> findBrand(Category category) {
+        return this.brandRepository.findBrand(category.getId());
+    }
+    public int deleteAll(Category category) {
+        log.info("try delete all with category [{}]", category);
+        int result = -1;
+        try {
+            result = this.productImageRepository.deleteByCategoryId(category.getId());
+            result = this.productRepository.deleteByCategoryId(category.getId());
+            log.info("success full delete product items [{}]", result);
+            return result;
+        } catch (Throwable e) {
+            log.error(e.getMessage());
+            throw e;
+        }
+    }
+    public void deleteAll() {
+        this.productImageRepository.deleteAllInBatch();
+        this.productRepository.deleteAllInBatch();
+    }
 }

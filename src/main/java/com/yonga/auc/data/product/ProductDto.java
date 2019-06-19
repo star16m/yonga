@@ -1,7 +1,7 @@
-package com.yonga.auc.data.product2;
+package com.yonga.auc.data.product;
 
 import com.yonga.auc.common.YongaUtil;
-import com.yonga.auc.data.product2.image.NewProductImage;
+import com.yonga.auc.data.product.image.ProductImage;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -53,7 +53,7 @@ public class ProductDto {
     private List<String> fileZoomList = new ArrayList<>();
     private List<String> fileListAdmin = new ArrayList<>();
     private List<String> fileZoomListAdmin = new ArrayList<>();
-    private List<NewProductImage> productImage;
+    private List<ProductImage> productImage;
 
     public void setKaisaiJkn(Long kaisaiJkn) {
         this.kaisaiJknLocalDateTime = YongaUtil.parseLocalDateTime(kaisaiJkn);

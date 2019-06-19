@@ -1,16 +1,20 @@
 package com.yonga.auc.data.product.image;
 
-import javax.transaction.Transactional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-public interface ProductImageRepository extends JpaRepository<ProductImage, Integer> {
+import javax.transaction.Transactional;
+import java.util.List;
 
-	@Transactional
-	@Query(value = "delete from product_image pi where exists (select 1 from product p where p.id = pi.product_id and p.category_no = :categoryId )", nativeQuery=true)
-	@Modifying
-	int deleteByCategoryId(@Param("categoryId") Integer categoryId);
+public interface ProductImageRepository extends JpaRepository<ProductImage, String> {
+    List<ProductImage> findByUketsukeBngOrderByDisplayOrderAsc(String uketsukeBng);
+    @Transactional
+    void deleteByGenreCd(Integer genreCd);
+
+    @Transactional
+    @Query(value = "delete from ProductImage p where p.genreCd = :categoryId")
+    @Modifying
+    int deleteByCategoryId(@Param("categoryId") Integer categoryId);
 }

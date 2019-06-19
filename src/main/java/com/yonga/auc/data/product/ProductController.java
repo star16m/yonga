@@ -7,10 +7,6 @@ import com.yonga.auc.data.category.detail.Brand;
 import com.yonga.auc.data.category.detail.Keijo;
 import com.yonga.auc.data.category.detail.Maker;
 import com.yonga.auc.data.log.LogService;
-import com.yonga.auc.data.product2.NewProduct;
-import com.yonga.auc.data.product2.NewProductRepository;
-import com.yonga.auc.data.product2.NewProductService;
-import com.yonga.auc.data.product2.ProductSearchOption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -30,9 +26,9 @@ import java.util.stream.Collectors;
 class ProductController {
 
 	@Autowired
-	private NewProductService newProductService;
+	private ProductService productService;
 	@Autowired
-	private NewProductRepository newProductRepository;
+	private ProductRepository productRepository;
 	@Autowired
 	private CategoryRepository categoryRepository;
 	@Autowired
@@ -71,12 +67,11 @@ class ProductController {
     }
     @GetMapping("/product/{categoryId}/{uketsukeNo}")
     public String showProductList(HttpSession session, @PathVariable("categoryId") Integer categoryId, @PathVariable(value="uketsukeNo", required = false) String uketsukeNo, Map<String, Object> model, Pageable pageable) {
-		NewProduct product = null;
+		Product product = null;
 		if (uketsukeNo != null) {
 			// find product value
-			product = this.newProductService.findNewProductByUketsukeNo(uketsukeNo);
+			product = this.productService.findNewProductByUketsukeNo(uketsukeNo);
 			if (product != null) {
-//				product.setImageList(product.getImageList().stream().sorted(Comparator.comparing(ProductImage::getName)).collect(Collectors.toList()));
 				model.put("product", product);
 			}
 		}
@@ -86,7 +81,7 @@ class ProductController {
     }
     
     @SuppressWarnings("unchecked")
-	private void findModelValue(HttpSession session, Map<String, Object> model, Optional<Integer> categoryId, Pageable pageable, NewProduct product) {
+	private void findModelValue(HttpSession session, Map<String, Object> model, Optional<Integer> categoryId, Pageable pageable, Product product) {
     	// category list
     	model.put("categoryList", this.categoryRepository.findCategory());
     	if (categoryId.isPresent() && categoryId.get() > 0) {
@@ -94,7 +89,7 @@ class ProductController {
 			Category currentCategory = this.categoryRepository.getOne(categoryId.get());
     		model.put("currentCategory", currentCategory);
     		// maker list
-    		List<Maker> makerInfo = this.newProductService.findMaker(currentCategory);
+    		List<Maker> makerInfo = this.productService.findMaker(currentCategory);
 			ProductSearchOption searchOption = null;
 			if (session.getAttribute("selectsOption") != null) {
 				searchOption = (ProductSearchOption) session.getAttribute("selectsOption");
@@ -107,7 +102,7 @@ class ProductController {
     			selectsMakerList = makerInfo.stream().map(i -> i.getMakerCd()).collect(Collectors.toList());
     		}
     		// brand type list
-    		List<Brand> brandInfo = this.newProductService.findBrand(currentCategory);
+    		List<Brand> brandInfo = this.productService.findBrand(currentCategory);
     		List<Integer> selectsBrandList = null;
     		model.put("brandList", brandInfo);
     		if (!session.isNew() && searchOption != null && searchOption.getSelectsBrand() != null) {
@@ -116,7 +111,7 @@ class ProductController {
 				selectsBrandList = brandInfo.stream().map(i -> i.getBrandCd()).collect(Collectors.toList());
     		}
     		// keijo list
-			List<Keijo> keijoInfo = this.newProductService.findKeijo(currentCategory);
+			List<Keijo> keijoInfo = this.productService.findKeijo(currentCategory);
     		List<Integer> selectsKeijoList = null;
 			model.put("keijoList", keijoInfo);
 			if (!session.isNew() && searchOption != null && searchOption.getSelectsKeijo() != null) {
@@ -125,12 +120,12 @@ class ProductController {
 				selectsKeijoList = keijoInfo.stream().map(i -> i.getKeijoCd()).collect(Collectors.toList());
 			}
     		// product list
-    		Page<NewProduct> productPage = this.newProductService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, pageable);
-    		PageWrapper<NewProduct> page = new PageWrapper<> (productPage, "/product/" + categoryId.get());
+    		Page<Product> productPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, pageable);
+    		PageWrapper<Product> page = new PageWrapper<> (productPage, "/product/" + categoryId.get());
     		model.put("page", page);
     		// left & right product
 			if (product != null) {
-				List<NewProduct> contents = productPage.getContent();
+				List<Product> contents = productPage.getContent();
 				int currentProductIndex = -1;
 				for (int i = 0; i < contents.size(); i++) {
 					if (contents.get(i).getUketsukeBng().equals(product.getUketsukeBng())) {
@@ -149,8 +144,8 @@ class ProductController {
 						if (!productPage.getPageable().hasPrevious()) {
 							// first page
 						} else {
-							Page<NewProduct> previousProductPage = this.newProductService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, pageable.previousOrFirst());
-							NewProduct previousProduct = previousProductPage.getContent().get(pageable.getPageSize() - 1);
+							Page<Product> previousProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, pageable.previousOrFirst());
+							Product previousProduct = previousProductPage.getContent().get(pageable.getPageSize() - 1);
 							leftProduct = previousProduct.getUketsukeBng();
 							previousPage = previousProductPage.getPageable().getPageNumber();
 						}
@@ -160,8 +155,8 @@ class ProductController {
 						if (productPage.getTotalPages() <= productPage.getPageable().next().getPageNumber()) {
 							// last page
 						} else {
-							Page<NewProduct> nextProductPage = this.newProductService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, productPage.getPageable().next());
-							NewProduct nextProduct = nextProductPage.getContent().get(0);
+							Page<Product> nextProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, productPage.getPageable().next());
+							Product nextProduct = nextProductPage.getContent().get(0);
 							rightProduct = nextProduct.getUketsukeBng();
 							nextPage = nextProductPage.getPageable().getPageNumber();
 						}
