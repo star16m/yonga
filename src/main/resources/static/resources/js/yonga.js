@@ -53,6 +53,7 @@ $(document).ready(function() {
     // select event
     $('#categorySelect').on('changed.bs.select', function(e) {
     	var data = {};
+    	data["viewProductImage"] = $('input#checkViewProductImage').is(":checked");
     	var categoryId = $(this).val();
     	$.ajax({
             url: "/selects/options",

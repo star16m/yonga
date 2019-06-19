@@ -4,7 +4,6 @@ import com.yonga.auc.data.common.CommonBaseDataWithoutKey;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +15,6 @@ import javax.persistence.Table;
 @Table(name = "product_image_new")
 @Data
 @NoArgsConstructor
-@ToString(exclude="product_new")
 public class ProductImage extends CommonBaseDataWithoutKey {
     @Id
     @Column(name = "image_url")

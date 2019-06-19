@@ -195,11 +195,6 @@
 					<td th:text="${p.brand.name}" class="text-center"></td>
 					<td th:text="${p.keijo.name}" class="text-center"></td>
 					<td th:text="${p.hyoka + '(' + p.hyokaGaiso + '/' + p.hyokaNaiso + ')'}" class="text-center"></td>
-					<!--<td class="text-center" th:if="${session.viewProductImage}">-->
-						<!--<a th:href="@{/product/__${currentCategory.id}__/__${p.uketsukeBng}__(page=${page.number-1},size=${page.size})}">-->
-							<!--<img th:src="@{${p.allFileList}}" />-->
-						<!--</a>-->
-					<!--</td>-->
 				</tr>
 				<th:block th:if="${session.selectsOption != null && session.selectsOption.viewProductImage != null && session.selectsOption.viewProductImage}">
 					<tr>

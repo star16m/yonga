@@ -1,6 +1,7 @@
 package com.yonga.auc.data.product;
 
 import com.yonga.auc.common.PageWrapper;
+import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.category.CategoryRepository;
 import com.yonga.auc.data.category.detail.Brand;
@@ -28,8 +29,6 @@ class ProductController {
 	@Autowired
 	private ProductService productService;
 	@Autowired
-	private ProductRepository productRepository;
-	@Autowired
 	private CategoryRepository categoryRepository;
 	@Autowired
 	private LogService logService;
@@ -37,32 +36,16 @@ class ProductController {
 	public @ResponseBody String selectsMaker(HttpSession session, @RequestBody ProductSearchOption productSearchOption) {
 		log.info("selects option [{}]", productSearchOption);
 		session.setAttribute("selectsOption", productSearchOption);
-//
-//		session.setAttribute("selectsMaker", (List<Integer>)optionMap.get("selectsMaker"));
-//		session.setAttribute("selectsBrand", (List<Integer>)optionMap.get("selectsBrand"));
-//		session.setAttribute("selectsKeijo", (List<Integer>)optionMap.get("selectsKeijo"));
-//		session.setAttribute("viewProductImage", optionMap.get("viewProductImage"));
 		return "success";
 	}
 	@GetMapping("/product")
 	public String showProductList(HttpSession session, Map<String, Object> model) {
-		// remove maker
-		session.removeAttribute("selectsOption");
-//		session.removeAttribute("selectsType");
-//		session.removeAttribute("selectsType");
-//		session.removeAttribute("selectsKeijo");
-//		session.removeAttribute("viewProductImage");
 		return showProductList(session, Optional.empty(), model, PageRequest.of(0, 10));
 	}
     @GetMapping("/product/{categoryId}")
     public String showProductList(HttpSession session, @PathVariable(value="categoryId", required=false) Optional<Integer> pathCategoryId, Map<String, Object> model, Pageable pageable) {
     	// find model value
     	findModelValue(session, model, pathCategoryId, pageable, null);
-//    	if (true && pathCategoryId.isPresent()) {
-//    		log.info("전체 제품 갯수 : {}", this.productService.findAllProductNum());
-//    		log.info("카테고리 없는 것 : {}", this.productService.findCategoryIdNull());
-//    		log.info("제품 갯수 : {}", this.productService.findProductNum(pathCategoryId.get()));
-//		}
         return "product/product";
     }
     @GetMapping("/product/{categoryId}/{uketsukeNo}")

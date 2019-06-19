@@ -157,18 +157,15 @@ public class Product extends CommonBaseDataWithoutKey {
         if (genreCd == 1 || genreCd == 2 || genreCd == 3) {
             // 백/시계/귀금속
             String genreUrlCd = genreCd == 1 ? "bag" : genreCd == 2 ? "watch" : genreCd == 3 ? "noble" : null;
-            // https://u.brand-auc.com/api/v1/auction/auctionItems/bag/1/517/516-10578/B02-01
             if (this.kaijoCd == 0) {
                 return String.format("https://u.brand-auc.com/api/v1/shops/buyItems/%s/%s/false", genreUrlCd, this.invTorokuBng);
             }
             return String.format("https://u.brand-auc.com/api/v1/auction/auctionItems/%s/%s/%s/%s/B02-01", genreUrlCd, this.kaijoCd, this.kaisaiKaisu, this.uketsukeBng);
         } else {
             if (this.kaijoCd == 0) {
-//                return String.format("https://u.brand-auc.com/api/v1/shops/buyItems/other/%s/%s", this.invTorokuBng, this.seiyakuFlg);
                 return String.format("https://u.brand-auc.com/api/v1/shops/buyItems/other/%s/false", this.invTorokuBng);
-            } else {
-                return String.format("https://u.brand-auc.com/api/v1/auction/auctionItems/other/1/%s/%s/B02-01/%s", this.kaisaiKaisu, this.uketsukeBng, this.genreCd);
             }
+            return String.format("https://u.brand-auc.com/api/v1/auction/auctionItems/other/1/%s/%s/B02-01/%s", this.kaisaiKaisu, this.uketsukeBng, this.genreCd);
         }
     }
 }

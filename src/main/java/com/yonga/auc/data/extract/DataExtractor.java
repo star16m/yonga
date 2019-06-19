@@ -59,7 +59,7 @@ public class DataExtractor {
         WebDriverRunner.setWebDriver(driver);
     }
 
-    private boolean login() {
+    private void login() throws DataExtractException {
         open(this.siteInfo.getTargetURL());
         $("input[name=username]").setValue(this.siteInfo.getUid());
         $("input[name=password]").setValue(this.siteInfo.getPwd());
@@ -68,16 +68,17 @@ public class DataExtractor {
             SelenideElement errorDetail = $("li#error_detail");
             if (errorDetail != null && errorDetail.exists()) {
                 log.error("Error displayed [{}]", errorDetail.text());
-                return false;
+                throw new DataExtractException(ExtractExceptionMessage.LOGIN_FAIL);
             }
             SelenideElement loginInfoElement = $("div.kaiinInfo");
             loginInfoElement.shouldHave(text(this.siteInfo.getUid()));
             loginInfoElement.shouldHave(text("様"));
+        } catch (DataExtractException e) {
+            throw e;
         } catch (Exception e) {
             log.warn(e.getMessage());
-            return false;
+            throw new DataExtractException(ExtractExceptionMessage.LOGIN_FAIL);
         }
-        return true;
     }
 
     private <T> T extract(Class<T> classType, String url, Path path) {
@@ -128,9 +129,7 @@ public class DataExtractor {
         Objects.requireNonNull(extractProductDetailConsumer);
         try {
             // 1. 로그인
-            if (!login()) {
-                throw new DataExtractException(ExtractExceptionMessage.LOGIN_FAIL);
-            }
+            login();
 
             // 2. 옥션 정보
             AuctionInfo auctionInfo = extract(AuctionInfo.class, "https://u.brand-auc.com/api/v1/auction/auctionInfos/auctionOpenInfo",Paths.get(this.siteInfo.getWorkRoot(), "auctioninfo.json"));

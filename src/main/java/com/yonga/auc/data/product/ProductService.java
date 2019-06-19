@@ -58,8 +58,4 @@ public class ProductService {
             throw e;
         }
     }
-    public void deleteAll() {
-        this.productImageRepository.deleteAllInBatch();
-        this.productRepository.deleteAllInBatch();
-    }
 }
