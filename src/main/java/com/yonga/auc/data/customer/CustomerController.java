@@ -75,7 +75,8 @@ public class CustomerController {
         customer.setEnabled(request.isUserInRole("ADMIN"));
         this.customerRepository.save(customer);
         String adminEmail = this.configService.getConfigValue("CONFIG", "ADMIN_EMAIL");
-        if (YongaUtil.isNotEmpty(adminEmail)) {
+        String mailId = this.configService.getConfigValue("CONFIG", "MAIL_ID");
+        if (YongaUtil.isNotEmpty(mailId)) {
             try {
                 this.mailService.sendEmail(new MailContents("고객 가입 승인 요청", "가입 승인 요청이 있습니다.",
                         Arrays.asList("승인 요청 시간 : [" + new Date() + "]"),

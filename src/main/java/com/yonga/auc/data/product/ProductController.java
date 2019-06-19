@@ -1,9 +1,16 @@
 package com.yonga.auc.data.product;
 
 import com.yonga.auc.common.PageWrapper;
+import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.category.CategoryRepository;
+import com.yonga.auc.data.category.detail.Brand;
+import com.yonga.auc.data.category.detail.Keijo;
+import com.yonga.auc.data.category.detail.Maker;
 import com.yonga.auc.data.log.LogService;
-import com.yonga.auc.data.product.image.ProductImage;
+import com.yonga.auc.data.product2.NewProduct;
+import com.yonga.auc.data.product2.NewProductRepository;
+import com.yonga.auc.data.product2.NewProductService;
+import com.yonga.auc.data.product2.ProductSearchOption;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -13,12 +20,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,26 +30,31 @@ import java.util.stream.Collectors;
 class ProductController {
 
 	@Autowired
-	private ProductService productService;
+	private NewProductService newProductService;
+	@Autowired
+	private NewProductRepository newProductRepository;
 	@Autowired
 	private CategoryRepository categoryRepository;
 	@Autowired
 	private LogService logService;
 	@PatchMapping("/selects/options")
-	public @ResponseBody String selectsMaker(HttpSession session, @RequestBody Map<String, Object> optionMap) {
-		log.info("selects maker [{}], type [{}], keijo [{}]", optionMap.get("selectsMaker"), optionMap.get("selectsType"), optionMap.get("selectsKeijo"));
-		session.setAttribute("selectsMaker", optionMap.get("selectsMaker"));
-		session.setAttribute("selectsType", optionMap.get("selectsType"));
-		session.setAttribute("selectsKeijo", optionMap.get("selectsKeijo"));
-		session.setAttribute("viewProductImage", optionMap.get("viewProductImage"));
+	public @ResponseBody String selectsMaker(HttpSession session, @RequestBody ProductSearchOption productSearchOption) {
+		log.info("selects option [{}]", productSearchOption);
+		session.setAttribute("selectsOption", productSearchOption);
+//
+//		session.setAttribute("selectsMaker", (List<Integer>)optionMap.get("selectsMaker"));
+//		session.setAttribute("selectsBrand", (List<Integer>)optionMap.get("selectsBrand"));
+//		session.setAttribute("selectsKeijo", (List<Integer>)optionMap.get("selectsKeijo"));
+//		session.setAttribute("viewProductImage", optionMap.get("viewProductImage"));
 		return "success";
 	}
 	@GetMapping("/product")
 	public String showProductList(HttpSession session, Map<String, Object> model) {
 		// remove maker
-		session.removeAttribute("selectsMaker");
-		session.removeAttribute("selectsType");
-		session.removeAttribute("selectsKeijo");
+		session.removeAttribute("selectsOption");
+//		session.removeAttribute("selectsType");
+//		session.removeAttribute("selectsType");
+//		session.removeAttribute("selectsKeijo");
 //		session.removeAttribute("viewProductImage");
 		return showProductList(session, Optional.empty(), model, PageRequest.of(0, 10));
 	}
@@ -62,12 +71,12 @@ class ProductController {
     }
     @GetMapping("/product/{categoryId}/{uketsukeNo}")
     public String showProductList(HttpSession session, @PathVariable("categoryId") Integer categoryId, @PathVariable(value="uketsukeNo", required = false) String uketsukeNo, Map<String, Object> model, Pageable pageable) {
-		Product product = null;
+		NewProduct product = null;
 		if (uketsukeNo != null) {
 			// find product value
-			product = this.productService.findProductByUketsukeNo(uketsukeNo);
+			product = this.newProductService.findNewProductByUketsukeNo(uketsukeNo);
 			if (product != null) {
-				product.setImageList(product.getImageList().stream().sorted(Comparator.comparing(ProductImage::getName)).collect(Collectors.toList()));
+//				product.setImageList(product.getImageList().stream().sorted(Comparator.comparing(ProductImage::getName)).collect(Collectors.toList()));
 				model.put("product", product);
 			}
 		}
@@ -77,60 +86,62 @@ class ProductController {
     }
     
     @SuppressWarnings("unchecked")
-	private void findModelValue(HttpSession session, Map<String, Object> model, Optional<Integer> categoryId, Pageable pageable, Product product) {
+	private void findModelValue(HttpSession session, Map<String, Object> model, Optional<Integer> categoryId, Pageable pageable, NewProduct product) {
     	// category list
     	model.put("categoryList", this.categoryRepository.findCategory());
     	if (categoryId.isPresent() && categoryId.get() > 0) {
     		// currentCategory value
-    		model.put("currentCategory", this.categoryRepository.getOne(categoryId.get()));
+			Category currentCategory = this.categoryRepository.getOne(categoryId.get());
+    		model.put("currentCategory", currentCategory);
     		// maker list
-    		List<Map<String, Object>> makerInfo = this.productService.findProductMaker(categoryId.get());
-    		List<String> selectsMakerList = null;
+    		List<Maker> makerInfo = this.newProductService.findMaker(currentCategory);
+			ProductSearchOption searchOption = null;
+			if (session.getAttribute("selectsOption") != null) {
+				searchOption = (ProductSearchOption) session.getAttribute("selectsOption");
+			}
+    		List<Integer> selectsMakerList = null;
     		model.put("makerList", makerInfo);
-    		if (!session.isNew() && session.getAttribute("selectsMaker") != null) {
-    			log.debug("maker is {}", session.getAttribute("selectsMaker"));
-    			selectsMakerList = (List<String>) session.getAttribute("selectsMaker");
+    		if (!session.isNew() && searchOption != null && searchOption.getSelectsMaker() != null) {
+    			selectsMakerList = searchOption.getSelectsMaker();
     		} else {
-    			selectsMakerList = makerInfo.stream().map(i -> i.get("maker").toString()).collect(Collectors.toList());
+    			selectsMakerList = makerInfo.stream().map(i -> i.getMakerCd()).collect(Collectors.toList());
     		}
-    		// type list
-    		List<Map<String, Object>> typeInfo = this.productService.findProductType(categoryId.get());
-    		List<String> selectsTypeList = null;
-    		model.put("typeList", typeInfo);
-    		if (!session.isNew() && session.getAttribute("selectsType") != null) {
-    			log.debug("maker is {}", session.getAttribute("selectsType"));
-    			selectsTypeList = (List<String>) session.getAttribute("selectsType");
+    		// brand type list
+    		List<Brand> brandInfo = this.newProductService.findBrand(currentCategory);
+    		List<Integer> selectsBrandList = null;
+    		model.put("brandList", brandInfo);
+    		if (!session.isNew() && searchOption != null && searchOption.getSelectsBrand() != null) {
+				selectsBrandList = searchOption.getSelectsBrand();
     		} else {
-    			selectsTypeList = typeInfo.stream().map(i -> i.get("type").toString()).collect(Collectors.toList());
+				selectsBrandList = brandInfo.stream().map(i -> i.getBrandCd()).collect(Collectors.toList());
     		}
     		// keijo list
-			List<Map<String, Object>> keijoInfo = this.productService.findProductKeijo(categoryId.get());
-    		List<String> selectsKeijoList = null;
+			List<Keijo> keijoInfo = this.newProductService.findKeijo(currentCategory);
+    		List<Integer> selectsKeijoList = null;
 			model.put("keijoList", keijoInfo);
-			if (!session.isNew() && session.getAttribute("selectsKeijo") != null) {
-				log.debug("keijo is {}", session.getAttribute("selectsKeijo"));
-				selectsKeijoList = (List<String>) session.getAttribute("selectsKeijo");
+			if (!session.isNew() && searchOption != null && searchOption.getSelectsKeijo() != null) {
+				selectsKeijoList = searchOption.getSelectsKeijo();
 			} else {
-				selectsKeijoList = keijoInfo.stream().map(i -> i.get("keijo").toString()).collect(Collectors.toList());
+				selectsKeijoList = keijoInfo.stream().map(i -> i.getKeijoCd()).collect(Collectors.toList());
 			}
     		// product list
-    		Page<Product> productPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, selectsKeijoList, pageable);
-    		PageWrapper<Product> page = new PageWrapper<> (productPage, "/product/" + categoryId.get());
+    		Page<NewProduct> productPage = this.newProductService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, pageable);
+    		PageWrapper<NewProduct> page = new PageWrapper<> (productPage, "/product/" + categoryId.get());
     		model.put("page", page);
     		// left & right product
 			if (product != null) {
-				List<Product> contents = productPage.getContent();
+				List<NewProduct> contents = productPage.getContent();
 				int currentProductIndex = -1;
 				for (int i = 0; i < contents.size(); i++) {
-					if (contents.get(i).getUketsukeNo().equals(product.getUketsukeNo())) {
+					if (contents.get(i).getUketsukeBng().equals(product.getUketsukeBng())) {
 						currentProductIndex = i;
 						break;
 					}
 				}
 				if (currentProductIndex > -1) {
 					// founded product
-					String leftProduct = currentProductIndex == 0 ? null : contents.get(currentProductIndex - 1).getUketsukeNo();
-					String rightProduct = currentProductIndex == contents.size() - 1 ? null : contents.get(currentProductIndex + 1).getUketsukeNo();
+					String leftProduct = currentProductIndex == 0 ? null : contents.get(currentProductIndex - 1).getUketsukeBng();
+					String rightProduct = currentProductIndex == contents.size() - 1 ? null : contents.get(currentProductIndex + 1).getUketsukeBng();
 					Integer previousPage = productPage.getPageable().getPageNumber();
 					Integer nextPage = productPage.getPageable().getPageNumber();
 					// left 가 없는 경우
@@ -138,9 +149,9 @@ class ProductController {
 						if (!productPage.getPageable().hasPrevious()) {
 							// first page
 						} else {
-							Page<Product> previousProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, selectsKeijoList, pageable.previousOrFirst());
-							Product previousProduct = previousProductPage.getContent().get(pageable.getPageSize() - 1);
-							leftProduct = previousProduct.getUketsukeNo();
+							Page<NewProduct> previousProductPage = this.newProductService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, pageable.previousOrFirst());
+							NewProduct previousProduct = previousProductPage.getContent().get(pageable.getPageSize() - 1);
+							leftProduct = previousProduct.getUketsukeBng();
 							previousPage = previousProductPage.getPageable().getPageNumber();
 						}
 					}
@@ -149,9 +160,9 @@ class ProductController {
 						if (productPage.getTotalPages() <= productPage.getPageable().next().getPageNumber()) {
 							// last page
 						} else {
-							Page<Product> nextProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsTypeList, selectsKeijoList, productPage.getPageable().next());
-							Product nextProduct = nextProductPage.getContent().get(0);
-							rightProduct = nextProduct.getUketsukeNo();
+							Page<NewProduct> nextProductPage = this.newProductService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, productPage.getPageable().next());
+							NewProduct nextProduct = nextProductPage.getContent().get(0);
+							rightProduct = nextProduct.getUketsukeBng();
 							nextPage = nextProductPage.getPageable().getPageNumber();
 						}
 					}

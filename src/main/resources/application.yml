@@ -1,3 +1,14 @@
+app:
+  brand-auc:
+    workhome: .
+    uid: K021347
+    pwd: dyddk1309
+    targetProtocol: https
+    targetHost: www.brand-auc.com
+    executor: /Users/star16m/Downloads/chromedriver
+    work.path: ${app.brand-auc.workhome}/data/exportHtmlfiles
+    version: 1.0.0-nomoney
+    exportPassword: yongababo
 
 
 server:
@@ -15,8 +26,9 @@ spring:
   datasource:
     sql-script-encoding: UTF-8
     url: jdbc:hsqldb:${app.brand-auc.workhome}/data/data
-    # schema: classpath*:db/schema.sql
-    # data: classpath*:db/data.sql
+#    schema: classpath*:db/temp.sql
+#    schema: classpath*:db/schema.sql
+#    data: classpath*:db/data.sql
   thymeleaf:
     mode: HTML
   jpa:

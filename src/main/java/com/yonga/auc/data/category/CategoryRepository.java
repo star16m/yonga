@@ -10,7 +10,13 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface CategoryRepository extends JpaRepository<Category, Integer> {
     @Cacheable("category")
-	@Query(value="select c.* from category c where ext_product_num is not null and ext_product_num > 0 and total_product_num is not null and total_product_num > 0", nativeQuery=true)
+	@Query(value=
+            "select c.* " +
+            "from category c " +
+            "where ext_product_num is not null " +
+              "and ext_product_num > 0 " +
+              "and total_product_num is not null " +
+              "and total_product_num > 0", nativeQuery=true)
 	List<Category> findCategory() throws DataAccessException;
 
     @SuppressWarnings("unchecked")

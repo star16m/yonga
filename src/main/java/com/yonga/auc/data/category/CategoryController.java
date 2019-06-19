@@ -6,7 +6,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yonga.auc.config.ConfigService;
+import com.yonga.auc.data.category.detail.BrandRepository;
+import com.yonga.auc.data.category.detail.KeijoRepository;
+import com.yonga.auc.data.category.detail.MakerRepository;
+import com.yonga.auc.data.product2.NewProductRepository;
+import com.yonga.auc.data.product2.image.NewProductImageRepository;
 import com.yonga.auc.mail.MailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -43,6 +49,19 @@ class CategoryController {
 	@Autowired
 	private MailService mailService;
 
+	@Autowired
+	private NewProductRepository newProductRepository;
+	@Autowired
+	private NewProductImageRepository newProductImageRepository;
+	@Autowired
+	private MakerRepository makerRepository;
+	@Autowired
+	private BrandRepository brandRepository;
+	@Autowired
+	private KeijoRepository keijoRepository;
+	@Autowired
+    private ObjectMapper objectMapper;
+
     @GetMapping("/category")
     public String getCategoryList(Map<String, Object> model) {
         model.put("categoryList", this.categoryService.findAll());
@@ -56,7 +75,7 @@ class CategoryController {
 
 	// 기동 이후 3분 이후에 실행
 	// 이후 15분 마다 확인
-	@Scheduled(initialDelay = 3 * 60 * 1000, fixedDelay = 15 * 60 * 1000)
+//	@Scheduled(initialDelay = 3 * 60 * 1000, fixedDelay = 15 * 60 * 1000)
     public void findNotCompleteCategory() {
 		String executorStatus = this.configService.getConfigValue("EXECUTOR", "STATUS");
 		if ("RUNNING".equals(executorStatus)) {
@@ -100,7 +119,8 @@ class CategoryController {
 			this.categoryService.save(c);
 		});
 		if (extractMode.isRequiredInitialize()) EXECUTOR.submit(new DataCleanWorker(this.categoryService, this.productService, this.siteInfo, this.logService, categoryList));
-		EXECUTOR.submit(new DataExtractWorker(this.categoryService, this.productService, this.siteInfo, this.logService, this.configService, categoryList, extractMode, this.mailService));
+		EXECUTOR.submit(new DataExtractWorker(this.categoryService, this.productService, this.siteInfo, this.logService, this.configService, categoryList, extractMode, this.mailService,
+				newProductRepository, newProductImageRepository, makerRepository, brandRepository, keijoRepository, objectMapper));
 		this.configService.setConfigValue("EXECUTOR", "STATUS", "RUNNING");
 	}
 }

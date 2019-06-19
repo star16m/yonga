@@ -30,8 +30,13 @@ $(document).ready(function() {
             $("form.login-form").submit();
         }
     });
+    $(document).keydown(function(event) {
+        if ($('.main_product').show()) {
+            console.log(event.keyCode);
+        }
+    });
     // enable selectpicker
-    $('#categorySelect,#makerSelect,#typeSelect,#keijoSelect').selectpicker({
+    $('#categorySelect,#makerSelect,#brandSelect,#keijoSelect').selectpicker({
     	width: '100%'
     });
     
@@ -65,7 +70,7 @@ $(document).ready(function() {
             }
     	});
     });
-    $('#makerSelect,#typeSelect,#keijoSelect').on('changed.bs.select', function(e) {
+    $('#makerSelect,#brandSelect,#keijoSelect').on('changed.bs.select', function(e) {
     	$(this).data('targetchanged', true);
     });
     function changeOption() {
@@ -73,6 +78,7 @@ $(document).ready(function() {
     	var data = {};
     	data["selectsMaker"] = $('#makerSelect').val();
     	data["selectsKeijo"] = $('#keijoSelect').val();
+    	data["selectsBrand"] = $('#brandSelect').val();
     	data["viewProductImage"] = $('input#checkViewProductImage').is(":checked");
     	$.ajax({
             url: "/selects/options",
@@ -90,7 +96,7 @@ $(document).ready(function() {
             }
     	});
     }
-    $('#makerSelect,#keijoSelect').on('hide.bs.select', function (e) {
+    $('#makerSelect,#keijoSelect,#brandSelect').on('hide.bs.select', function (e) {
     	if (!$(this).data('targetchanged')) {
     		return;
     	}

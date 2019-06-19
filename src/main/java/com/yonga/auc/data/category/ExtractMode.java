@@ -17,15 +17,4 @@ public enum ExtractMode {
     public boolean isRequiredInitialize() {
         return this.requiredInitialize;
     }
-    public Integer getExtractProductNumber(Category category) {
-        Integer startAt = new Integer(0);
-        switch (this) {
-            case INITIALIZE:
-                break;
-            case EXTRACT:
-                startAt = category.getExtProductNum();
-                break;
-        }
-        return startAt;
-    }
 }

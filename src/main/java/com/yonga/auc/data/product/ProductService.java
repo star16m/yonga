@@ -33,18 +33,18 @@ public class ProductService {
 	public List<Product> findCategoryIdNull() {
 		return this.productRepository.findProductByCategoryIdIsNull();
 	}
-	@Cacheable("maker")
-	public List<Map<String, Object>> findProductMaker(Integer categoryId) {
-		return this.productRepository.findProductMaker(categoryId);
-	}
-	@Cacheable("productType")
-	public List<Map<String, Object>> findProductType(Integer categoryId) {
-		return this.productRepository.findProductType(categoryId);
-	}
-	@Cacheable("keijo")
-	public List<Map<String, Object>> findProductKeijo(Integer categoryId) {
-		return this.productRepository.findProductKeijo(categoryId);
-	}
+//	@Cacheable("maker")
+//	public List<Map<String, Object>> findProductMaker(Integer categoryId) {
+//		return this.productRepository.findProductMaker(categoryId);
+//	}
+//	@Cacheable("productType")
+//	public List<Map<String, Object>> findProductType(Integer categoryId) {
+//		return this.productRepository.findProductType(categoryId);
+//	}
+//	@Cacheable("keijo")
+//	public List<Map<String, Object>> findProductKeijo(Integer categoryId) {
+//		return this.productRepository.findProductKeijo(categoryId);
+//	}
 	
 	public Page<Product> findProductList(Integer categoryId, List<String> selectsMakerList, List<String> selectsTypeList, List<String> selectsKeijoList, Pageable pageable) {
 		return this.productRepository.findProductByCategoryIdAndMakerInAndTypeInAndKeijoInOrderByMakerAscKeijoAscRatingAscProductNoAsc(categoryId, selectsMakerList, selectsTypeList, selectsKeijoList, pageable);
@@ -60,7 +60,7 @@ public class ProductService {
 		return this.productImageRepository.save(productImage);
 	}
 	public int deleteAll(Category category) {
-		log.info("try delte all with category [{}]", category);
+		log.info("try delete all with category [{}]", category);
 		int result = -1;
 		try {
 			result = this.productImageRepository.deleteByCategoryId(category.getId());

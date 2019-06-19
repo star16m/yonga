@@ -1,17 +1,24 @@
 package com.yonga.auc.data.extract;
 
 import com.codeborne.selenide.*;
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
 import com.yonga.auc.common.YongaUtil;
+import com.yonga.auc.data.category.AuctionInfo;
 import com.yonga.auc.data.category.Category;
+import com.yonga.auc.data.category.CategoryDetailInfo;
+import com.yonga.auc.data.category.CategoryInfo;
 import com.yonga.auc.data.extract.DataExtractException.ExtractExceptionMessage;
 import com.yonga.auc.data.product.Product;
+import com.yonga.auc.data.product2.NewProduct;
+import com.yonga.auc.data.product2.ProductDto;
+import com.yonga.auc.data.product2.ProductList;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.openqa.selenium.Alert;
-import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
@@ -19,18 +26,18 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.springframework.data.util.Pair;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selenide.*;
@@ -59,23 +66,18 @@ public class DataExtractor {
 
     private boolean login() {
         open(this.siteInfo.getTargetURL());
-        $("input[name=uid]").setValue(this.siteInfo.getUid());
-        $("input[name=pwd]").setValue(this.siteInfo.getPwd());
-        $("input[name=imageField]").click();
+        $("input[name=username]").setValue(this.siteInfo.getUid());
+        $("input[name=password]").setValue(this.siteInfo.getPwd());
+        $("button.c-btn--login").click();
         try {
-            Alert alert = WebDriverRunner.getWebDriver().switchTo().alert();
-            String alertText = alert.getText();
-            if (alertText.contains("すでにログインされているか")) {
-                alert.accept();
+            SelenideElement errorDetail = $("li#error_detail");
+            if (errorDetail != null && errorDetail.exists()) {
+                log.error("Error displayed [{}]", errorDetail.text());
                 return false;
             }
-            alert.accept();
-            SelenideElement loginInfoElement = $("div#divUserData");
+            SelenideElement loginInfoElement = $("div.kaiinInfo");
             loginInfoElement.shouldHave(text(this.siteInfo.getUid()));
             loginInfoElement.shouldHave(text("様"));
-            $("div#navigation ul li a span").shouldHave(text("下見検索"));
-        } catch (final NoAlertPresentException e) {
-            return true;
         } catch (Exception e) {
             log.warn(e.getMessage());
             return false;
@@ -83,181 +85,147 @@ public class DataExtractor {
         return true;
     }
 
-    private void loadMainMenu(Category category) {
-        // select category
-        open(this.siteInfo.getTargetURL("ba_menu.aspx?ud=0"));
-        // main menu check
-        SelenideElement loginInfoElement = $("div#divUserData");
-        SelenideElement menuElement = loginInfoElement.parent().parent();
-        menuElement.shouldHave(text("②メイン画面（メニュー）"));
-
-        // category click
-        ElementsCollection atagCollection = $$("a.x-tree-node-anchor");
-        atagCollection.shouldHaveSize(8);
-        SelenideElement aTag = atagCollection.stream()
-                .filter(a -> category.getJapanese().equals(a.getText()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(String.format("Can't find category name. [%s]", category.getKorean())));
-        aTag.click();
-        // category selected check
-        SelenideElement categoryNameElement = $("div.x-panel-tc span.x-panel-header-text");
-        categoryNameElement.shouldHave(text(category.getJapanese()));
-        // click search button
-        $("a#seachlink").click();
-        SelenideElement titleElement = $("div#mainPanel div span.x-panel-header-text");
-        titleElement.shouldHave(text("出品一覧"));
-
-        // 검색 순서 변경
-        $("div.x-grid3-hd-inner.x-grid3-hd-clmUketsukeNo").hover();
-        $(".x-grid3-hd-clmUketsukeNo a").click();
-        $(".x-menu-item.xg-hmenu-sort-asc").click();
-    }
-
-    private boolean hasProductDetail() {
-        DataExtractorUtil.waitLoading();
-        ElementsCollection productCollection = $$("div.x-grid3-cell-inner.x-grid3-col-clmUketsukeNo");
-        productCollection.shouldBe(CollectionCondition.sizeGreaterThanOrEqual(0));
-        if (productCollection != null && productCollection.size() > 0) {
-            productCollection.get(0).click();
-            DataExtractorUtil.waitLoading();
-            SelenideElement titleElement = $("span.x-panel-header-text");
-            titleElement.shouldHave(text("出品詳細"));
-            return true;
+    private <T> T extract(Class<T> classType, String url, Path path) {
+        open(url);
+        File categoryFile = extractTargetElement(path, $("body"));
+        Gson gson = new Gson();
+        try (JsonReader reader = new JsonReader(new FileReader(categoryFile))) {
+            return gson.fromJson(reader, classType);
+        } catch (IOException e) {
+            log.error("Error occurred while extracting data from [{}]. [{}]", url, e.getMessage(), e);
         }
-        return false;
+        return null;
     }
 
     private void logout() {
-        SelenideElement exitLink = $("a#exitlink");
+        SelenideElement exitLink = $("#pc_header > div > div.info > ul > li.button");
         if (exitLink.exists()) {
             exitLink.click();
+        } else {
+            open("https://u.brand-auc.com");
+            exitLink = $("#pc_header > div > div.info > ul > li.button");
+            if (exitLink.exists()) {
+                exitLink.click();
+                exitLink = $("div.modal-position > div.modal > div.button_area > button.common_btn.deep > div");
+                if (exitLink.exists()) {
+                    exitLink.click();
+                }
+            }
         }
         WebDriverRunner.getWebDriver().close();
     }
 
     public boolean extractProductDetail(
             List<Category> targetCategoryList,
-            BiFunction<Category, Integer, Integer> foundTotalCategoryProductConsumer,
-            BiConsumer<Category, Pair<Product, List<String>>> extractConsumer,
-            BiConsumer<Category, Integer> extractedProductConsumer
+            Consumer<AuctionInfo> extractAuctionInfoConsumer,
+            BiConsumer<Category, CategoryDetailInfo> extractCategoryDetailInfoConsumer,
+            BiConsumer<Category, Integer> foundCategoryProductTotalNumConsumer,
+            BiFunction<Category, ProductList, List<NewProduct>> extractProductListFunction,
+            BiConsumer<Category, NewProduct> extractProductDetailConsumer,
+            BiConsumer<Category, NewProduct> failedExtractProductConsumer,
+            BiConsumer<Category, Integer> completedCategoryProductConsumer
     ) throws DataExtractException {
         Objects.requireNonNull(targetCategoryList);
-        Objects.requireNonNull(extractConsumer);
+        if (!YongaUtil.isNotEmpty(targetCategoryList)) {
+            log.error("대상 카테고리가 지정되어 있지 않습니다.");
+            throw new DataExtractException(ExtractExceptionMessage.NOT_FOUND_CATEGORY);
+        }
+        Objects.requireNonNull(extractProductDetailConsumer);
         try {
+            // 1. 로그인
             if (!login()) {
                 throw new DataExtractException(ExtractExceptionMessage.LOGIN_FAIL);
             }
-            targetCategoryList.stream().forEach(category -> {
-                loadMainMenu(category);
 
-                Integer foundProductNums = 0;
-                if (hasProductDetail()) {
-                    foundProductNums = foundTotalProductNum();
-                    Integer startAt = foundTotalCategoryProductConsumer.apply(category, foundProductNums);
-                    IntStream.rangeClosed(startAt, foundProductNums).boxed().map(String::valueOf).forEach(productNo -> {
-                        long start = System.currentTimeMillis();
-                        // move product page
-                        SelenideElement currentProductPage = $("input.x-tbar-page-number");
-                        currentProductPage.setValue(productNo).pressEnter();
-                        DataExtractorUtil.waitLoading();
-                        // export html file
-                        File htmlFile = exportHtmlFiles(Paths.get(this.siteInfo.getWorkRoot(), this.siteInfo.getWorkPathDetail(), String.format("%s_%s_%s.html", category.getId(), category.getKorean(), productNo)));
-                        extractProduct(category, htmlFile, extractConsumer);
-                        log.info(String.format("extract Product %s %s %s", category.getKorean(), productNo, (System.currentTimeMillis() - start)));
-                    });
+            // 2. 옥션 정보
+            AuctionInfo auctionInfo = extract(AuctionInfo.class, "https://u.brand-auc.com/api/v1/auction/auctionInfos/auctionOpenInfo",Paths.get(this.siteInfo.getWorkRoot(), "auctioninfo.json"));
+            auctionInfo.setExtractDate(LocalDateTime.now());
+            extractAuctionInfoConsumer.accept(auctionInfo);
+
+            // 3. 카테고리 정보
+            CategoryInfo[] categoryInfoArray = extract(CategoryInfo[].class, "https://u.brand-auc.com/api/v1/com/allGenre", Paths.get(this.siteInfo.getWorkRoot(), "allCategory.json"));
+            if (categoryInfoArray == null || categoryInfoArray.length <= 0) {
+                throw new DataExtractException(ExtractExceptionMessage.FAIL_EXTRACT_ALL_CATEGORY);
+            }
+
+            // 4. 카테고리별로 데이터 추출
+            targetCategoryList.stream().forEach(category -> {
+                CategoryDetailInfo categoryDetailInfo = extract(CategoryDetailInfo.class,
+                        String.format("https://u.brand-auc.com/api/v1/auction/searchHeader/options/previewSearch?genreCds=%s&gamenId=B02-01", category.getId()),
+                        Paths.get(this.siteInfo.getWorkRoot(),String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
+                Objects.nonNull(categoryDetailInfo);
+                // 전체 메이커 지정하여 다시 한번 추출.
+                categoryDetailInfo = extract(CategoryDetailInfo.class,
+                        String.format("https://u.brand-auc.com/api/v1/auction/searchHeader/options/previewSearch?genreCds=%s&makerCds=%s&gamenId=B02-01", category.getId(), categoryDetailInfo.getMakerListInfo().stream().map(maker -> String.valueOf(maker.getMakerCd())).collect(Collectors.joining(","))),
+                        Paths.get(this.siteInfo.getWorkRoot(),String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
+                // 3. 카테고리별 상세 정보 저장
+                extractCategoryDetailInfoConsumer.accept(category, categoryDetailInfo);
+
+                AtomicInteger currentPageIndex = new AtomicInteger(0);
+                AtomicInteger currentProductDetailNum = new AtomicInteger(0);
+                ProductList productList = null;
+                while ((productList = extract(ProductList.class,
+                        String.format("https://u.brand-auc.com/api/v1/auction/previewItems/list?genreCds=%s&gamenId=B02-01&page=%s&pageNumber=0&viewType=1&albumTorokuSort=0&size=100", category.getId(), currentPageIndex.get()),
+                        Paths.get(this.siteInfo.getWorkRoot(), this.siteInfo.getWorkPathDetail(), String.format("category_%s", category.getId()), String.format("list_%s.json", currentPageIndex.getAndIncrement())))) != null) {
+                    log.debug("extract product list [{}]", productList);
+                    if (productList.getFirst()) {
+                        foundCategoryProductTotalNumConsumer.accept(category, productList.getTotalElements());
+                    }
+
+                    List<NewProduct> initializedProductList = extractProductListFunction.apply(category, productList);
+                    if (YongaUtil.isNotEmpty(initializedProductList)) {
+                        // extract product detail
+                        initializedProductList.stream().forEach(product -> {
+                            ProductDto productDto = extract(ProductDto.class, product.getDetailUrl(),
+                                    Paths.get(this.siteInfo.getWorkRoot(),
+                                            this.siteInfo.getWorkPathDetail(),
+                                            String.format("category_%s", category.getId()),
+                                            String.format("product_%s.json", product.getUketsukeBng())));
+                            if (YongaUtil.isNull(productDto) || YongaUtil.isNull(productDto.getUketsukeBng())) {
+                                String code = YongaUtil.isNull(productDto) ? "" : productDto.getCode();
+                                String message = YongaUtil.isNull(productDto) ? "" : productDto.getMessage();
+                                log.info("제품 추출에 실패하였습니다. code [{}], message [{}], product [{}]", code, message, productDto);
+                                failedExtractProductConsumer.accept(category, product);
+                                return;
+                            }
+                            productDto.setKaijoCd(product.getKaijoCd());
+                            productDto.setHyoka(product.getHyoka());
+                            productDto.setHyokaGaiso(product.getHyokaGaiso());
+                            productDto.setHyokaNaiso(product.getHyokaNaiso());
+
+                            NewProduct productDetail = new NewProduct(productDto);
+
+                            extractProductDetailConsumer.accept(category, productDetail);
+                            currentProductDetailNum.incrementAndGet();
+                        });
+                    }
+                    if (productList.getLast()) {
+                        completedCategoryProductConsumer.accept(category, currentProductDetailNum.get());
+                        break;
+                    }
                 }
-                extractedProductConsumer.accept(category, foundProductNums);
+//                extractedProductConsumer.accept(category, foundProductNums);
             });
             return true;
         } catch (DataExtractException e) {
             throw e;
         } catch (Throwable e) {
-            log.warn(e.getMessage());
+            log.error("에러가 발생하였습니다. [{}]", e.getMessage(), e);
             Arrays.asList(e.getStackTrace()).stream().forEach(s -> log.warn(s.toString()));
-            throw new DataExtractException(ExtractExceptionMessage.UNKNOWN);
+            throw new DataExtractException(ExtractExceptionMessage.UNKNOWN, e);
         } finally {
             logout();
         }
     }
 
-    public Integer foundTotalProductNum() {
-        String pageInfo = DataExtractorUtil.getText($("div.x-paging-info"));
-        Objects.requireNonNull(pageInfo);
-        if (pageInfo.contains("下見情報が見つかりませんでした")) {
-            return 0;
-        }
-        if (pageInfo.contains("件中")) {
-            Integer totalProductNum = Integer.valueOf(YongaUtil.getMatchedGroup(pageInfo, "(\\d+)件中"));
-            return totalProductNum;
-        }
-        return 0;
-    }
-
-    private File exportHtmlFiles(Path targetFilePath) {
-        File htmlFile = targetFilePath.toFile();
+    private File extractTargetElement(Path targetFilePath, SelenideElement targetElement) {
+        File targetFile = targetFilePath.toFile();
         try {
-            FileUtils.write(htmlFile, WebDriverRunner.getWebDriver().getPageSource(), Charset.forName("UTF-8"));
+            FileUtils.write(targetFile, targetElement.getText(), Charset.forName("UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
-        return htmlFile;
-    }
-
-    private Product extractProduct(Category category, File htmlFile, BiConsumer<Category, Pair<Product, List<String>>> extractConsumer) {
-        Document doc = DataExtractorUtil.getJsoupDocument(htmlFile);
-        String uketsukeNo = doc.select("span#desc-uketsuke-no").first().text();
-        String maker = doc.select("span#desc-maker").first().text();
-        String keijo = doc.select("span#desc-keijo").first().text();
-        String type = doc.select("span#desc-type").first().text();
-        String itemName = doc.select("span#desc-item-name").first().text();
-        String rating = doc.select("span#desc-rating").first().text();
-
-
-        String salesPoint = doc.select("span#desc-sales-point").first().text().replaceAll("[\n　 ]+", ", ");
-        String salesPoint2 = doc.select("span#desc-sales-point2").first().text().replaceAll("[\n　 ]+", ", ");
-        String accessories = doc.select("span#desc-accessories").first().text().replaceAll("[\n　 ]+", ", ");
-        String seriBng = doc.select("span#desc-seri-bng").first().text();
-        String openCount = doc.select("span#desc-open-count").first().text();
-        String openDate = doc.select("span#desc-open-date").first().text();
-        String start = doc.select("span#desc-start").first().text();
-        String result = doc.select("span#desc-result").first().text();
-        String bikoInfo = doc.select("span#desc-note table tbody td.bikoTd").stream()
-                .map(Element::text)
-                .map(StringUtils::trim)
-                .map(t -> StringUtils.replaceAll(t, "[ 　\r\n]", ""))
-                .filter(t -> !t.isEmpty())
-                .collect(Collectors.joining(", "));
-        List<String> imageList = doc.select("img[id*=img]").stream()
-                .filter(e -> e.hasAttr("src"))
-                .map(e -> e.attr("src"))
-                .filter(src -> src != null && !src.isEmpty() && src.contains("/ext_photos/") && src.contains("TN.jpg"))
-                .map(src -> src.replaceAll("\\?.+", "").replaceAll(".+/ext_photos/", "ext_photos/"))
-                .map(src -> this.siteInfo.getTargetURL() + src)
-                .distinct()
-                .collect(Collectors.toList());
-
-        Product extractedProduct = new Product();
-        extractedProduct.setUketsukeNo(uketsukeNo);
-        extractedProduct.setKeijo(keijo);
-        extractedProduct.setType(type);
-        extractedProduct.setItemName(itemName);
-        extractedProduct.setName(itemName);
-        extractedProduct.setMaker(maker);
-        extractedProduct.setRating(rating);
-        extractedProduct.setSalesPoint(salesPoint);
-        extractedProduct.setSalesPoint2(salesPoint2);
-        extractedProduct.setAccessories(accessories);
-        extractedProduct.setSeriBng(seriBng);
-        extractedProduct.setOpenCount(openCount);
-        extractedProduct.setOpenDate(openDate);
-        extractedProduct.setStart(start);
-        extractedProduct.setResult(result);
-        extractedProduct.setNote(bikoInfo);
-
-        extractedProduct.setCategory(category);
-        extractedProduct.setCreateDate(new Date());
-        extractConsumer.accept(category, Pair.of(extractedProduct, imageList));
-        return extractedProduct;
+        return targetFile;
     }
 }

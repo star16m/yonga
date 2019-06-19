@@ -50,7 +50,7 @@ public class DataExtractorUtil {
 		}
 	}
 	public static void waitLoading() {
-		$("div.ext-el-mask-msg.x-mask-loading").shouldNotBe(Condition.visible);
+		$("#page_content > app-preview-search > main > app-loading div").shouldNotBe(Condition.visible);
 	}
 	public static Document getJsoupDocument(File file) {
 		try {

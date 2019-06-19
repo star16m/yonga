@@ -3,6 +3,7 @@ package com.yonga.auc.data.category;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Transient;
 
 import com.yonga.auc.data.common.CommonBaseData;
 

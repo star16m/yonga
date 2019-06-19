@@ -2,15 +2,50 @@
 
 <html xmlns:th="http://www.thymeleaf.org" th:replace="~{fragments/layout :: layout (~{::body},'home')}">
 
-  <body>
-    <h2 th:text="${T(com.yonga.auc.config.ConfigConstants).APPLICATION_WELCOME}">용아몰</h2>
-    <br /><br />
-    <h2>Auction 스케줄</h2>
+<body>
+<h2 th:text="${T(com.yonga.auc.config.ConfigConstants).APPLICATION_WELCOME}">용아몰</h2>
+<br/><br/>
+<th:block sec:authorize="isAuthenticated()" th:if="${T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO} != null"
+          th:object="${T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO}">
     <div class="row">
         <div class="col-md-12">
-          <img class="img-responsive" src="https://www.brand-auc.com/images/index/top_artnex_schedule.jpg" th:src="@{https://www.brand-auc.com/images/index/top_artnex_schedule.jpg}"/>
+            <div class="jumbotron">
+                <h2 class="display-2">Auction 정보</h2>
+                <p class="lead" th:text="'[' + *{kaisaiKaisu} + '] 회 Auction 이 진행 중입니다.'">
+                </p>
+                <hr class="my-4">
+                <p class="lead">
+                <ul class="list-group">
+                    <!--<li class="list-group-item" th:text="'추출일 : [' + #dates.format(*{extractDate}, 'MM/dd HH:mm') + ']'"/>-->
+                    <li class="list-group-item" th:text="'추출일 : [' + *{extractDateString} + ']'"/>
+                    <li class="list-group-item" th:text="'총 제품 수 : [' + (*{shuppinCount} + *{lowPriceCount}) + ']'"/>
+                </ul>
+                <ul class="list-group">
+                    <li class="list-group-item" th:text="'개최횟수 : [' + *{kaisaiKaisu} + ']'"/>
+                    <li class="list-group-item" th:text="'개최일 : [' + *{kaisaiYmdFormatted} + ']'"/>
+                    <li class="list-group-item" th:text="'상태 : [' + *{seriJokyo} + ']'"/>
+                    <li class="list-group-item" th:text="'출품 제품 수 : [' + *{shuppinCount} + ']'"/>
+                </ul>
+                <ul class="list-group">
+                    <li class="list-group-item" th:text="'저가 제품 Auction 상태 : [' + *{lowPriceJokyo} + ']'"/>
+                    <li class="list-group-item" th:text="'저가 제품 Auction 출품 제품 수 : [' + *{lowPriceCount} + ']'"/>
+                    <li class="list-group-item"
+                        th:text="'저가 제품 Auction 개최 : [' + *{lowPriceKaisaiFrom} + '] ~ [' + *{lowPriceKaisaiFrom} + ']'"/>
+                </ul>
+                <ul class="list-group">
+                    <li class="list-group-item" th:text="'channelA : [' + *{channelA} + ']'"/>
+                    <li class="list-group-item" th:text="'channelB : [' + *{channelB} + ']'"/>
+                    <li class="list-group-item" th:text="'channelC : [' + *{channelC} + ']'"/>
+                    <li class="list-group-item" th:text="'channelD : [' + *{channelD} + ']'"/>
+                    <li class="list-group-item" th:text="'channelE : [' + *{channelE} + ']'"/>
+                    <li class="list-group-item" th:text="'channelF : [' + *{channelF} + ']'"/>
+                    <li class="list-group-item" th:text="'channelG : [' + *{channelG} + ']'"/>
+                </ul>
+                </p>
+            </div>
         </div>
     </div>
-  </body>
+</th:block>
+</body>
 
 </html>
