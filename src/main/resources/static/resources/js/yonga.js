@@ -30,11 +30,6 @@ $(document).ready(function() {
             $("form.login-form").submit();
         }
     });
-    $(document).keydown(function(event) {
-        if ($('.main_product').show()) {
-            console.log(event.keyCode);
-        }
-    });
     // enable selectpicker
     $('#categorySelect,#makerSelect,#brandSelect,#keijoSelect').selectpicker({
     	width: '100%'
