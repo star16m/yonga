@@ -105,7 +105,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                 // 초기화를 하지 않는 경우에도 카테고리 별 제품 수를 추출하여 다른 경우 초기화를 시도한다.
                 this.targetCategoryList.stream().forEach(category -> {
                     Integer productNum = this.dataExtractor.extractProductNum(category);
-                    if (category.getTotalProductNum() != productNum) {
+                    if (!category.getTotalProductNum().equals(productNum)) {
                         this.extractMode = ExtractMode.INITIALIZE;
                         this.logService.addLog(String.format("카테고리 [%s] 에 저장되어 있는 제품 수가 달라서 초기화를 시도합니다. 기존 제품 수 [%s], 신규 제품 수 [%s]", category.getKorean(), category.getTotalProductNum(), productNum));
                     }
