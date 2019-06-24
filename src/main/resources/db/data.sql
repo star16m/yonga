@@ -1,14 +1,14 @@
 insert into dual (dummy) values ('X');
 -- 카테고리 초기화
-INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (2, 'Watch', '시계', '時計', 'NONE', CURRENT_TIMESTAMP);
-INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (1, 'Bag', '백', 'バッグ', 'NONE', CURRENT_TIMESTAMP);
-INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (3, 'Precious metal', '귀금속', '貴金属', 'NONE', CURRENT_TIMESTAMP);
-INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (4, 'Clothing', '의류', '衣類', 'NONE', CURRENT_TIMESTAMP);
-INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (5, 'Accessories', '악세사리', '小物・アクセサリー', 'NONE', CURRENT_TIMESTAMP);
-INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (6, 'Tableware', '식기', '食器', 'NONE', CURRENT_TIMESTAMP);
-INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (7, 'Variety', '취미', 'お楽しみ', 'NONE', CURRENT_TIMESTAMP);
-INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (8, 'Painting･Art', '미술품', '絵画・美術品', 'NONE', CURRENT_TIMESTAMP);
-INSERT INTO category(id, name, korean, japanese, status, create_date) VALUES (9, 'Coin', '코인', 'コイン・古銭', 'NONE', CURRENT_TIMESTAMP);
+INSERT INTO category(id, name, korean, japanese, status, kaisai_kaisu, create_date) VALUES (2, 'Watch', '시계', '時計', 'NONE', 0, CURRENT_TIMESTAMP);
+INSERT INTO category(id, name, korean, japanese, status, kaisai_kaisu, create_date) VALUES (1, 'Bag', '백', 'バッグ', 'NONE', 0, CURRENT_TIMESTAMP);
+INSERT INTO category(id, name, korean, japanese, status, kaisai_kaisu, create_date) VALUES (3, 'Precious metal', '귀금속', '貴金属', 'NONE', 0, CURRENT_TIMESTAMP);
+INSERT INTO category(id, name, korean, japanese, status, kaisai_kaisu, create_date) VALUES (4, 'Clothing', '의류', '衣類', 'NONE', 0, CURRENT_TIMESTAMP);
+INSERT INTO category(id, name, korean, japanese, status, kaisai_kaisu, create_date) VALUES (5, 'Accessories', '악세사리', '小物・アクセサリー', 'NONE', 0, CURRENT_TIMESTAMP);
+INSERT INTO category(id, name, korean, japanese, status, kaisai_kaisu, create_date) VALUES (6, 'Tableware', '식기', '食器', 'NONE', 0, CURRENT_TIMESTAMP);
+INSERT INTO category(id, name, korean, japanese, status, kaisai_kaisu, create_date) VALUES (7, 'Variety', '취미', 'お楽しみ', 'NONE', 0, CURRENT_TIMESTAMP);
+INSERT INTO category(id, name, korean, japanese, status, kaisai_kaisu, create_date) VALUES (8, 'Painting･Art', '미술품', '絵画・美術品', 'NONE', 0, CURRENT_TIMESTAMP);
+INSERT INTO category(id, name, korean, japanese, status, kaisai_kaisu, create_date) VALUES (9, 'Coin', '코인', 'コイン・古銭', 'NONE', 0, CURRENT_TIMESTAMP);
 
 
 -- CONFIG

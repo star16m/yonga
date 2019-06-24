@@ -18,7 +18,7 @@ import java.util.List;
 
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "product_new")
+@Table(name = "product")
 @Data
 @NoArgsConstructor
 public class Product extends CommonBaseDataWithoutKey {
@@ -137,6 +137,7 @@ public class Product extends CommonBaseDataWithoutKey {
     @Column(name = "update_date")
     private LocalDateTime updateDateLocalDateTime;
     @Column(name = "extract_result")
+    @Enumerated(EnumType.STRING)
     private ExtractResult extractResult;
     @OneToMany
     @JoinColumn(name = "product_uketsuke_bng", updatable = false, insertable = false)

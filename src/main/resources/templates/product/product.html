@@ -92,7 +92,13 @@
 	</div>
 	
 	<th:block th:if="${page == null || currentCategory == null}">
-		<h2>Category</h2>
+		<h2 th:if="${T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO != null}"
+			th:text="'[' + ${T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO.kaisaiKaisu} + '] 회차'">제품</h2>
+
+		<h3 th:text="${'대상 카테고리 : ' + #lists.size(categoryList) + ' 개 중 [' + totalProductNum + '] 건 상세 추출 완료'}"></h3>
+		<h3 th:text="${'  총 제품 수 : ' + totalProductNum + ' 건'}"></h3>
+		<h3 th:text="${'상세 제품 수 : ' + extractedProductNum + ' 건'}"></h3>
+		<h3 th:text="${'개최일 : ' + T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO.kaisaiYmdFormatted}"></h3>
 		<table id="category" class="table table-striped">
 			<thead>
 				<tr>

@@ -5,7 +5,7 @@
 <body>
 <h2 th:text="${T(com.yonga.auc.config.ConfigConstants).APPLICATION_WELCOME}">용아몰</h2>
 <br/><br/>
-<th:block sec:authorize="isAuthenticated()" th:if="${T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO} != null"
+<th:block sec:authorize="isAuthenticated()" th:if="${T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO} != null and ${T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO.kaisaiKaisu} != null"
           th:object="${T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO}">
     <div class="row">
         <div class="col-md-12">

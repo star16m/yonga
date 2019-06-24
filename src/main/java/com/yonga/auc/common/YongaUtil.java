@@ -1,5 +1,6 @@
 package com.yonga.auc.common;
 
+import com.yonga.auc.data.category.CategoryInfo;
 import com.yonga.auc.data.product.ProductDto;
 import com.yonga.auc.data.product.image.ProductImage;
 import org.apache.commons.io.FileUtils;
@@ -19,14 +20,19 @@ import java.util.stream.Collectors;
 
 public final class YongaUtil {
 
-    private static DateTimeFormatter COMMON_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM월 dd일 (EEEE) HH:mm", Locale.KOREAN);
+    public static DateTimeFormatter COMMON_DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("MM월 dd일 (EEEE) HH:mm", Locale.KOREAN);
+    public static DateTimeFormatter COMMON_DATE_FORMATTER = DateTimeFormatter.ofPattern("MM월 dd일 (EEEE)", Locale.KOREAN);
     private YongaUtil() {
     }
+
     public static String getString(LocalDateTime localDateTime) {
+        return getString(localDateTime, COMMON_DATE_TIME_FORMATTER);
+    }
+    public static String getString(LocalDateTime localDateTime, DateTimeFormatter dateTimeFormatter) {
         if (isNull(localDateTime)) {
             return "";
         }
-        return localDateTime.format(COMMON_DATE_TIME_FORMATTER);
+        return localDateTime.format(dateTimeFormatter);
     }
     public static String getString(String string) {
         return getString(string, "");
@@ -131,5 +137,19 @@ public final class YongaUtil {
                 })
                 .filter(productImage -> YongaUtil.isNotNull(productImage) && YongaUtil.isNotNull(productImage.getImageUrl()) && YongaUtil.isNotNull(productImage.getThumbnailImageUrl()))
                 .collect(Collectors.toList());
+    }
+
+    public static boolean isNullOrEmpty(Object[] objectArray) {
+        return objectArray == null || objectArray.length == 0;
+    }
+    public static boolean isNullOrEmpty(List<?> list) {
+        return list == null || list.isEmpty();
+    }
+
+    public static String substring(String message) {
+        if (message == null) {
+            return null;
+        }
+        return StringUtils.substring(message, 100);
     }
 }

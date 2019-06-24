@@ -1,11 +1,9 @@
 DROP TABLE dual IF EXISTS;
 DROP TABLE product_image IF EXISTS;
-DROP TABLE product_image_new IF EXISTS;
 DROP TABLE maker IF EXISTS;
 DROP TABLE brand IF EXISTS;
 DROP TABLE keijo IF EXISTS;
 DROP TABLE product IF EXISTS;
-DROP TABLE product_new IF EXISTS;
 DROP TABLE category IF EXISTS;
 DROP TABLE work_log IF EXISTS;
 DROP TABLE config IF EXISTS;
@@ -25,6 +23,7 @@ CREATE TABLE category (
     status VARCHAR(80) NOT NULL,
     total_product_num INTEGER,
     ext_product_num INTEGER,
+    kaisai_kaisu INTEGER,
     create_date TIMESTAMP,
     modified_date TIMESTAMP
 );
@@ -62,37 +61,6 @@ CREATE TABLE keijo (
 
 -- 제품
 CREATE TABLE product (
-    id INTEGER IDENTITY PRIMARY KEY,
-    name VARCHAR(80) NOT NULL,
-    category_no INTEGER NOT NULL,
-    product_no INTEGER NOT NULL,
-    desc_uketsuke_no VARCHAR(80),
-    desc_keijo VARCHAR(255),
-    desc_open_count VARCHAR(255),
-    desc_open_date VARCHAR(255),
-    desc_seri_bng VARCHAR(255),
-    desc_maker VARCHAR(255),
-    desc_type VARCHAR(255),
-    desc_item_name VARCHAR(255),
-    desc_rating VARCHAR(255),
-    desc_outer VARCHAR(255),
-    desc_interior VARCHAR(255),
-    desc_start VARCHAR(255),
-    desc_result VARCHAR(255),
-    desc_model_no VARCHAR(255),
-    desc_reference_price VARCHAR(255),
-    desc_sales_point VARCHAR(255),
-    desc_sales_point2 VARCHAR(255),
-    desc_accessories VARCHAR(255),
-    desc_note VARCHAR(255),
-    desc_correction VARCHAR(255),
-    thumbnail_image VARCHAR(255),
-    create_date TIMESTAMP,
-    modified_date TIMESTAMP
-);
-
--- 제품
-CREATE TABLE product_new (
     uketsuke_bng VARCHAR(80) PRIMARY KEY,
     genre_cd INTEGER NOT NULL,
     kaijo_cd INTEGER DEFAULT 0 NOT NULL, -- 몰 인 경우 0
@@ -131,16 +99,6 @@ CREATE TABLE product_new (
 
 -- 제품 이미지
 CREATE TABLE product_image (
-    id            INTEGER IDENTITY PRIMARY KEY,
-    name          VARCHAR(255),
-    product_id    INTEGER NOT NULL,
-    create_date   TIMESTAMP,
-    modified_date TIMESTAMP
-);
-ALTER TABLE product_image ADD CONSTRAINT fk_product_image FOREIGN KEY (product_id) REFERENCES product (id);
-
--- 제품 이미지
-CREATE TABLE product_image_new (
     image_url VARCHAR(255) NOT NULL PRIMARY KEY,
     thumbnail_image_url VARCHAR(255) NOT NULL,
     genre_cd INTEGER NOT NULL,
@@ -149,7 +107,7 @@ CREATE TABLE product_image_new (
     create_date   TIMESTAMP,
     modified_date TIMESTAMP
 );
-ALTER TABLE product_image_new ADD CONSTRAINT fk_product_image_new FOREIGN KEY (product_uketsuke_bng) REFERENCES product_new (uketsuke_bng);
+ALTER TABLE product_image ADD CONSTRAINT fk_product_image FOREIGN KEY (product_uketsuke_bng) REFERENCES product (uketsuke_bng);
 
 
 -- LOG

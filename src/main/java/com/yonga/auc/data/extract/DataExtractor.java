@@ -8,6 +8,7 @@ import com.yonga.auc.data.category.AuctionInfo;
 import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.category.CategoryDetailInfo;
 import com.yonga.auc.data.category.CategoryInfo;
+import com.yonga.auc.data.common.PageResponse;
 import com.yonga.auc.data.extract.DataExtractException.ExtractExceptionMessage;
 import com.yonga.auc.data.product.Product;
 import com.yonga.auc.data.product.ProductDto;
@@ -59,7 +60,7 @@ public class DataExtractor {
         WebDriverRunner.setWebDriver(driver);
     }
 
-    private void login() throws DataExtractException {
+    public void login() throws DataExtractException {
         open(this.siteInfo.getTargetURL());
         $("input[name=username]").setValue(this.siteInfo.getUid());
         $("input[name=password]").setValue(this.siteInfo.getPwd());
@@ -111,11 +112,27 @@ public class DataExtractor {
         WebDriverRunner.getWebDriver().close();
     }
 
+    public AuctionInfo extractAuctionInfo() {
+        // 옥션 정보 추출
+        AuctionInfo auctionInfo = extract(AuctionInfo.class,
+                "https://u.brand-auc.com/api/v1/auction/auctionInfos/auctionOpenInfo",
+                Paths.get(this.siteInfo.getWorkRoot(), "auctioninfo.json"));
+        auctionInfo.setExtractDate(LocalDateTime.now());
+        return auctionInfo;
+    }
+    public CategoryDetailInfo extractCategoryDetail(Category category) {
+        CategoryDetailInfo categoryDetailInfo = extract(CategoryDetailInfo.class,
+                String.format("https://u.brand-auc.com/api/v1/auction/searchHeader/options/previewSearch?genreCds=%s&gamenId=B02-01", category.getId()),
+                Paths.get(this.siteInfo.getWorkRoot(),String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
+        Objects.requireNonNull(categoryDetailInfo);
+        // 5.2. 전체 메이커 지정하여 다시 한번 추출.
+        categoryDetailInfo = extract(CategoryDetailInfo.class,
+                String.format("https://u.brand-auc.com/api/v1/auction/searchHeader/options/previewSearch?genreCds=%s&makerCds=%s&gamenId=B02-01", category.getId(), categoryDetailInfo.getMakerListInfo().stream().map(maker -> String.valueOf(maker.getMakerCd())).collect(Collectors.joining(","))),
+                Paths.get(this.siteInfo.getWorkRoot(),String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
+        return categoryDetailInfo;
+    }
     public boolean extractProductDetail(
             List<Category> targetCategoryList,
-            Consumer<AuctionInfo> extractAuctionInfoConsumer,
-            BiConsumer<Category, CategoryDetailInfo> extractCategoryDetailInfoConsumer,
-            BiConsumer<Category, Integer> foundCategoryProductTotalNumConsumer,
             BiFunction<Category, ProductList, List<Product>> extractProductListFunction,
             BiConsumer<Category, Product> extractProductDetailConsumer,
             BiConsumer<Category, Product> failedExtractProductConsumer,
@@ -131,30 +148,18 @@ public class DataExtractor {
             // 1. 로그인
             login();
 
-            // 2. 옥션 정보
-            AuctionInfo auctionInfo = extract(AuctionInfo.class, "https://u.brand-auc.com/api/v1/auction/auctionInfos/auctionOpenInfo",Paths.get(this.siteInfo.getWorkRoot(), "auctioninfo.json"));
-            auctionInfo.setExtractDate(LocalDateTime.now());
-            extractAuctionInfoConsumer.accept(auctionInfo);
+
 
             // 3. 카테고리 정보
-            CategoryInfo[] categoryInfoArray = extract(CategoryInfo[].class, "https://u.brand-auc.com/api/v1/com/allGenre", Paths.get(this.siteInfo.getWorkRoot(), "allCategory.json"));
-            if (categoryInfoArray == null || categoryInfoArray.length <= 0) {
+            CategoryInfo[] categoryInfoArray = extract(CategoryInfo[].class,
+                    "https://u.brand-auc.com/api/v1/com/allGenre",
+                    Paths.get(this.siteInfo.getWorkRoot(), "allCategory.json"));
+            if (YongaUtil.isNullOrEmpty(categoryInfoArray)) {
                 throw new DataExtractException(ExtractExceptionMessage.FAIL_EXTRACT_ALL_CATEGORY);
             }
 
             // 4. 카테고리별로 데이터 추출
             targetCategoryList.stream().forEach(category -> {
-                CategoryDetailInfo categoryDetailInfo = extract(CategoryDetailInfo.class,
-                        String.format("https://u.brand-auc.com/api/v1/auction/searchHeader/options/previewSearch?genreCds=%s&gamenId=B02-01", category.getId()),
-                        Paths.get(this.siteInfo.getWorkRoot(),String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
-                Objects.nonNull(categoryDetailInfo);
-                // 전체 메이커 지정하여 다시 한번 추출.
-                categoryDetailInfo = extract(CategoryDetailInfo.class,
-                        String.format("https://u.brand-auc.com/api/v1/auction/searchHeader/options/previewSearch?genreCds=%s&makerCds=%s&gamenId=B02-01", category.getId(), categoryDetailInfo.getMakerListInfo().stream().map(maker -> String.valueOf(maker.getMakerCd())).collect(Collectors.joining(","))),
-                        Paths.get(this.siteInfo.getWorkRoot(),String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
-                // 3. 카테고리별 상세 정보 저장
-                extractCategoryDetailInfoConsumer.accept(category, categoryDetailInfo);
-
                 AtomicInteger currentPageIndex = new AtomicInteger(0);
                 AtomicInteger currentProductDetailNum = new AtomicInteger(0);
                 ProductList productList = null;
@@ -162,9 +167,6 @@ public class DataExtractor {
                         String.format("https://u.brand-auc.com/api/v1/auction/previewItems/list?genreCds=%s&gamenId=B02-01&page=%s&pageNumber=0&viewType=1&albumTorokuSort=0&size=100", category.getId(), currentPageIndex.get()),
                         Paths.get(this.siteInfo.getWorkRoot(), this.siteInfo.getWorkPathDetail(), String.format("category_%s", category.getId()), String.format("list_%s.json", currentPageIndex.getAndIncrement())))) != null) {
                     log.debug("extract product list [{}]", productList);
-                    if (productList.getFirst()) {
-                        foundCategoryProductTotalNumConsumer.accept(category, productList.getTotalElements());
-                    }
 
                     List<Product> initializedProductList = extractProductListFunction.apply(category, productList);
                     if (YongaUtil.isNotEmpty(initializedProductList)) {
@@ -221,5 +223,50 @@ public class DataExtractor {
             return null;
         }
         return targetFile;
+    }
+
+    public Integer extractProductNum(Category category) {
+        PageResponse pageResponse = extract(PageResponse.class,
+                String.format("https://u.brand-auc.com/api/v1/auction/previewItems/list?genreCds=%s&gamenId=B02-01&page=1&pageNumber=0&viewType=1&albumTorokuSort=0&size=10",
+                        category.getId()),
+                Paths.get(this.siteInfo.getWorkRoot(),
+                        this.siteInfo.getWorkPathDetail(),
+                        String.format("category_%s", category.getId()),
+                        String.format("product_num.json"))
+        );
+        return pageResponse.getTotalElements();
+    }
+
+    public ProductList extractProductList(Category category, Integer page) {
+        ProductList productList = extract(ProductList.class,
+                String.format("https://u.brand-auc.com/api/v1/auction/previewItems/list?genreCds=%s&gamenId=B02-01&page=%s&pageNumber=0&viewType=1&albumTorokuSort=0&size=100",
+                        category.getId(), page),
+                Paths.get(this.siteInfo.getWorkRoot(), this.siteInfo.getWorkPathDetail(), String.format("category_%s", category.getId()), String.format("list_%s.json", page)));
+        return productList;
+    }
+
+    public Product extractProduct(Category category, Product product) {
+        ProductDto productDto = extract(ProductDto.class, product.getDetailUrl(),
+                Paths.get(this.siteInfo.getWorkRoot(),
+                        this.siteInfo.getWorkPathDetail(),
+                        String.format("category_%s", category.getId()),
+                        String.format("product_%s.json", product.getUketsukeBng())));
+        if (YongaUtil.isNull(productDto) || YongaUtil.isNull(productDto.getUketsukeBng())) {
+            String code = YongaUtil.isNull(productDto) ? "" : productDto.getCode();
+            String message = YongaUtil.isNull(productDto) ? "" : productDto.getMessage();
+            log.info("제품 추출에 실패하였습니다. code [{}], message [{}], product [{}]", code, message, productDto);
+            return null;
+        }
+        productDto.setKaijoCd(product.getKaijoCd());
+        productDto.setHyoka(product.getHyoka());
+        productDto.setHyokaGaiso(product.getHyokaGaiso());
+        productDto.setHyokaNaiso(product.getHyokaNaiso());
+
+        Product productDetail = new Product(productDto);
+        return productDetail;
+    }
+
+    public void close() {
+        logout();
     }
 }

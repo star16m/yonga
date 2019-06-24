@@ -38,7 +38,7 @@ public class Brand extends CommonBaseDataWithoutKey {
     }
 
     public static Brand valueOf(BrandResponse brandResponse, Category category) {
-        Objects.nonNull(brandResponse);
+        Objects.requireNonNull(brandResponse);
         Brand brand = new Brand();
         brand.setBrandCd(brandResponse.getBrandTypeCd());
         brand.setName(brandResponse.getBrandType());

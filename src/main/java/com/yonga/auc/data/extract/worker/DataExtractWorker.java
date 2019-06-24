@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.config.ConfigConstants;
 import com.yonga.auc.config.ConfigService;
-import com.yonga.auc.data.category.Category;
-import com.yonga.auc.data.category.CategoryService;
-import com.yonga.auc.data.category.ExtractMode;
+import com.yonga.auc.data.category.*;
 import com.yonga.auc.data.category.detail.*;
 import com.yonga.auc.data.extract.DataExtractException;
 import com.yonga.auc.data.extract.DataExtractor;
@@ -14,6 +12,7 @@ import com.yonga.auc.data.extract.ExtractSiteInfo;
 import com.yonga.auc.data.log.LogService;
 import com.yonga.auc.data.product.ExtractResult;
 import com.yonga.auc.data.product.Product;
+import com.yonga.auc.data.product.ProductList;
 import com.yonga.auc.data.product.ProductRepository;
 import com.yonga.auc.data.product.image.ProductImageRepository;
 import com.yonga.auc.mail.MailContents;
@@ -22,9 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StopWatch;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -83,103 +80,179 @@ public class DataExtractWorker implements Callable<Boolean> {
         try {
             // extract
             this.logService.addLog("데이터 상세 추출을 시작합니다.");
-//            AtomicInteger detailNum = new AtomicInteger(0);
-            // extract detail
-            extractedProductList &= this.dataExtractor.extractProductDetail(
-                    this.targetCategoryList.stream().collect(Collectors.toList()),
-                    (auctionInfo) -> {
-                        log.info("수집된 auction 정보 [{}]", auctionInfo);
-                        try {
-                            String auctionInfoString = this.objectMapper.writeValueAsString(auctionInfo);
-                            if (YongaUtil.isNotEmpty(auctionInfoString)) {
-                                this.configService.setConfigValue("AUCTION", "INFO", auctionInfoString);
-                            }
-                            ConfigConstants.AUCTION_INFO = auctionInfo;
-                        } catch (IOException e) {
-                            // do nothing.
+            // 1. 로그인
+            this.dataExtractor.login();
+            // 2. AuctionInfo 수집
+            AuctionInfo auctionInfo = this.dataExtractor.extractAuctionInfo();
+            log.info("수집된 auction 정보 [{}]", auctionInfo);
+            try {
+                String auctionInfoString = this.objectMapper.writeValueAsString(auctionInfo);
+                if (YongaUtil.isNotEmpty(auctionInfoString)) {
+                    this.configService.setConfigValue("AUCTION", "INFO", auctionInfoString);
+                }
+                if (YongaUtil.isNotNull(ConfigConstants.AUCTION_INFO) && !ConfigConstants.AUCTION_INFO.getKaisaiKaisu().equals(auctionInfo.getKaisaiKaisu())) {
+                    // 저장되어 있는 회차가 다른 경우, 무조건 초기화 한다.
+                    this.extractMode = ExtractMode.INITIALIZE;
+                    this.logService.addLog(String.format("새로운 Auction 회차[%s]가 확인 되어 초기화를 시도합니다.", auctionInfo.getKaisaiKaisu()));
+                }
+                ConfigConstants.AUCTION_INFO = auctionInfo;
+            } catch (IOException e) {
+                // do nothing.
+                this.logService.addLog(String.format("Auction 정보를 변환 중에 에러가 발생하였습니다. [%s]", YongaUtil.substring(e.getMessage())));
+            }
+            // 3. 카테고리 별 상세 조건(maker, brand, keijo) 추출
+            if (!this.extractMode.isRequiredInitialize()) {
+                // 초기화를 하지 않는 경우에도 카테고리 별 제품 수를 추출하여 다른 경우 초기화를 시도한다.
+                this.targetCategoryList.stream().forEach(category -> {
+                    Integer productNum = this.dataExtractor.extractProductNum(category);
+                    if (category.getTotalProductNum() != productNum) {
+                        this.extractMode = ExtractMode.INITIALIZE;
+                        this.logService.addLog(String.format("카테고리 [%s] 에 저장되어 있는 제품 수가 달라서 초기화를 시도합니다. 기존 제품 수 [%s], 신규 제품 수 [%s]", category.getKorean(), category.getTotalProductNum(), productNum));
+                    }
+                });
+            }
+            // 4. 카테고리 별 초기화
+            Map<Integer, List<Maker>> makerMap = new HashMap<>();
+            Map<Integer, List<Brand>> brandMap = new HashMap<>();
+            Map<Integer, List<Keijo>> keijoMap = new HashMap<>();
+            if (this.extractMode.isRequiredInitialize()) {
+                this.targetCategoryList.stream().forEach(category -> {
+                    this.logService.addLog(String.format("카테고리 [%s] 를 초기화합니다.", category.getKorean()));
+                    CategoryDetailInfo categoryDetailInfo = this.dataExtractor.extractCategoryDetail(category);
+                    // 초기화 할 경우, 각 카테고리 상세 정보를 초기화 한다.
+                    this.productImageRepository.deleteByGenreCd(category.getId());
+                    this.productRepository.deleteByGenreCd(category.getId());
+                    this.makerRepository.deleteByCategoryNo(category.getId());
+                    this.brandRepository.deleteByCategoryNo(category.getId());
+                    this.keijoRepository.deleteByCategoryNo(category.getId());
+                    makerMap.put(category.getId(), new ArrayList<>());
+                    brandMap.put(category.getId(), new ArrayList<>());
+                    keijoMap.put(category.getId(), new ArrayList<>());
+                    if (YongaUtil.isNotEmpty(categoryDetailInfo.getMakerListInfo())) {
+                        categoryDetailInfo.getMakerListInfo().stream().map(maker -> Maker.valueOf(maker, category)).forEach(maker -> {
+                            makerMap.get(category.getId()).add(maker);
+                            this.makerRepository.save(maker);
+                        });
+                    }
+                    if (YongaUtil.isNotEmpty(categoryDetailInfo.getBrandTypeListInfo())) {
+                        categoryDetailInfo.getBrandTypeListInfo().stream().map(brand -> Brand.valueOf(brand, category)).forEach(brand -> {
+                            brandMap.get(category.getId()).add(brand);
+                            this.brandRepository.save(brand);
+                        });
+                    }
+                    if (YongaUtil.isNotEmpty(categoryDetailInfo.getKeijoListInfo())) {
+                        categoryDetailInfo.getKeijoListInfo().stream().map(keijo -> Keijo.valueOf(keijo, category)).forEach(keijo -> {
+                            keijoMap.get(category.getId()).add(keijo);
+                            this.keijoRepository.save(keijo);
+                        });
+                    }
+                    Integer productNum = this.dataExtractor.extractProductNum(category);
+                    category.setTotalProductNum(productNum);
+                    category.setKaisaiKaisu(ConfigConstants.AUCTION_INFO.getKaisaiKaisu());
+                    category.setStatus("INIT");
+                    category.setExtProductNum(0);
+                    category.setModifiedDate(new Date());
+                    this.categoryService.save(category);
+                });
+            }
+            // 5. 카테고리 별 기본 정보 조회
+            if (this.extractMode.isRequiredInitialize()) {
+                this.targetCategoryList.stream().forEach(category -> {
+                    List<Maker> makerList = makerMap.get(category.getId());
+                    List<Brand> brandList = brandMap.get(category.getId());
+                    List<Keijo> keijoList = keijoMap.get(category.getId());
+                    ProductList productList = null;
+                    AtomicInteger page = new AtomicInteger(0);
+                    while ((productList = this.dataExtractor.extractProductList(category, page.getAndIncrement())) != null) {
+                        if (YongaUtil.isNullOrEmpty(productList.getContent())) {
+                            break;
                         }
-                    },
-                    (category, categoryDetailInfo) -> {
-                        // 초기화 할 경우, 각 카테고리 상세 정보를 초기화 한다.
-                        if (this.extractMode.isRequiredInitialize()) {
-                            this.productImageRepository.deleteByGenreCd(category.getId());
-                            this.productRepository.deleteByGenreCd(category.getId());
-                            this.makerRepository.deleteByCategoryNo(category.getId());
-                            this.brandRepository.deleteByCategoryNo(category.getId());
-                            this.keijoRepository.deleteByCategoryNo(category.getId());
-                            if (YongaUtil.isNotEmpty(categoryDetailInfo.getMakerListInfo())) {
-                                categoryDetailInfo.getMakerListInfo().stream().map(maker -> Maker.valueOf(maker, category)).forEach(maker -> this.makerRepository.save(maker));
-                            }
-                            if (YongaUtil.isNotEmpty(categoryDetailInfo.getBrandTypeListInfo())) {
-                                categoryDetailInfo.getBrandTypeListInfo().stream().map(brand -> Brand.valueOf(brand, category)).forEach(brand -> this.brandRepository.save(brand));
-                            }
-                            if (YongaUtil.isNotEmpty(categoryDetailInfo.getKeijoListInfo())) {
-                                categoryDetailInfo.getKeijoListInfo().stream().map(keijo -> Keijo.valueOf(keijo, category)).forEach(keijo -> this.keijoRepository.save(keijo));
-                            }
-                        }
-                    },
-                    (category, foundCategoryProductTotalNum) -> {
-                        // 기존 데이터와 전체 건수가 상이한 경우 데이터를 초기화 한다.
-                        if (this.extractMode.isRequiredInitialize() || foundCategoryProductTotalNum != category.getTotalProductNum()) {
-                            this.logService.addLog(
-                                    String.format("카테고리[%s]를 초기화 합니다. 추출된 전체 건수 [%s], 기존 전체 건수 [%s], 전달된 초기화 여부 [%s]",
-                                            category.getKorean(),
-                                            foundCategoryProductTotalNum,
-                                            category.getTotalProductNum(),
-                                            this.extractMode.isRequiredInitialize()));
-                            category.setStatus("PROGRESS");
-                            category.setExtProductNum(0);
-                            category.setTotalProductNum(foundCategoryProductTotalNum);
-                            category.setModifiedDate(new Date());
-                            this.categoryService.save(category);
-                        }
-                        this.logService.addLog(
-                                String.format("카테고리[%s] 추출을 시작합니다. 전체 건수 [%s]", category.getKorean(), foundCategoryProductTotalNum)
-                        );
-                    },
-                    (category, productList) -> {
                         log.info("extract category [{}], elements [{}]", category.getKorean(), productList.getSize());
-                        // 그 외의 경우, 모든 제품에 대해서 상세 추출을 진행한다.
                         AtomicInteger extractProduct = new AtomicInteger(0);
-                        List<Product> initializedProductList = productList.getContent().stream().map(p -> {
+                        productList.getContent().stream().forEach(p -> {
+                            // maker / brand / keijo 가 없는 경우, 미리 설정
+                            boolean makerExists = makerList.stream().anyMatch(m -> m.getMakerCd().equals(p.getMakerCd()));
+                            boolean brandExists = brandList.stream().anyMatch(b -> b.getBrandCd().equals(p.getBrandTypeCd()));
+                            boolean keijoExists = keijoList.stream().anyMatch(k -> k.getKeijoCd().equals(p.getKeijoCd()));
+                            if (makerExists && brandExists && keijoExists) {
+                            } else {
+                                log.info("제품 : maker [{}] exists [{}], brand [{}] exists [{}], keijo [{}] exists [{}]", p.getMakerCd(), makerExists, p.getBrandTypeCd(), brandExists, p.getKeijoCd(), keijoExists);
+                                if (!makerExists) {
+                                    Maker maker = new Maker();
+                                    maker.setMakerCd(p.getMakerCd());
+                                    maker.setName(p.getMaker());
+                                    maker.setNameKr(p.getMaker());
+                                    maker.setNameEn(p.getMaker());
+                                    maker.setCategoryNo(category.getId());
+                                    this.makerRepository.save(maker);
+                                }
+                                if (!brandExists) {
+                                    Brand brand = new Brand();
+                                    brand.setBrandCd(p.getBrandTypeCd());
+                                    brand.setName(p.getBrandType());
+                                    brand.setNameEn(p.getBrandTypeEn());
+                                    brand.setNameKr(p.getBrandType());
+                                    brand.setCategoryNo(category.getId());
+                                    this.brandRepository.save(brand);
+                                }
+                                if (!keijoExists) {
+                                    Keijo keijo = new Keijo();
+                                    keijo.setKeijoCd(p.getKeijoCd());
+                                    keijo.setName(p.getKeijo());
+                                    keijo.setNameEn(p.getKeijoEn());
+                                    keijo.setNameKr(p.getKeijo());
+                                    keijo.setCategoryNo(category.getId());
+                                    this.keijoRepository.save(keijo);
+                                }
+                            }
                             Product product = new Product(p);
                             product.setExtractResult(ExtractResult.INITIALIZE);
-                            product = this.productRepository.save(product);
+                            log.info("제품 : maker [{}], brand [{}], keijo [{}]", p.getMakerCd(), p.getBrandTypeCd(), p.getKeijoCd());
+                            this.productRepository.save(product);
                             extractProduct.incrementAndGet();
-                            totalExtractNum.incrementAndGet();
-                            return product;
-                        }).collect(Collectors.toList());
-                        category.setExtProductNum(category.getExtProductNum() + extractProduct.get());
-                        this.categoryService.save(category);
-                        return initializedProductList;
-                    }, (category, product) -> {
-
-                        log.info("extracted product [{}]", product);
-                        this.productImageRepository.saveAll(product.getProductImage());
-                        product.setExtractResult(ExtractResult.COMPLETE);
-                        if (!this.brandRepository.existsById(product.getBrandTypeCd())) {
-                            Brand brand = new Brand();
-                            brand.setBrandCd(product.getBrandTypeCd());
-                            brand.setCategoryNo(product.getGenreCd());
-                            brand.setName(product.getBrandType());
-                            brand.setNameEn(product.getBrandType());
-                            brand.setNameKr(product.getBrandType());
-                            this.brandRepository.save(brand);
+                        });
+                    }
+                });
+            }
+            // 6. 카테고리 별 상세 정보 조회
+            this.targetCategoryList.stream().forEach(category -> {
+                category.setStatus("PROGRESS");
+                this.categoryService.save(category);
+                List<Product> notCollectedProductList = this.productRepository.findProductByNotCollected(category.getId());
+                category.setExtProductNum(category.getTotalProductNum() - notCollectedProductList.size());
+                this.categoryService.save(category);
+                log.info("not collected product list [{}]", notCollectedProductList == null ? 0 : notCollectedProductList.size());
+                AtomicInteger extractProductNum = new AtomicInteger(0);
+                if (!YongaUtil.isNullOrEmpty(notCollectedProductList)) {
+                    this.logService.addLog(String.format("카테고리 [%s] 의 제품 [%s] 개를 상세 추출 합니다. ", category.getKorean(), notCollectedProductList.size()));
+                    notCollectedProductList.stream().forEach(product -> {
+                        Product productDetail = this.dataExtractor.extractProduct(category, product);
+                        if (YongaUtil.isNotNull(productDetail)) {
+                            if (!YongaUtil.isNullOrEmpty(productDetail.getProductImage())) {
+                                this.productImageRepository.saveAll(productDetail.getProductImage());
+                            }
+                            productDetail.setExtractResult(ExtractResult.COMPLETE);
+                            this.productRepository.save(productDetail);
+                            extractProductNum.incrementAndGet();
+                            if (extractProductNum.get() % 100 == 0) {
+                                // 100 번 추출 시마다, 현재 추출한 데이터를 update
+                                category.setExtProductNum(category.getExtProductNum() + 100);
+                                this.categoryService.save(category);
+                            }
                         }
-                        this.productRepository.save(product);
-                    }, (category, product) -> {
-                        this.logService.addLog(String.format("[%s] 제품 상세 추출에 실패하였습니다. 카테고리:[%s], 접수번호:[%s]", category.getKorean(), product.getUketsukeBng()));
-                    }, (category, extractedProductNum) -> {
-                        category.setStatus("COMPLETE");
-                        category.setModifiedDate(new Date());
-                        categoryService.save(category);
-                        this.logService.addLog(String.format("[%s] 데이터 상세 추출을 완료 하였습니다.(%d)", category.getKorean(), extractedProductNum));
                     });
+                    notCollectedProductList = this.productRepository.findProductByNotCollected(category.getId());
+                }
+                category.setExtProductNum(category.getTotalProductNum() - (notCollectedProductList == null || notCollectedProductList.isEmpty() ? 0 : notCollectedProductList.size()));
+                category.setModifiedDate(new Date());
+                category.setStatus("COMPLETE");
+                this.categoryService.save(category);
+            });
             this.logService.addLog("데이터 상세 추출을 완료하였습니다. Total[" + totalExtractNum.get() + "]");
             this.configService.setConfigValue("EXECUTOR", "STATUS", "COMPLETE");
             this.configService.setConfigValue("EXECUTOR", "MESSAGE", "완료");
-        } catch (DataExtractException e) {
-            log.warn(e.getMessage());
+        } catch (Throwable e) {
+            log.error(e.getMessage());
             this.logService.addLog(e.getMessage());
             if (YongaUtil.isNotNull(e.getCause())) {
                 this.logService.addLog("error [" + e.getCause() + "]");
@@ -187,6 +260,9 @@ public class DataExtractWorker implements Callable<Boolean> {
             this.configService.setConfigValue("EXECUTOR", "STATUS", "FAIL");
             this.configService.setConfigValue("EXECUTOR", "MESSAGE", e.getMessage());
         } finally {
+            if (dataExtractor != null) {
+                this.dataExtractor.close();
+            }
             watch.stop();
             String adminEmail = this.configService.getConfigValue("CONFIG", "ADMIN_EMAIL");
             String mailId = this.configService.getConfigValue("CONFIG", "MAIL_ID");

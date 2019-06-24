@@ -25,4 +25,6 @@ public interface ProductRepository extends JpaRepository<Product, String> {
     @Modifying
     int deleteByCategoryId(@Param("categoryId") Integer categoryId);
 
+    @Query(value = "select * from product p where p.genre_cd = :categoryId and p.extract_result = 'INITIALIZE'", nativeQuery = true)
+    List<Product> findProductByNotCollected(@Param("categoryId") Integer categoryId);
 }

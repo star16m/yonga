@@ -39,7 +39,6 @@ public class ConfigService {
         String auctionInfo = getConfigValue("AUCTION", "INFO");
         ConfigConstants.APPLICATION_TITLE = title != null ? title : ConfigConstants.APPLICATION_TITLE;
         ConfigConstants.APPLICATION_WELCOME = welcome != null ? welcome : ConfigConstants.APPLICATION_WELCOME;
-//        ConfigConstants.AUCTION_INFO = new AuctionInfo();
         if (YongaUtil.isNotEmpty(auctionInfo)) {
             try {
                 ConfigConstants.AUCTION_INFO = objectMapper.readValue(auctionInfo, AuctionInfo.class);
@@ -56,8 +55,8 @@ public class ConfigService {
         }
         return null;
     }
-//
-//    @CacheEvict(value = "config", allEntries = true)
+
+    @CacheEvict(value = "config", allEntries = true)
     public void setConfigValue(String group, String key, String value) {
 
         Config config = getConfig(group, key);

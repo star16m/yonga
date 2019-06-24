@@ -8,10 +8,10 @@
             <li th:text="#{'executor.status.' + ${executorStatus}}">작업 진행 상태</li>
             <li th:if="${executorStatus} == 'FAIL'" th:text="${executorMessage}"></li>
         </ul>
-      <h2>카테고리별 작업 진행 상태</h2>
+      <h2>완료되지 않은 카테고리별 작업 진행 상태</h2>
       <div class="log-contain">
           <ul th:each="category : ${categoryList}">
-              <li th:text="${category.korean + ' [' + category.status + '] ' + category.extProductNum}">category</li>
+              <li th:text="${category.korean + ' [' + category.status + '] : ' + #strings.defaultString(category.extProductNum, '-') + ' / ' + #strings.defaultString(category.totalProductNum, '-')}">category</li>
           </ul>
       </div>
       <h2>작업 로그</h2>

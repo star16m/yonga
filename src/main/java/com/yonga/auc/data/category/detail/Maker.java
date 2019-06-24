@@ -35,7 +35,7 @@ public class Maker extends CommonBaseDataWithoutKey {
     }
 
     public static Maker valueOf(MakerResponse makerResponse, Category category) {
-        Objects.nonNull(makerResponse);
+        Objects.requireNonNull(makerResponse);
         Maker maker = new Maker();
         maker.setMakerCd(makerResponse.getMakerCd());
         maker.setName(makerResponse.getMaker());

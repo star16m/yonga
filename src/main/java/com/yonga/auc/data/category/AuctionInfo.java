@@ -42,7 +42,7 @@ public class AuctionInfo implements Serializable {
     private LocalDateTime extractDate;
 
     public String getKaisaiYmdFormatted() {
-        return YongaUtil.getString(YongaUtil.parseLocalDateTime(kaisaiYmd));
+        return YongaUtil.getString(YongaUtil.parseLocalDateTime(kaisaiYmd), YongaUtil.COMMON_DATE_FORMATTER);
     }
     public String getExtractDateString() {
         return YongaUtil.getString(extractDate);

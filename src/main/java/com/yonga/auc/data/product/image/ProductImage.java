@@ -12,7 +12,7 @@ import javax.persistence.Table;
 
 @EqualsAndHashCode(callSuper = false)
 @Entity
-@Table(name = "product_image_new")
+@Table(name = "product_image")
 @Data
 @NoArgsConstructor
 public class ProductImage extends CommonBaseDataWithoutKey {

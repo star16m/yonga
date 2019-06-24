@@ -1,5 +1,6 @@
 package com.yonga.auc.data.category;
 
+import com.yonga.auc.common.YongaUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +14,15 @@ public class CategoryService {
 	@Autowired
 	private CategoryRepository categoryRepository;
 
-	public List<Category> findAll() {
+	public List<Category> findAll(Integer kaisaiKaisu) {
+		if (YongaUtil.isNotNull(kaisaiKaisu)) {
+			return categoryRepository.findAllByKaisaiKaisu(kaisaiKaisu);
+		}
 		return categoryRepository.findAll();
 	}
 
 	public List<Category> findNotCompleteCategory() {
-		List<Category> categoryList = findAll();
+		List<Category> categoryList = findAll(null);
 		return categoryList.stream().filter(c -> "EXTRACT_INIT".equals(c.getStatus()) || "PROGRESS".equals(c.getStatus())).collect(Collectors.toList());
 	}
 	

@@ -23,10 +23,17 @@ public class ProductDto {
     private Integer kaisaiKaisu;
     private Integer seriBng;
     private Boolean seiyakuFlg;
+
     private Integer makerCd;
+    private String maker;
+
     private Integer brandTypeCd;
     private String brandType;
+    private String brandTypeEn;
     private Integer keijoCd;
+    private String keijo;
+    private String keijoEn;
+
     // 상세 정보
     private String seizoBng;
     private String channelKbn;

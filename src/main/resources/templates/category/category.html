@@ -22,9 +22,10 @@
 			<tr>
 				<th>카테고리</th>
 				<th>한글(일본어)</th>
+				<th>Auction회차</th>
 				<th>상태</th>
 				<th>제품</th>
-				<th>완료</th>
+				<th>전체</th>
 				<th>수정일</th>
 			</tr>
 		</thead>
@@ -32,12 +33,11 @@
 			<tr th:each="category : ${categoryList}">
 				<td th:text="${category.name}" class="text-center"></td>
 				<td th:text="${category.korean + '(' + category.japanese + ')'}" class="text-center"></td>
-				<td th:text="#{'category.status.' + ${category.status}}"
-					class="text-center"></td>
+				<td th:text="${category.kaisaiKaisu}" class="text-center"></td>
+				<td th:text="#{'category.status.' + ${category.status}}" class="text-center"></td>
 				<td th:text="${category.totalProductNum}" class="text-right"></td>
 				<td th:text="${category.extProductNum}" class="text-right"></td>
-				<td th:text="${#dates.format(category.modifiedDate, 'MM월 dd일 (E) HH:mm:ss')}"
-					class="text-center"></td>
+				<td th:text="${#dates.format(category.modifiedDate, 'MM월 dd일 (E) HH:mm:ss')}" class="text-center"></td>
 			</tr>
 		</tbody>
 	</table>

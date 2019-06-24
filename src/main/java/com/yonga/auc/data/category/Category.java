@@ -31,4 +31,7 @@ public class Category extends CommonBaseData {
 	
 	@Column(name = "ext_product_num")
 	private Integer extProductNum;
+
+	@Column(name = "kaisai_kaisu")
+	private Integer kaisaiKaisu;
 }

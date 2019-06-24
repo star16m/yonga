@@ -38,7 +38,7 @@ public class Keijo extends CommonBaseDataWithoutKey {
     }
 
     public static Keijo valueOf(KeijoResponse keijoResponse, Category category) {
-        Objects.nonNull(keijoResponse);
+        Objects.requireNonNull(keijoResponse);
         Keijo keijo = new Keijo();
         keijo.setKeijoCd(keijoResponse.getKeijoCd());
         keijo.setName(keijoResponse.getKeijo());

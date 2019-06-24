@@ -2,6 +2,7 @@ package com.yonga.auc.data.product;
 
 import com.yonga.auc.common.PageWrapper;
 import com.yonga.auc.common.YongaUtil;
+import com.yonga.auc.config.ConfigConstants;
 import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.category.CategoryRepository;
 import com.yonga.auc.data.category.detail.Brand;
@@ -66,7 +67,16 @@ class ProductController {
     @SuppressWarnings("unchecked")
 	private void findModelValue(HttpSession session, Map<String, Object> model, Optional<Integer> categoryId, Pageable pageable, Product product) {
     	// category list
-    	model.put("categoryList", this.categoryRepository.findCategory());
+        Integer kaisaiKaisu = null;
+        if (YongaUtil.isNotNull(ConfigConstants.AUCTION_INFO)) {
+            kaisaiKaisu = ConfigConstants.AUCTION_INFO.getKaisaiKaisu();
+        }
+        List<Category> allExtractedCategoryList = this.categoryRepository.findAllByKaisaiKaisu(kaisaiKaisu);
+        Integer extractedProductNum = allExtractedCategoryList == null ? 0 : allExtractedCategoryList.stream().collect(Collectors.summingInt(c -> c.getExtProductNum() == null ? 0 : c.getExtProductNum()));
+        Integer totalProductNum = allExtractedCategoryList == null ? 0 : allExtractedCategoryList.stream().collect(Collectors.summingInt(c -> c.getTotalProductNum() == null ? 0 : c.getTotalProductNum()));
+        model.put("categoryList", allExtractedCategoryList);
+        model.put("extractedProductNum", extractedProductNum);
+        model.put("totalProductNum", totalProductNum);
     	if (categoryId.isPresent() && categoryId.get() > 0) {
     		// currentCategory value
 			Category currentCategory = this.categoryRepository.getOne(categoryId.get());

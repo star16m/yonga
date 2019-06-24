@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Controller
@@ -28,7 +29,10 @@ class LogController {
 		model.put("executorStatus", this.configService.getConfigValue("EXECUTOR", "STATUS"));
 		model.put("executorMessage", this.configService.getConfigValue("EXECUTOR", "MESSAGE"));
 
-		List<Category> categoryList = this.categoryService.findNotCompleteCategory();
+		Integer kaisaiKaisu = 0;
+		List<Category> categoryList = this.categoryService.findAll(null).stream().filter(c -> {
+			return !c.getStatus().equals("COMPLETE");
+		}).collect(Collectors.toList());
 		model.put("categoryList", categoryList);
 		return "log/log";
 	}

@@ -1,6 +1,8 @@
 package com.yonga.auc.data.category;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.yonga.auc.common.YongaUtil;
+import com.yonga.auc.config.ConfigConstants;
 import com.yonga.auc.config.ConfigService;
 import com.yonga.auc.data.category.detail.BrandRepository;
 import com.yonga.auc.data.category.detail.KeijoRepository;
@@ -60,7 +62,7 @@ class CategoryController {
 
     @GetMapping("/category")
     public String getCategoryList(Map<String, Object> model) {
-        model.put("categoryList", this.categoryService.findAll());
+        model.put("categoryList", this.categoryService.findAll(null));
         return "category/category";
     }
 
@@ -106,7 +108,7 @@ class CategoryController {
 		if ("RUNNING".equals(executorStatus)) {
 			return "실행 중입니다.";
 		}
-		List<Category> targetCategoryList = this.categoryService.findAll().stream().filter(category -> categoryIdList.contains(String.valueOf(category.getId()))).collect(Collectors.toList());
+		List<Category> targetCategoryList = this.categoryService.findAll(null).stream().filter(category -> categoryIdList.contains(String.valueOf(category.getId()))).collect(Collectors.toList());
 		extract(targetCategoryList, extractMode);
 		return "success";
     }
