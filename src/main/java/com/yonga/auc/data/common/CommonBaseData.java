@@ -31,12 +31,12 @@ public class CommonBaseData implements Serializable {
 	@Column(name = "name")
     private String name;
 
-	@Column(name = "create_date", updatable = false, insertable = true)
+	@Column(name = "create_date", updatable = false)
 	@CreatedDate
 	@Temporal(TemporalType.TIMESTAMP)
     private Date createDate;
 
-	@Column(name = "modified_date", updatable = true)
+	@Column(name = "modified_date")
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;

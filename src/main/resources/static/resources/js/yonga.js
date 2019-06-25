@@ -126,7 +126,6 @@ function initialCategory(categoryId, status) {
 	        	if (data != "success") {
 	        		alert(data);
 	        	} else {
-	        		alert('초기화를 진행 합니다.');
 	        		location.reload();
 	        	}
 	        }

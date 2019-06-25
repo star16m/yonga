@@ -13,14 +13,13 @@ import java.util.Date;
 @MappedSuperclass
 @EntityListeners({AuditingEntityListener.class})
 public class CommonBaseDataWithoutKey implements Serializable {
-	private static final long serialVersionUID = 449027036578512049L;
 
-	@Column(name = "create_date", updatable = false, insertable = true)
+	@Column(name = "create_date", updatable = false)
 	@CreatedDate
 	@Temporal(TemporalType.TIMESTAMP)
     private Date createDate;
 
-	@Column(name = "modified_date", updatable = true)
+	@Column(name = "modified_date")
     @LastModifiedDate
     @Temporal(TemporalType.TIMESTAMP)
     private Date modifiedDate;

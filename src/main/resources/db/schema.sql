@@ -1,4 +1,3 @@
-DROP TABLE dual IF EXISTS;
 DROP TABLE product_image IF EXISTS;
 DROP TABLE maker IF EXISTS;
 DROP TABLE brand IF EXISTS;
@@ -8,11 +7,6 @@ DROP TABLE category IF EXISTS;
 DROP TABLE work_log IF EXISTS;
 DROP TABLE config IF EXISTS;
 DROP TABLE customer if EXISTS;
-
--- dual
-CREATE TABLE dual (
-	dummy varchar(1)
-);
 
 -- 카테고리
 CREATE TABLE category (
@@ -30,33 +24,36 @@ CREATE TABLE category (
 
 -- 메이커
 CREATE TABLE maker (
-    maker_cd INTEGER IDENTITY PRIMARY KEY,
+    maker_cd INTEGER NOT NULL,
     name VARCHAR(255) NOT NULL,
     category_no INTEGER NOT NULL,
     name_en VARCHAR(255) NOT NULL,
     name_kr VARCHAR(255) NULL,
     create_date TIMESTAMP,
-    modified_date TIMESTAMP
+    modified_date TIMESTAMP,
+    constraint maker_pk primary key (category_no, maker)
 );
 -- 브랜드
 CREATE TABLE brand (
-    brand_cd INTEGER IDENTITY PRIMARY KEY,
+    brand_cd INTEGER NOT NULL,
     name VARCHAR(255) NOT NULL,
     category_no INTEGER NOT NULL,
     name_en VARCHAR(255) NOT NULL,
     name_kr VARCHAR(255) NULL,
     create_date TIMESTAMP,
-    modified_date TIMESTAMP
+    modified_date TIMESTAMP,
+    constraint brand_pk primary key(category_no, brand_cd)
 );
 -- 형상
 CREATE TABLE keijo (
-    keijo_cd INTEGER IDENTITY PRIMARY KEY,
+    keijo_cd INTEGER NOT NULL,
     name VARCHAR(255) NOT NULL,
     category_no INTEGER NOT NULL,
     name_en VARCHAR(255) NOT NULL,
     name_kr VARCHAR(255) NULL,
     create_date TIMESTAMP,
-    modified_date TIMESTAMP
+    modified_date TIMESTAMP,
+    constraint keijo_pk primary key (category_no, keijo_cd)
 );
 
 -- 제품
@@ -137,5 +134,5 @@ create table customer (
     privilege       VARCHAR(255),
     enabled         boolean,
     display         boolean,
-    last_login       TIMESTAMP
+    last_login      TIMESTAMP
 );
