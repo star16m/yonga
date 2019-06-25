@@ -62,6 +62,7 @@
 </nav>
 <div class="container-fluid">
     <div class="container xd-container">
+        <div class="alert-space"></div>
         <div th:replace="${template}"/>
         <div class="pagination" th:if="${page != null and #lists.size(page.items) gt 0 }">
             <a th:class="${page.firstPage} ? 'disabled' : ''" th:href="@{${page.url}(page=0,size=${page.size})}">←

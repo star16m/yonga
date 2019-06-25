@@ -102,12 +102,24 @@ $(document).ready(function() {
 	    changeOption();
 	});
 });
+
+function showMessage(msg) {
+    showMessage(msg, false);
+}
+function showMessage(msg, warning) {
+    var alertClass = warning ? 'alert-danger' : 'alert-success';
+    $(".alert-space").after("<div class='alert " + alertClass + " alert-message fade' role='alert'>" + msg + "</div>");
+    $(".alert").fadeTo(2000, 50).slideUp(800, function() {
+        $(this).alert('close');
+    });
+}
 function initialCategory(categoryId, status) {
 	var message = '';
 	var data = {};
+
 	if (categoryId == null) {
 		if ($("#extractCategorySelect").val() == null || $("#extractCategorySelect").val() == "") {
-			alert("초기화할 카테고리를 선택해 주세요.");
+			showMessage("초기화할 카테고리를 선택해 주세요.", true);
 			return;
 		}
 		if (!confirm("선택한 [" + $("#extractCategorySelect").val().length + "] 개 카테고리를 초기화 하시겠습니까?")) {
@@ -136,7 +148,7 @@ function setConfig() {
 	var message = '';
 	var data = {};
     if (!$("#inputTitle").val() || !$("#inputWelcome").val() || !$("#inputAdminEmail").val() || !$("#inputMailHost").val() || !$("#inputMailPort").val() || !$("#inputMailId").val() || !$("#inputMailPassword").val()) {
-        alert("설정값을 입력해 주세요.");
+        showMessage("설정값을 입력해 주세요.", true);
         return;
     }
     data["title"] = $("#inputTitle").val();
@@ -155,13 +167,12 @@ function setConfig() {
         data: JSON.stringify(data),
         //dataType: 'json',
         success: function (data,status,xhr) {
-            alert('저장되었습니다.');
+            showMessage('저장되었습니다.');
             location.reload();
         },
         error : function(error) {
             console.log(error.responseText);
             alert('저장에 실패하였습니다. [' + error.responseText + ']');
-
         }
     });
 }
@@ -185,7 +196,7 @@ function modifyCustomer() {
         }),
         //dataType: 'json',
         success: function (data,status,xhr) {
-            alert(isAdmin || isModify ? '저장되었습니다.' : '저장되었습니다.\n사용자 승인이 완료되기 까지는 로그인이 제한됩니다.');
+            showMessage(isAdmin || isModify ? '저장되었습니다.' : '저장되었습니다.\n사용자 승인이 완료되기 까지는 로그인이 제한됩니다.');
             window.location.href = isAdmin ? "/customer" : "/";
         },
         error : function(data,status,xhr) {
@@ -212,7 +223,7 @@ function enableCustomer(customerId, enabled) {
         }),
         //dataType: 'json',
         success: function (data,status,xhr) {
-            alert("저장되었습니다.");
+            showMessage("저장되었습니다.");
             window.location.href = "/customer";
         },
         error : function(data,status,xhr) {
@@ -234,7 +245,5 @@ function deleteCustomer(customerId) {
                     alert(data.responseJSON.result);
                 }
             });
-    } else {
-        alert('취소');
     }
 }
