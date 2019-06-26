@@ -13,5 +13,6 @@ public interface BrandRepository extends JpaRepository<Brand, Integer> {
     List<Brand> findBrand(@Param("categoryId") Integer categoryId) throws DataAccessException;
 
     @Transactional
-    void deleteByCategoryNo(Integer categoryNo) throws DataAccessException;
+    @Query(value = "delete from brand where category_no = :categoryNo", nativeQuery = true)
+    void deleteByCategoryNo(@Param("categoryNo") Integer categoryNo) throws DataAccessException;
 }

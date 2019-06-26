@@ -30,7 +30,7 @@
 			</tr>
 		</thead>
 		<tbody>
-			<tr th:each="category : ${categoryList}">
+			<tr th:each="category : ${categoryList}" th:class="${T(com.yonga.auc.config.ConfigConstants).AUCTION_INFO?.kaisaiKaisu == category.kaisaiKaisu and category.status == 'COMPLETE'} ? 'currentProduct'">
 				<td th:text="${category.name}" class="text-center"></td>
 				<td th:text="${category.korean + '(' + category.japanese + ')'}" class="text-center"></td>
 				<td th:text="${category.kaisaiKaisu}" class="text-center"></td>

@@ -6,7 +6,6 @@ import com.yonga.auc.config.ConfigConstants;
 import com.yonga.auc.config.ConfigService;
 import com.yonga.auc.data.category.*;
 import com.yonga.auc.data.category.detail.*;
-import com.yonga.auc.data.extract.DataExtractException;
 import com.yonga.auc.data.extract.DataExtractor;
 import com.yonga.auc.data.extract.ExtractSiteInfo;
 import com.yonga.auc.data.log.LogService;
@@ -24,7 +23,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
 @Slf4j
 public class DataExtractWorker implements Callable<Boolean> {
@@ -90,7 +88,9 @@ public class DataExtractWorker implements Callable<Boolean> {
                 if (YongaUtil.isNotEmpty(auctionInfoString)) {
                     this.configService.setConfigValue("AUCTION", "INFO", auctionInfoString);
                 }
-                if (YongaUtil.isNotNull(ConfigConstants.AUCTION_INFO) && !ConfigConstants.AUCTION_INFO.getKaisaiKaisu().equals(auctionInfo.getKaisaiKaisu())) {
+                if (YongaUtil.isNull(ConfigConstants.AUCTION_INFO)
+                        && YongaUtil.isNull(ConfigConstants.AUCTION_INFO.getKaisaiKaisu())
+                        && !ConfigConstants.AUCTION_INFO.getKaisaiKaisu().equals(auctionInfo.getKaisaiKaisu())) {
                     // 저장되어 있는 회차가 다른 경우, 무조건 초기화 한다.
                     this.extractMode = ExtractMode.INITIALIZE;
                     this.logService.addLog(String.format("새로운 Auction 회차[%s]가 확인 되어 초기화를 시도합니다.", auctionInfo.getKaisaiKaisu()));
@@ -129,7 +129,9 @@ public class DataExtractWorker implements Callable<Boolean> {
                     brandMap.put(category.getId(), new ArrayList<>());
                     keijoMap.put(category.getId(), new ArrayList<>());
                     if (YongaUtil.isNotEmpty(categoryDetailInfo.getMakerListInfo())) {
-                        categoryDetailInfo.getMakerListInfo().stream().map(maker -> Maker.valueOf(maker, category)).forEach(maker -> {
+                        categoryDetailInfo.getMakerListInfo().stream()
+                                .map(maker -> Maker.valueOf(maker, category))
+                                .forEach(maker -> {
                             makerMap.get(category.getId()).add(maker);
                             this.makerRepository.save(maker);
                         });
@@ -171,7 +173,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                         AtomicInteger extractProduct = new AtomicInteger(0);
                         productList.getContent().stream().forEach(p -> {
                             // maker / brand / keijo 가 없는 경우, 미리 설정
-                            boolean makerExists = makerList.stream().anyMatch(m -> m.getMakerCd().equals(p.getMakerCd()));
+                            boolean makerExists = makerList.stream().anyMatch(m -> m.getMakerKey().getMakerCd().equals(p.getMakerCd()));
                             boolean brandExists = brandList.stream().anyMatch(b -> b.getBrandCd().equals(p.getBrandTypeCd()));
                             boolean keijoExists = keijoList.stream().anyMatch(k -> k.getKeijoCd().equals(p.getKeijoCd()));
                             if (makerExists && brandExists && keijoExists) {
@@ -179,29 +181,35 @@ public class DataExtractWorker implements Callable<Boolean> {
                                 log.info("제품 : maker [{}] exists [{}], brand [{}] exists [{}], keijo [{}] exists [{}]", p.getMakerCd(), makerExists, p.getBrandTypeCd(), brandExists, p.getKeijoCd(), keijoExists);
                                 if (!makerExists) {
                                     Maker maker = new Maker();
-                                    maker.setMakerCd(p.getMakerCd());
+                                    MakerKey key = new MakerKey();
+                                    key.setCategoryNo(category.getId());
+                                    key.setMakerCd(p.getMakerCd());
+                                    maker.setMakerKey(key);
                                     maker.setName(p.getMaker());
                                     maker.setNameKr(p.getMaker());
                                     maker.setNameEn(p.getMaker());
-                                    maker.setCategoryNo(category.getId());
                                     this.makerRepository.save(maker);
                                 }
                                 if (!brandExists) {
                                     Brand brand = new Brand();
-                                    brand.setBrandCd(p.getBrandTypeCd());
+                                    BrandKey key = new BrandKey();
+                                    key.setBrandCd(p.getBrandTypeCd());
+                                    key.setCategoryNo(category.getId());
+                                    brand.setBrandKey(key);
                                     brand.setName(p.getBrandType());
                                     brand.setNameEn(p.getBrandTypeEn());
                                     brand.setNameKr(p.getBrandType());
-                                    brand.setCategoryNo(category.getId());
                                     this.brandRepository.save(brand);
                                 }
                                 if (!keijoExists) {
                                     Keijo keijo = new Keijo();
-                                    keijo.setKeijoCd(p.getKeijoCd());
+                                    KeijoKey key = new KeijoKey();
+                                    key.setKeijoCd(p.getKeijoCd());
+                                    key.setCategoryNo(category.getId());
+                                    keijo.setKeijoKey(key);
                                     keijo.setName(p.getKeijo());
                                     keijo.setNameEn(p.getKeijoEn());
                                     keijo.setNameKr(p.getKeijo());
-                                    keijo.setCategoryNo(category.getId());
                                     this.keijoRepository.save(keijo);
                                 }
                             }
@@ -255,7 +263,7 @@ public class DataExtractWorker implements Callable<Boolean> {
             log.error(e.getMessage());
             this.logService.addLog(e.getMessage());
             if (YongaUtil.isNotNull(e.getCause())) {
-                this.logService.addLog("error [" + e.getCause() + "]");
+                this.logService.addLog("error [" + YongaUtil.getString(e.getCause().toString(), 230) + "]");
             }
             this.configService.setConfigValue("EXECUTOR", "STATUS", "FAIL");
             this.configService.setConfigValue("EXECUTOR", "MESSAGE", e.getMessage());

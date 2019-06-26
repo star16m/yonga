@@ -1,6 +1,8 @@
 package com.yonga.auc.data.extract;
 
 import com.codeborne.selenide.*;
+import com.codeborne.selenide.ex.ElementNotFound;
+import com.codeborne.selenide.ex.UIAssertionError;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.yonga.auc.common.YongaUtil;
@@ -52,7 +54,7 @@ public class DataExtractor {
         Configuration.screenshots = false;
         Configuration.timeout = 10000;
         ChromeOptions options = new ChromeOptions();
-//		options.setHeadless(true);
+		options.setHeadless(true);
         options.addArguments("disable-infobars");
         options.addArguments("—start-maximized");
         options.addArguments("—disable-application-cache");
@@ -62,10 +64,10 @@ public class DataExtractor {
 
     public void login() throws DataExtractException {
         open(this.siteInfo.getTargetURL());
-        $("input[name=username]").setValue(this.siteInfo.getUid());
-        $("input[name=password]").setValue(this.siteInfo.getPwd());
-        $("button.c-btn--login").click();
         try {
+            $("input[name=username]").setValue(this.siteInfo.getUid());
+            $("input[name=password]").setValue(this.siteInfo.getPwd());
+            $("button.c-btn--login").click();
             SelenideElement errorDetail = $("li#error_detail");
             if (errorDetail != null && errorDetail.exists()) {
                 log.error("Error displayed [{}]", errorDetail.text());
@@ -76,9 +78,19 @@ public class DataExtractor {
             loginInfoElement.shouldHave(text("様"));
         } catch (DataExtractException e) {
             throw e;
-        } catch (Exception e) {
-            log.warn(e.getMessage());
-            throw new DataExtractException(ExtractExceptionMessage.LOGIN_FAIL);
+        } catch (UIAssertionError e) {
+            ExtractExceptionMessage extractExceptionMessage = null;
+            try {
+                $("body").shouldBe(Condition.exist, text("メンテナンス中"));
+                extractExceptionMessage = ExtractExceptionMessage.MAINTENANCE;
+            } catch (Throwable e1) {
+                // ignorred.
+            }
+            log.error("error occurrred while extract.", e);
+            if (YongaUtil.isNull(extractExceptionMessage)) {
+                extractExceptionMessage = ExtractExceptionMessage.LOGIN_FAIL;
+            }
+            throw new DataExtractException(extractExceptionMessage);
         }
     }
 

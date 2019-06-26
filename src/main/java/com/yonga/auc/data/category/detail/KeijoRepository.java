@@ -12,5 +12,6 @@ public interface KeijoRepository extends JpaRepository<Keijo, Integer> {
     @Query(value="select k.* from keijo k where category_no = :categoryId order by keijo_cd asc", nativeQuery=true)
     List<Keijo> findKeijo(@Param("categoryId") Integer categoryId) throws DataAccessException;
     @Transactional
-    void deleteByCategoryNo(Integer categoryNo) throws DataAccessException;
+    @Query(value = "delete from keijo where category_no = :categoryNo", nativeQuery = true)
+    void deleteByCategoryNo(@Param("categoryNo") Integer categoryNo) throws DataAccessException;
 }

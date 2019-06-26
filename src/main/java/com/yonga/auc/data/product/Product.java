@@ -76,11 +76,17 @@ public class Product extends CommonBaseDataWithoutKey {
     @Column(name = "maker_cd")
     private Integer makerCd;
     @OneToOne
-    @JoinColumn(name = "maker_cd", updatable = false, insertable = false)
+    @JoinColumns({
+            @JoinColumn(name = "genre_cd", referencedColumnName="category_no", updatable = false, insertable = false),
+            @JoinColumn(name = "maker_cd", referencedColumnName = "maker_cd", updatable = false, insertable = false)
+    })
     @JsonIgnore
     private Maker maker;
     @OneToOne
-    @JoinColumn(name = "brand_type_cd", updatable = false, insertable = false)
+    @JoinColumns({
+            @JoinColumn(name = "genre_cd", referencedColumnName="category_no", updatable = false, insertable = false),
+            @JoinColumn(name = "brand_type_cd", referencedColumnName = "brand_cd", updatable = false, insertable = false)
+    })
     @JsonIgnore
     private Brand brand;
     @Column(name = "brand_type_cd")
@@ -88,7 +94,10 @@ public class Product extends CommonBaseDataWithoutKey {
     @Transient
     private String brandType;
     @OneToOne
-    @JoinColumn(name = "keijo_cd", updatable = false, insertable = false)
+    @JoinColumns({
+            @JoinColumn(name = "genre_cd", referencedColumnName="category_no", updatable = false, insertable = false),
+            @JoinColumn(name = "keijo_cd", referencedColumnName = "keijo_cd", updatable = false, insertable = false)
+    })
     @JsonIgnore
     private Keijo keijo;
     @Column(name = "keijo_cd")

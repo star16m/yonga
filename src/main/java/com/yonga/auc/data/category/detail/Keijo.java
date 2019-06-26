@@ -6,10 +6,7 @@ import com.yonga.auc.data.common.CommonBaseDataWithoutKey;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.Objects;
 
 @EqualsAndHashCode(callSuper = false)
@@ -17,18 +14,20 @@ import java.util.Objects;
 @Entity
 @Table(name = "keijo")
 public class Keijo extends CommonBaseDataWithoutKey {
-    @Id
-    @Column(name = "keijo_cd")
-    private Integer keijoCd;
+    @EmbeddedId
+    private KeijoKey keijoKey;
     @Column(name = "name")
     private String name;
     @Column(name = "name_en")
     private String nameEn;
     @Column(name = "name_kr")
     private String nameKr;
-    @Column(name = "category_no")
-    private Integer categoryNo;
-
+    public Integer getKeijoCd() {
+        return this.keijoKey.getKeijoCd();
+    }
+    public Integer getCategoryNo() {
+        return this.keijoKey.getCategoryNo();
+    }
     @Data
     public static class KeijoResponse {
         private Integer keijoCd;
@@ -40,11 +39,13 @@ public class Keijo extends CommonBaseDataWithoutKey {
     public static Keijo valueOf(KeijoResponse keijoResponse, Category category) {
         Objects.requireNonNull(keijoResponse);
         Keijo keijo = new Keijo();
-        keijo.setKeijoCd(keijoResponse.getKeijoCd());
+        KeijoKey key = new KeijoKey();
+        key.setKeijoCd(keijoResponse.getKeijoCd());
+        key.setCategoryNo(category.getId());
+        keijo.setKeijoKey(key);
         keijo.setName(keijoResponse.getKeijo());
         keijo.setNameEn(keijoResponse.getKeijoEn());
         keijo.setNameKr(keijoResponse.getKeijoEn());
-        keijo.setCategoryNo(category.getId());
         return keijo;
     }
 }

@@ -7,6 +7,7 @@ DROP TABLE category IF EXISTS;
 DROP TABLE work_log IF EXISTS;
 DROP TABLE config IF EXISTS;
 DROP TABLE customer if EXISTS;
+DROP TABLE dual if EXISTS;
 
 -- 카테고리
 CREATE TABLE category (
@@ -23,7 +24,7 @@ CREATE TABLE category (
 );
 
 -- 메이커
-CREATE TABLE maker (
+CREATE TABLE MAKER (
     maker_cd INTEGER NOT NULL,
     name VARCHAR(255) NOT NULL,
     category_no INTEGER NOT NULL,
@@ -31,8 +32,9 @@ CREATE TABLE maker (
     name_kr VARCHAR(255) NULL,
     create_date TIMESTAMP,
     modified_date TIMESTAMP,
-    constraint maker_pk primary key (category_no, maker)
+    CONSTRAINT maker_pk PRIMARY KEY (category_no, maker_cd)
 );
+
 -- 브랜드
 CREATE TABLE brand (
     brand_cd INTEGER NOT NULL,

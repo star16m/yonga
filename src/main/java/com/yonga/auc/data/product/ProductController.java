@@ -92,7 +92,7 @@ class ProductController {
     		if (!session.isNew() && searchOption != null && searchOption.getSelectsMaker() != null) {
     			selectsMakerList = searchOption.getSelectsMaker();
     		} else {
-    			selectsMakerList = makerInfo.stream().map(i -> i.getMakerCd()).collect(Collectors.toList());
+    			selectsMakerList = makerInfo.stream().map(i -> i.getMakerKey().getMakerCd()).collect(Collectors.toList());
     		}
     		// brand type list
     		List<Brand> brandInfo = this.productService.findBrand(currentCategory);

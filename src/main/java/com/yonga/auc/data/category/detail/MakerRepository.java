@@ -12,5 +12,6 @@ public interface MakerRepository extends JpaRepository<Maker, Integer> {
 	@Query(value="select m.* from maker m where category_no = :categoryId order by maker_cd asc", nativeQuery=true)
     List<Maker> findMaker(@Param("categoryId") Integer categoryId) throws DataAccessException;
 	@Transactional
-	void deleteByCategoryNo(Integer categoryNo) throws DataAccessException;
+	@Query(value = "delete from maker where category_no = :categoryNo", nativeQuery = true)
+	void deleteByCategoryNo(@Param("categoryNo") Integer categoryNo) throws DataAccessException;
 }

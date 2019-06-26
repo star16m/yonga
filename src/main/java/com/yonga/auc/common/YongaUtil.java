@@ -37,6 +37,9 @@ public final class YongaUtil {
     public static String getString(String string) {
         return getString(string, "");
     }
+    public static String getString(String string, int maxLength) {
+        return getString(string).substring(0, maxLength);
+    }
 
     public static String getString(String string, String defaultString) {
         return isNotEmpty(string) ? string : defaultString;
