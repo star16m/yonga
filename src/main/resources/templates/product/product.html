@@ -54,10 +54,6 @@
 					<th class="text-center">타입</th>
 					<td th:text="*{keijo?.name}" /></td>
 				</tr>
-				<!--<tr>-->
-					<!--<th class="text-center">개최횟수</th>-->
-					<!--<td th:text="*{openCount}" /></td>-->
-				<!--</tr>-->
 				<tr>
 					<th class="text-center">개최일</th>
 					<td th:text="*{kaisaiYmdFormattedString}" /></td>
@@ -80,11 +76,11 @@
 				<!--</tr>-->
 				<tr>
 					<th class="text-center">시작 가격</th>
-					<td th:text="${#numbers.formatInteger(product.startKng, 0, 'COMMA') + ' 円'}" /></td>
+					<td th:text="${#strings.defaultString(#numbers.formatInteger(product.startKng, 0, 'COMMA'), '-') + ' 円'}" /></td>
 				</tr>
 				<tr>
 					<th class="text-center">결과 가격</th>
-					<td th:text="${#numbers.formatInteger(product.kekkaKng, 0, 'COMMA') + ' 円'}" /></td>
+					<td th:text="${#strings.defaultString(#numbers.formatInteger(product.kekkaKng, 0, 'COMMA'), '-') + ' 円'}" /></td>
 				</tr>
 				<tr>
 					<th class="text-center">결과</th>
@@ -140,7 +136,6 @@
 			<div class="col-xs-12">
 				<select id="makerSelect" name="makerSelect" class="selectpicker" data-style="btn-primary" data-selected-text-format="count > 3" data-count-selected-text="{0} 개의 메이커 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(makerList) + '개 maker가 있습니다.'}" data-size="10">
 					<option th:each="maker : ${makerList}" th:value="${maker.makerCd}" th:text="${maker.name}" th:selected="${session.selectsOption != null && session.selectsOption.selectsMaker != null and #lists.contains(session.selectsOption.selectsMaker, maker.makerCd)}">maker</option>
-					<!--th:attr="data-subtext=${maker.makerCount}"-->
 				</select>
 			</div>
 		</div>
@@ -162,7 +157,6 @@
 			<div class="col-xs-12">
 				<select id="keijoSelect" name="keijoSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 타입 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(keijoList) + '개 타입이 있습니다.'}" data-size="10">
 					<option th:each="keijo : ${keijoList}" th:value="${keijo.keijoCd}" th:text="${keijo.name}" th:selected="${session.selectsOption != null && session.selectsOption.selectsKeijo != null and #lists.contains(session.selectsOption.selectsKeijo, keijo.keijoCd)}">keijo</option>
-					<!--th:attr="data-subtext=${keijo.keijoCount}"-->
 				</select>
 			</div>
 		</div>
@@ -192,7 +186,7 @@
 					th:each="p : ${page.content}">
 					<tr th:classappend="${product != null and product.uketsukeBng == p.uketsukeBng} ? 'currentProduct' : ''">
 					<td
-						th:text="${p.category.korean + '(' + p.category.japanese + ')'}"
+						th:text="${p.category.korean + ' (' + p.category.japanese + ')'}"
 						class="text-center"></td>
 					<td class="text-center">
 						<a th:href="@{/product/__${p.category.id}__/__${p.uketsukeBng}__(page=${page.number-1},size=${page.size})}"
@@ -204,15 +198,12 @@
 					<td th:text="${p.brand.name}" class="text-center"></td>
 					<td th:text="${p.keijo.name}" class="text-center"></td>
 					<td th:text="${p.hyoka + '(' + p.hyokaGaiso + '/' + p.hyokaNaiso + ')'}" class="text-center"></td>
-					<td th:text="${#numbers.formatInteger(p.startKng, 0, 'COMMA') + ' 円'}" class="text-right"></td>
+					<td th:text="${#strings.defaultString(#numbers.formatInteger(p.startKng, 0, 'COMMA'), '-') + ' 円'}" class="text-right"></td>
 				</tr>
 				<th:block th:if="${session.selectsOption != null && session.selectsOption.viewProductImage != null && session.selectsOption.viewProductImage}">
 					<tr>
 						<td class="text-center" colspan="7">
 							<div class="product-image-row" th:classappend="${#lists.size(p.productImage) == 0} ? 'text-center' : 'text-left'">
-								<!--<a th:each="productImg : ${p.productImage}" th:href="@{/product/__${p.category.id}__/__${p.uketsukeBng}__(page=${page.number-1},size=${page.size})}">-->
-									<!--<img th:src="@{/resources/images/403.png}" />-->
-								<!--</a>-->
 								<a th:each="productImg : ${p.productImage}" th:href="@{/product/__${p.category.id}__/__${p.uketsukeBng}__(page=${page.number-1},size=${page.size})}">
 									<img th:src="${productImg.thumbnailImageUrl}" />'
 								</a>
