@@ -13,9 +13,9 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, String> {
     Boolean existsByUketsukeBng(String uketsukeBng);
 
-    Page<Product> findNewProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(Integer genreCd, List<Integer> selectsMakerCdList, List<Integer> selectsBrandTypeList, List<Integer> selectsKeijoCdList, Pageable pageable);
+    Page<Product> findProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(Integer genreCd, List<Integer> selectsMakerCdList, List<Integer> selectsBrandTypeList, List<Integer> selectsKeijoCdList, Pageable pageable);
 
-    Product findNewProductByUketsukeBng(String uketsukeBng);
+    Product findProductByUketsukeBng(String uketsukeBng);
 
     @Transactional
     void deleteByGenreCd(Integer genreCd);
@@ -27,4 +27,5 @@ public interface ProductRepository extends JpaRepository<Product, String> {
 
     @Query(value = "select * from product p where p.genre_cd = :categoryId and p.extract_result = 'INITIALIZE'", nativeQuery = true)
     List<Product> findProductByNotCollected(@Param("categoryId") Integer categoryId);
+
 }

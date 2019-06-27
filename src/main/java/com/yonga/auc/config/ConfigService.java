@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.data.category.AuctionInfo;
+import com.yonga.auc.data.category.CategoryService;
+import com.yonga.auc.data.product.ProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -24,6 +26,9 @@ public class ConfigService {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @Autowired
+    private CategoryService categoryService;
+
     public Config getConfig(String group, String key) {
         return this.configRepository.findConfig(group, key);
     }
@@ -42,6 +47,7 @@ public class ConfigService {
         if (YongaUtil.isNotEmpty(auctionInfo)) {
             try {
                 ConfigConstants.AUCTION_INFO = objectMapper.readValue(auctionInfo, AuctionInfo.class);
+                ConfigConstants.EXTRACT_PROUCT_NUM = this.categoryService.countExtractedProductNum(ConfigConstants.AUCTION_INFO.getKaisaiKaisu());
             } catch (IOException e) {
                 log.error("옥션 정보 초기화 중 에러가 발생하였습니다.", e);
             }

@@ -37,4 +37,8 @@ public class CategoryService {
 		category.setStatus("INIT");
 		return save(category);
 	}
+
+    public Integer countExtractedProductNum(Integer kaisaiKaisu) {
+		return this.categoryRepository.countExtractedProductNum(kaisaiKaisu);
+    }
 }

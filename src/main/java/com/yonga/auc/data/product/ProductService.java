@@ -25,17 +25,12 @@ public class ProductService {
     @Autowired
     private ProductImageRepository productImageRepository;
     public Page<Product> findProductList(Integer categoryId, List<Integer> selectsMakerList, List<Integer> selectsTypeList, List<Integer> selectsKeijoList, Pageable pageable) {
-        return this.productRepository.findNewProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(categoryId, selectsMakerList, selectsTypeList, selectsKeijoList, pageable);
+        return this.productRepository.findProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(categoryId, selectsMakerList, selectsTypeList, selectsKeijoList, pageable);
     }
-
-    public Product findNewProductByUketsukeNo(String uketsukeNo) {
-        Product product = this.productRepository.findNewProductByUketsukeBng(uketsukeNo);
-//        if (YongaUtil.isNotNull(product)) {
-//            product.setProductImageList(this.productImageRepository.findByUketsukeBngOrderByDisplayOrderAsc(uketsukeNo));
-//        }
+    public Product findProductByUketsukeNo(String uketsukeNo) {
+        Product product = this.productRepository.findProductByUketsukeBng(uketsukeNo);
         return product;
     }
-
     public List<Maker> findMaker(Category category) {
         return this.makerRepository.findMaker(category.getId());
     }

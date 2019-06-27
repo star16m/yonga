@@ -54,7 +54,7 @@ class ProductController {
 		Product product = null;
 		if (uketsukeNo != null) {
 			// find product value
-			product = this.productService.findNewProductByUketsukeNo(uketsukeNo);
+			product = this.productService.findProductByUketsukeNo(uketsukeNo);
 			if (product != null) {
 				model.put("product", product);
 			}

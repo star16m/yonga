@@ -18,7 +18,7 @@
                 <ul class="list-group">
                     <!--<li class="list-group-item" th:text="'추출일 : [' + #dates.format(*{extractDate}, 'MM/dd HH:mm') + ']'"/>-->
                     <li class="list-group-item" th:text="'추출일 : [' + *{extractDateString} + ']'"/>
-                    <li class="list-group-item" th:text="'총 제품 수 : [' + (*{shuppinCount} + *{lowPriceCount}) + ']'"/>
+                    <li class="list-group-item" th:text="'제품 추출 현황 : [' + (*{shuppinCount} + *{lowPriceCount}) + '] 건 중 [' + ${T(com.yonga.auc.config.ConfigConstants).EXTRACT_PROUCT_NUM} + '] 건 추출 완료'"/>
                 </ul>
                 <ul class="list-group">
                     <li class="list-group-item" th:text="'개최횟수 : [' + *{kaisaiKaisu} + ']'"/>
@@ -30,7 +30,7 @@
                     <li class="list-group-item" th:text="'저가 제품 Auction 상태 : [' + *{lowPriceJokyo} + ']'"/>
                     <li class="list-group-item" th:text="'저가 제품 Auction 출품 제품 수 : [' + *{lowPriceCount} + ']'"/>
                     <li class="list-group-item"
-                        th:text="'저가 제품 Auction 개최 : [' + *{lowPriceKaisaiFrom} + '] ~ [' + *{lowPriceKaisaiFrom} + ']'"/>
+                        th:text="'저가 제품 Auction 개최 : [' + *{lowPriceKaisaiFrom} + '] ~ [' + *{lowPriceKaisaiTo} + ']'"/>
                 </ul>
                 <ul class="list-group">
                     <li class="list-group-item" th:text="'channelA : [' + *{channelA} + ']'"/>

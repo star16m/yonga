@@ -30,4 +30,8 @@ public interface CategoryRepository extends JpaRepository<Category, Integer> {
                     "and total_product_num > 0 " +
                     "and kaisai_kaisu = :kaisaiKaisu", nativeQuery=true)
     List<Category> findAllByKaisaiKaisu(@Param("kaisaiKaisu") Integer kaisaiKaisu);
+
+    @Query(value = "SELECT sum(EXT_PRODUCT_NUM) FROM category WHERE KAISAI_KAISU = :kaisaiKaisu", nativeQuery = true)
+    Integer countExtractedProductNum(@Param("kaisaiKaisu") Integer kaisaiKaisu);
+
 }

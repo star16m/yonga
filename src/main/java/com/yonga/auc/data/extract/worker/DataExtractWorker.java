@@ -274,6 +274,10 @@ public class DataExtractWorker implements Callable<Boolean> {
                 this.dataExtractor.close();
             }
             watch.stop();
+            if (YongaUtil.isNotNull(ConfigConstants.AUCTION_INFO) && YongaUtil.isNotNull(ConfigConstants.AUCTION_INFO.getKaisaiKaisu())) {
+//                ConfigConstants.EXTRACT_PROUCT_NUM = productRepository.countExtractedProductNum(ConfigConstants.AUCTION_INFO.getKaisaiKaisu());
+                ConfigConstants.EXTRACT_PROUCT_NUM = this.categoryService.countExtractedProductNum(ConfigConstants.AUCTION_INFO.getKaisaiKaisu());
+            }
             String adminEmail = this.configService.getConfigValue("CONFIG", "ADMIN_EMAIL");
             String mailId = this.configService.getConfigValue("CONFIG", "MAIL_ID");
             if (YongaUtil.isNotEmpty(mailId)) {
