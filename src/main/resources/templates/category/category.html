@@ -6,11 +6,13 @@
 <body>
 
 	<div class="text-right">
-		<select id="extractCategorySelect" name="extractCategorySelect" class="selectpicker" data-style="btn-success" data-width="400px" data-size="10" data-selected-text-format="count > 3" data-count-selected-text="{0} 개의 카테고리 선택중" th:title="${#lists.size(categoryList) + '개  Category가 있습니다'}" multiple data-actions-box="true">
-			<option th:each="category : ${categoryList}" th:text="${category.korean}" th:value="${category.id}" th:attr="data-subtext=${category.japanese}" selected="selected">
-				category
-			</option>
-		</select>
+		<div class="select-box">
+			<select id="extractCategorySelect" name="extractCategorySelect" class="selectpicker" data-style="btn-success" data-width="400px" data-size="10" data-selected-text-format="count > 3" data-count-selected-text="{0} 개의 카테고리 선택중" th:title="${#lists.size(categoryList) + '개  Category가 있습니다'}" multiple data-actions-box="true">
+				<option th:each="category : ${categoryList}" th:text="${category.korean}" th:value="${category.id}" th:attr="data-subtext=${category.japanese}" selected="selected">
+					category
+				</option>
+			</select>
+		</div>
 		<div class="checkbox">
 			<label><input type="checkbox" name="initialize" id="initialize" value="" checked="checked">초기화</label>
 			<a class="btn btn-default" href="javascript:void(0);" th:onclick="|javascript:initialCategory();|">추출</a>

@@ -1,19 +1,21 @@
 package com.yonga.auc.config;
 
 
-import java.util.Map;
-
-import com.yonga.auc.data.customer.Customer;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Map;
 
 @Controller
 class WelcomeController {
 
+    @Autowired
+    private ConfigService configService;
     @GetMapping("/")
     public String welcome(Map<String, Object> model) {
+        model.put("status", configService.getConfigValue("EXECUTOR", "STATUS"));
         return "welcome";
     }
     @GetMapping("/login")

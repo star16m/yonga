@@ -117,9 +117,9 @@ class CategoryController {
 			c.setStatus("EXTRACT_INIT");
 			this.categoryService.save(c);
 		});
+		this.configService.setConfigValue("EXECUTOR", "STATUS", "RUNNING");
 		if (extractMode.isRequiredInitialize()) EXECUTOR.submit(new DataCleanWorker(this.categoryService, this.productService, this.siteInfo, this.logService, categoryList));
 		EXECUTOR.submit(new DataExtractWorker(this.categoryService, this.siteInfo, this.logService, this.configService, categoryList, extractMode, this.mailService,
 				productRepository, productImageRepository, makerRepository, brandRepository, keijoRepository, objectMapper));
-		this.configService.setConfigValue("EXECUTOR", "STATUS", "RUNNING");
 	}
 }
