@@ -152,6 +152,9 @@ public class Product extends CommonBaseDataWithoutKey {
     @JoinColumn(name = "product_uketsuke_bng", updatable = false, insertable = false)
     private List<ProductImage> productImage;
 
+    public String getKaisaiYmdFormattedString() {
+        return YongaUtil.getDateString(this.kaisaiYmd);
+    }
     public void setKaisaiJkn(Long kaisaiJkn) {
         this.kaisaiJknLocalDateTime = YongaUtil.parseLocalDateTime(kaisaiJkn);
     }

@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -28,6 +29,12 @@ public final class YongaUtil {
     public static String getString(LocalDateTime localDateTime) {
         return getString(localDateTime, COMMON_DATE_TIME_FORMATTER);
     }
+    public static String getString(LocalDate localDate, DateTimeFormatter dateTimeFormatter) {
+        if (isNull(localDate)) {
+            return "";
+        }
+        return localDate.format(dateTimeFormatter);
+    }
     public static String getString(LocalDateTime localDateTime, DateTimeFormatter dateTimeFormatter) {
         if (isNull(localDateTime)) {
             return "";
@@ -43,6 +50,26 @@ public final class YongaUtil {
 
     public static String getString(String string, String defaultString) {
         return isNotEmpty(string) ? string : defaultString;
+    }
+    public static String getDateString(String formattedString) {
+        if (isEmpty(formattedString)) {
+            return "";
+        }
+        if (formattedString.length() == 8 && formattedString.startsWith("20") && isNumeric(formattedString)) {
+            String yyyy = StringUtils.substring(formattedString, 0, 4);
+            String mm = StringUtils.substring(formattedString, 4, 6);
+            String dd = StringUtils.substring(formattedString, 6, 8);
+            if (isNumeric(yyyy) && isNumeric(mm) && isNumeric(dd)) {
+                getString(LocalDate.of(getNumeric(yyyy), getNumeric(mm), getNumeric(dd)), COMMON_DATE_FORMATTER);
+            }
+        }
+        return formattedString;
+    }
+    public static boolean isNumeric(String string) {
+        return isNotEmpty(string) && StringUtils.isNumeric(string);
+    }
+    public static Integer getNumeric(String string) {
+        return Integer.valueOf(string);
     }
 
     public static boolean isNotEmpty(String string) {
