@@ -185,9 +185,8 @@
 			</thead>
 			<tbody>
 			<th:block th:if="${page != null and not #lists.isEmpty(page.content)}"
-					th:each="p : ${page.content}"
-					th:classappend="${product != null and product.uketsukeBng == p.uketsukeBng} ? 'currentProduct' : ''">
-					<tr>
+					th:each="p : ${page.content}">
+					<tr th:classappend="${product != null and product.uketsukeBng == p.uketsukeBng} ? 'currentProduct' : ''">
 					<td
 						th:text="${p.category.korean + '(' + p.category.japanese + ')'}"
 						class="text-center"></td>
