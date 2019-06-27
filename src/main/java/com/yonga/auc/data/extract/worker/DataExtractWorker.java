@@ -242,9 +242,9 @@ public class DataExtractWorker implements Callable<Boolean> {
                             productDetail.setExtractResult(ExtractResult.COMPLETE);
                             this.productRepository.save(productDetail);
                             extractProductNum.incrementAndGet();
-                            if (extractProductNum.get() % 100 == 0) {
-                                // 100 번 추출 시마다, 현재 추출한 데이터를 update
-                                category.setExtProductNum(category.getExtProductNum() + 100);
+                            if (extractProductNum.get() % 10 == 0) {
+                                // 10 번 추출 시마다, 현재 추출한 데이터를 update
+                                category.setExtProductNum(category.getExtProductNum() + 10);
                                 this.categoryService.save(category);
                             }
                         }
