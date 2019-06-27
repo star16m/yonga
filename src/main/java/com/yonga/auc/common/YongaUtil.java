@@ -51,6 +51,12 @@ public final class YongaUtil {
     public static String getString(String string, String defaultString) {
         return isNotEmpty(string) ? string : defaultString;
     }
+    public static Boolean getBoolean(String string) {
+        if (isEmpty(string)) {
+            return false;
+        }
+        return Boolean.getBoolean(string);
+    }
     public static String getDateString(String formattedString) {
         if (isEmpty(formattedString)) {
             return "";

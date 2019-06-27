@@ -16,7 +16,8 @@ INSERT INTO config(id, config_group, config_key, config_value) VALUES (1, 'EXECU
 INSERT INTO config(id, config_group, config_key, config_value) VALUES (2, 'CONFIG', 'TITLE', 'Yonga :: auc application');
 INSERT INTO config(id, config_group, config_key, config_value) VALUES (3, 'CONFIG', 'WELCOME', 'Welcome yonga mall');
 INSERT INTO config(id, config_group, config_key, config_value) VALUES (4, 'CONFIG', 'ADMIN_EMAIL', 'yaglobal@naver.com');
-INSERT INTO config(id, config_group, config_key, config_value) VALUES (5, 'AUCTION', 'INFO', '{}');
+INSERT INTO config(id, config_group, config_key, config_value) VALUES (5, 'CONFIG', 'EXTRACT_VIEW', 'true');
+INSERT INTO config(id, config_group, config_key, config_value) VALUES (6, 'AUCTION', 'INFO', '{}');
 
 
 INSERT INTO CUSTOMER(USER_ID, PASSWORD, NAME, TEL, EMAIL, DESCRIPTION, PRIVILEGE, ENABLED, DISPLAY) VALUES (

@@ -45,16 +45,15 @@ public class DataExtractor {
 
     private ExtractSiteInfo siteInfo;
 
-    public DataExtractor(ExtractSiteInfo siteInfo) {
+    public DataExtractor(ExtractSiteInfo siteInfo, boolean showExtractView) {
         this.siteInfo = siteInfo;
-
         System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, StringUtils.defaultString(this.siteInfo.getExecutor(), "driver/chromedriver.exe"));
         Configuration.browser = WebDriverRunner.CHROME;
         Configuration.savePageSource = false;
         Configuration.screenshots = false;
         Configuration.timeout = 10000;
         ChromeOptions options = new ChromeOptions();
-//		options.setHeadless(true);
+		options.setHeadless(showExtractView);
         options.addArguments("disable-infobars");
         options.addArguments("—start-maximized");
         options.addArguments("—disable-application-cache");

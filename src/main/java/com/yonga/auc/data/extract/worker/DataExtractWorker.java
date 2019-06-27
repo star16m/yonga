@@ -2,6 +2,7 @@ package com.yonga.auc.data.extract.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yonga.auc.common.YongaUtil;
+import com.yonga.auc.config.Config;
 import com.yonga.auc.config.ConfigConstants;
 import com.yonga.auc.config.ConfigService;
 import com.yonga.auc.data.category.*;
@@ -69,7 +70,8 @@ public class DataExtractWorker implements Callable<Boolean> {
 
     @Override
     public Boolean call() {
-        this.dataExtractor = new DataExtractor(siteInfo);
+        Boolean showExtractView = YongaUtil.getBoolean(this.configService.getConfigValue("CONFIG", "EXTRACT_VIEW"));
+        this.dataExtractor = new DataExtractor(siteInfo, showExtractView);
         boolean extractedProductList = true;
         Date startDate = new Date();
         AtomicInteger totalExtractNum = new AtomicInteger(0);

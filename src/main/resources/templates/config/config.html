@@ -21,6 +21,13 @@
             </div>
         </div>
         <div class="form-group">
+            <label for="inputWelcome" class="col-sm-2 control-label">추출시 화면 보이기</label>
+            <div class="col-sm-10">
+                <input type="checkbox" name="checkShowExtractView" id="checkShowExtractView"
+                       th:checked="${@configService.getConfigValue('CONFIG', 'EXTRACT_VIEW')}">
+            </div>
+        </div>
+        <div class="form-group">
             <label for="inputAdminEmail" class="col-sm-2 control-label">관리자 email</label>
             <div class="col-sm-10">
                 <input type="input" class="form-control" id="inputAdminEmail" placeholder="abc@abc.com"

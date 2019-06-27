@@ -147,13 +147,21 @@ function initialCategory(categoryId, status) {
 function setConfig() {
 	var message = '';
 	var data = {};
-    if (!$("#inputTitle").val() || !$("#inputWelcome").val() || !$("#inputAdminEmail").val() || !$("#inputMailHost").val() || !$("#inputMailPort").val() || !$("#inputMailId").val() || !$("#inputMailPassword").val()) {
-        showMessage("설정값을 입력해 주세요.", true);
+    if (!$("#inputTitle").val() || !$("#inputWelcome").val() || !$("#inputAdminEmail").val()) {
+        showMessage("설정 필수값을 입력해 주세요.", true);
+        return;
+    }
+    var invalidMailInfo = !(($("#inputMailHost").val() && $("#inputMailPort").val() && $("#inputMailId").val() && $("#inputMailPassword").val())
+    || (!$("#inputMailHost").val() && !$("#inputMailPort").val() && !$("#inputMailId").val() && !$("#inputMailPassword").val()));
+
+    if (invalidMailInfo) {
+        showMessage("메일 설정 정보는 모두 입력 하시거나 설정값을 비워 주세요.");
         return;
     }
     data["title"] = $("#inputTitle").val();
     data["welcome"] = $("#inputWelcome").val();
     data["adminEmail"] = $("#inputAdminEmail").val();
+    data["extractView"] = $('input#checkShowExtractView').is(":checked")
     data["mailHost"] = $("#inputMailHost").val();
     data["mailPort"] = $("#inputMailPort").val();
     data["mailId"] = $("#inputMailId").val();
@@ -168,7 +176,6 @@ function setConfig() {
         //dataType: 'json',
         success: function (data,status,xhr) {
             showMessage('저장되었습니다.');
-            location.reload();
         },
         error : function(error) {
             console.log(error.responseText);

@@ -48,6 +48,7 @@ class ConfigController {
 		String title = (String) model.get("title");
 		String welcome = (String) model.get("welcome");
 		String adminEmail = (String) model.get("adminEmail");
+		Boolean extractView = (Boolean) model.get("extractView");
 		String mailHost = (String) model.get("mailHost");
 		String mailPort = (String) model.get("mailPort");
 		String mailId = (String) model.get("mailId");
@@ -67,7 +68,7 @@ class ConfigController {
 		this.configService.setConfigValue("CONFIG", "MAIL_ID", mailId);
 		this.configService.setConfigValue("CONFIG", "MAIL_PASSWORD", mailPassword);
 		Boolean sendMail = false;
-		if (!YongaUtil.isEmpty(adminEmail)) {
+		if (!YongaUtil.isEmpty(mailId)) {
 			try {
 				mailService.sendEmailSync(new MailContents("메일 설정 변경 알림", "메일 설정을 변경하였습니다.",
 						Arrays.asList("테스트 메일 입니다."),
@@ -96,6 +97,7 @@ class ConfigController {
 		}
 		this.configService.setConfigValue("CONFIG", "TITLE", title);
 		this.configService.setConfigValue("CONFIG", "WELCOME", welcome);
+		this.configService.setConfigValue("CONFIG", "EXTRACT_VIEW", extractView.toString());
 		ConfigConstants.APPLICATION_TITLE = title;
 		ConfigConstants.APPLICATION_WELCOME = welcome;
 		return ResponseEntity.ok().build();
