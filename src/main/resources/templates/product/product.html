@@ -37,11 +37,11 @@
 				</tr>
 				<tr>
 					<th class="text-center">메이커</th>
-					<td th:text="*{makerCd}" /></td>
+					<td th:text="*{maker?.name}" /></td>
 				</tr>
 				<tr>
 					<th class="text-center">타입</th>
-					<td th:text="*{brandTypeCd}" /></td>
+					<td th:text="*{brand?.name}" /></td>
 				</tr>
 				<tr>
 					<th class="text-center">상품명</th>
@@ -52,8 +52,8 @@
 					<td th:text="*{hyoka}" /></td>
 				</tr>
 				<tr>
-					<th class="text-center">형상</th>
-					<td th:text="*{keijoCd}" /></td>
+					<th class="text-center">타입</th>
+					<td th:text="*{keijo?.name}" /></td>
 				</tr>
 				<!--<tr>-->
 					<!--<th class="text-center">개최횟수</th>-->
@@ -154,10 +154,10 @@
 		</div>
 		<br />
 
-		<h2 th:text="${'형상 [' + (session.selectsOption != null && session.selectsOption.selectsKeijo != null ? #lists.size(session.selectsOption.selectsKeijo) + '개 선택중' : 'ALL') + ']'}">Keijo</h2>
+		<h2 th:text="${'타입 [' + (session.selectsOption != null && session.selectsOption.selectsKeijo != null ? #lists.size(session.selectsOption.selectsKeijo) + '개 선택중' : 'ALL') + ']'}">Keijo</h2>
 		<div class="row">
 			<div class="col-xs-12">
-				<select id="keijoSelect" name="keijoSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 형상 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(keijoList) + '개 형상이 있습니다.'}" data-size="10">
+				<select id="keijoSelect" name="keijoSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 타입 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(keijoList) + '개 타입이 있습니다.'}" data-size="10">
 					<option th:each="keijo : ${keijoList}" th:value="${keijo.keijoCd}" th:text="${keijo.name}" th:selected="${session.selectsOption != null && session.selectsOption.selectsKeijo != null and #lists.contains(session.selectsOption.selectsKeijo, keijo.keijoCd)}">keijo</option>
 					<!--th:attr="data-subtext=${keijo.keijoCount}"-->
 				</select>
@@ -178,7 +178,7 @@
 					<th>세리순</th>
 					<th>메이커</th>
 					<th>브랜드타입</th>
-					<th>형상</th>
+					<th>타입</th>
 					<th>평가</th>
 					<th th:if="${session.viewProductImage}">제품 이미지</th>
 				</tr>
