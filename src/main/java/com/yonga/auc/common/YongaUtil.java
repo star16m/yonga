@@ -102,6 +102,12 @@ public final class YongaUtil {
         return StringUtils.isEmpty(string);
     }
 
+    public static String trim(String string) {
+        if (isNull(string)) {
+            return null;
+        }
+        return StringUtils.removeAll(string, "^[ 　]|[ 　]$");
+    }
     public static String getMatchedGroup(String orgString, String patternString) {
         String replaceString = new String(orgString);
         if (!isEmpty(patternString)) {

@@ -18,7 +18,8 @@
                 <ul class="list-group">
                     <!--<li class="list-group-item" th:text="'추출일 : [' + #dates.format(*{extractDate}, 'MM/dd HH:mm') + ']'"/>-->
                     <li class="list-group-item" th:text="'추출일 : [' + *{extractDateString} + ']'"/>
-                    <li class="list-group-item" th:text="'제품 추출 현황 : [' + (*{shuppinCount} + *{lowPriceCount}) + '] 건 중 [' + ${T(com.yonga.auc.config.ConfigConstants).EXTRACT_PROUCT_NUM} + '] 건 추출 완료'"/>
+                    <li class="list-group-item" th:text="'옥션 출품 제품 수 : [' + (*{totalProductNum}) + ']'"/>
+                    <li class="list-group-item" th:text="'몰 제품 포함 추출된 전체 제품 수 : [' + ${T(com.yonga.auc.config.ConfigConstants).EXTRACT_PROUCT_NUM} + ']'" />
                     <li class="list-group-item" th:text="'추출 상태 : ' + #{'executor.status.' + ${status}}"/>
                 </ul>
                 <ul class="list-group">

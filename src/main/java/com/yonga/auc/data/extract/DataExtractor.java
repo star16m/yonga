@@ -53,7 +53,7 @@ public class DataExtractor {
         Configuration.screenshots = false;
         Configuration.timeout = 10000;
         ChromeOptions options = new ChromeOptions();
-		options.setHeadless(showExtractView);
+		options.setHeadless(!showExtractView);
         options.addArguments("disable-infobars");
         options.addArguments("—start-maximized");
         options.addArguments("—disable-application-cache");

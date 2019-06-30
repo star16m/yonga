@@ -41,6 +41,14 @@ public class AuctionInfo implements Serializable {
     // 추출 정보
     private LocalDateTime extractDate;
 
+    // 총 제품 개수
+    private Integer totalProductNum;
+    public Integer getTotalProductNum() {
+        if (YongaUtil.isNull(this.totalProductNum)) {
+            return shuppinCount;
+        }
+        return totalProductNum;
+    }
     public String getKaisaiYmdFormatted() {
         return YongaUtil.getString(YongaUtil.parseLocalDateTime(kaisaiYmd), YongaUtil.COMMON_DATE_FORMATTER);
     }

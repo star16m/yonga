@@ -1,5 +1,6 @@
 package com.yonga.auc.data.category.detail;
 
+import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.common.CommonBaseData;
 import com.yonga.auc.data.common.CommonBaseDataWithoutKey;
@@ -43,9 +44,9 @@ public class Keijo extends CommonBaseDataWithoutKey {
         key.setKeijoCd(keijoResponse.getKeijoCd());
         key.setCategoryNo(category.getId());
         keijo.setKeijoKey(key);
-        keijo.setName(keijoResponse.getKeijo());
-        keijo.setNameEn(keijoResponse.getKeijoEn());
-        keijo.setNameKr(keijoResponse.getKeijoEn());
+        keijo.setName(YongaUtil.trim(keijoResponse.getKeijo()));
+        keijo.setNameEn(YongaUtil.trim(keijoResponse.getKeijoEn()));
+        keijo.setNameKr(YongaUtil.trim(keijoResponse.getKeijoEn()));
         return keijo;
     }
 }

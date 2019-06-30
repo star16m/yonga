@@ -1,5 +1,6 @@
 package com.yonga.auc.data.category.detail;
 
+import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.common.CommonBaseDataWithoutKey;
 import lombok.Data;
@@ -47,9 +48,9 @@ public class Maker extends CommonBaseDataWithoutKey {
         key.setCategoryNo(category.getId());
         key.setMakerCd(makerResponse.getMakerCd());
         maker.setMakerKey(key);
-        maker.setName(makerResponse.getMaker());
-        maker.setNameEn(makerResponse.getMakerEn());
-        maker.setNameKr(makerResponse.getMakerEn());
+        maker.setName(YongaUtil.trim(makerResponse.getMaker()));
+        maker.setNameEn(YongaUtil.trim(makerResponse.getMakerEn()));
+        maker.setNameKr(YongaUtil.trim(makerResponse.getMakerEn()));
         return maker;
     }
 }

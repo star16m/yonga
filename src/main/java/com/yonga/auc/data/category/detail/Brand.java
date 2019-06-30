@@ -1,5 +1,6 @@
 package com.yonga.auc.data.category.detail;
 
+import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.data.category.Category;
 import com.yonga.auc.data.common.CommonBaseDataWithoutKey;
 import lombok.Data;
@@ -46,9 +47,9 @@ public class Brand extends CommonBaseDataWithoutKey {
         key.setBrandCd(brandResponse.getBrandTypeCd());
         key.setCategoryNo(category.getId());
         brand.setBrandKey(key);
-        brand.setName(brandResponse.getBrandType());
-        brand.setNameEn(brandResponse.getBrandTypeEn());
-        brand.setNameKr(brandResponse.getBrandTypeEn());
+        brand.setName(YongaUtil.trim(brandResponse.getBrandType()));
+        brand.setNameEn(YongaUtil.trim(brandResponse.getBrandTypeEn()));
+        brand.setNameKr(YongaUtil.trim(brandResponse.getBrandTypeEn()));
         return brand;
     }
 }

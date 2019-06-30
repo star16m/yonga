@@ -2,7 +2,6 @@ package com.yonga.auc.data.extract.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yonga.auc.common.YongaUtil;
-import com.yonga.auc.config.Config;
 import com.yonga.auc.config.ConfigConstants;
 import com.yonga.auc.config.ConfigService;
 import com.yonga.auc.data.category.*;
@@ -139,13 +138,17 @@ public class DataExtractWorker implements Callable<Boolean> {
                         });
                     }
                     if (YongaUtil.isNotEmpty(categoryDetailInfo.getBrandTypeListInfo())) {
-                        categoryDetailInfo.getBrandTypeListInfo().stream().map(brand -> Brand.valueOf(brand, category)).forEach(brand -> {
+                        categoryDetailInfo.getBrandTypeListInfo().stream()
+                                .map(brand -> Brand.valueOf(brand, category))
+                                .forEach(brand -> {
                             brandMap.get(category.getId()).add(brand);
                             this.brandRepository.save(brand);
                         });
                     }
                     if (YongaUtil.isNotEmpty(categoryDetailInfo.getKeijoListInfo())) {
-                        categoryDetailInfo.getKeijoListInfo().stream().map(keijo -> Keijo.valueOf(keijo, category)).forEach(keijo -> {
+                        categoryDetailInfo.getKeijoListInfo().stream()
+                                .map(keijo -> Keijo.valueOf(keijo, category))
+                                .forEach(keijo -> {
                             keijoMap.get(category.getId()).add(keijo);
                             this.keijoRepository.save(keijo);
                         });
@@ -190,6 +193,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                                     maker.setName(p.getMaker());
                                     maker.setNameKr(p.getMaker());
                                     maker.setNameEn(p.getMaker());
+                                    makerMap.get(category.getId()).add(maker);
                                     this.makerRepository.save(maker);
                                 }
                                 if (!brandExists) {
@@ -201,6 +205,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                                     brand.setName(p.getBrandType());
                                     brand.setNameEn(p.getBrandTypeEn());
                                     brand.setNameKr(p.getBrandType());
+                                    brandMap.get(category.getId()).add(brand);
                                     this.brandRepository.save(brand);
                                 }
                                 if (!keijoExists) {
@@ -212,6 +217,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                                     keijo.setName(p.getKeijo());
                                     keijo.setNameEn(p.getKeijoEn());
                                     keijo.setNameKr(p.getKeijo());
+                                    keijoMap.get(category.getId()).add(keijo);
                                     this.keijoRepository.save(keijo);
                                 }
                             }
@@ -247,6 +253,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                             if (extractProductNum.get() % 10 == 0) {
                                 // 10 번 추출 시마다, 현재 추출한 데이터를 update
                                 category.setExtProductNum(category.getExtProductNum() + 10);
+                                ConfigConstants.EXTRACT_PROUCT_NUM = ConfigConstants.EXTRACT_PROUCT_NUM + 10;
                                 this.categoryService.save(category);
                             }
                         }
@@ -255,8 +262,9 @@ public class DataExtractWorker implements Callable<Boolean> {
                 }
                 category.setExtProductNum(category.getTotalProductNum() - (notCollectedProductList == null || notCollectedProductList.isEmpty() ? 0 : notCollectedProductList.size()));
                 category.setModifiedDate(new Date());
-                category.setStatus("COMPLETE");
+                category.setStatus(category.getTotalProductNum().equals(category.getExtProductNum()) ? "COMPLETE" : category.getStatus());
                 this.categoryService.save(category);
+                ConfigConstants.EXTRACT_PROUCT_NUM = this.categoryService.countExtractedProductNum(ConfigConstants.AUCTION_INFO.getKaisaiKaisu());
             });
             this.logService.addLog("데이터 상세 추출을 완료하였습니다. Total[" + totalExtractNum.get() + "]");
             this.configService.setConfigValue("EXECUTOR", "STATUS", "COMPLETE");
@@ -275,7 +283,6 @@ public class DataExtractWorker implements Callable<Boolean> {
             }
             watch.stop();
             if (YongaUtil.isNotNull(ConfigConstants.AUCTION_INFO) && YongaUtil.isNotNull(ConfigConstants.AUCTION_INFO.getKaisaiKaisu())) {
-//                ConfigConstants.EXTRACT_PROUCT_NUM = productRepository.countExtractedProductNum(ConfigConstants.AUCTION_INFO.getKaisaiKaisu());
                 ConfigConstants.EXTRACT_PROUCT_NUM = this.categoryService.countExtractedProductNum(ConfigConstants.AUCTION_INFO.getKaisaiKaisu());
             }
             String adminEmail = this.configService.getConfigValue("CONFIG", "ADMIN_EMAIL");
