@@ -162,6 +162,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                     this.categoryService.save(category);
                 });
             }
+            ConfigConstants.EXTRACT_PROUCT_NUM = this.categoryService.countExtractedProductNum(ConfigConstants.AUCTION_INFO.getKaisaiKaisu());
             // 5. 카테고리 별 기본 정보 조회
             if (this.extractMode.isRequiredInitialize()) {
                 this.targetCategoryList.stream().forEach(category -> {
@@ -230,6 +231,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                     }
                 });
             }
+            ConfigConstants.EXTRACT_PROUCT_NUM = this.categoryService.countExtractedProductNum(ConfigConstants.AUCTION_INFO.getKaisaiKaisu());
             // 6. 카테고리 별 상세 정보 조회
             this.targetCategoryList.stream().forEach(category -> {
                 category.setStatus("PROGRESS");
@@ -250,6 +252,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                             productDetail.setExtractResult(ExtractResult.COMPLETE);
                             this.productRepository.save(productDetail);
                             extractProductNum.incrementAndGet();
+                            totalExtractNum.incrementAndGet();
                             if (extractProductNum.get() % 10 == 0) {
                                 // 10 번 추출 시마다, 현재 추출한 데이터를 update
                                 category.setExtProductNum(category.getExtProductNum() + 10);
