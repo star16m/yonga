@@ -78,7 +78,7 @@ public class MailService {
 
         Multipart multipart = new MimeMultipart();
         multipart.addBodyPart(messageBodyPart);
-//        MimeBodyPart attachPart = new MimeBodyPart();
+//        MimeBodyPart attachPart = new MimeBodyPart()
 //
 //        attachPart.attachFile("/Users/star16m/project/yonga/src/main/resources/static/resources/images/403.png");
 //        multipart.addBodyPart(attachPart);
