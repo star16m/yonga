@@ -68,7 +68,7 @@ public class CustomerController {
             return new ResponseEntity<>(Collections.singletonMap("result", e.getMessage()), HttpStatus.BAD_REQUEST);
         }
         if (this.customerRepository.findByUserId(customer.getUserId()) != null) {
-            return new ResponseEntity<>(Collections.singletonMap("result", "already exist customer [" + customer.getUserId() + "]"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(Collections.singletonMap("result", "이미 존재하는 id 입니다. [" + customer.getUserId() + "]"), HttpStatus.BAD_REQUEST);
         }
         customer.setPassword(passwordEncoder.encode(customer.getPassword()));
         customer.setPrivilege("ROLE_USER");

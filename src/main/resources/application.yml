@@ -2,7 +2,7 @@ app:
   brand-auc:
     workhome: .
     uid: K021347
-    pwd: dyddk1309
+    pwd: dyddk1024 # dyddk1309
     targetProtocol: https
     targetHost: www.brand-auc.com
     executor: /Users/star16m/Downloads/chromedriver
@@ -25,6 +25,7 @@ spring:
     active: production
   datasource:
     sql-script-encoding: UTF-8
+#    url: jdbc:hsqldb:/Users/star16m/project/yonga/data/data;AUTO_SERVER=TRUE
     url: jdbc:hsqldb:${app.brand-auc.workhome}/data/data
 #    schema: classpath*:db/schema.sql
 #    data: classpath*:db/data.sql

@@ -1,6 +1,7 @@
 package com.yonga.auc.data.extract.worker;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import com.yonga.auc.common.YongaUtil;
 import com.yonga.auc.config.ConfigConstants;
 import com.yonga.auc.config.ConfigService;
@@ -44,6 +45,7 @@ public class DataExtractWorker implements Callable<Boolean> {
     private ExtractMode extractMode;
     private MailService mailService;
     private ObjectMapper objectMapper;
+    private Gson gson;
 
     public DataExtractWorker(CategoryService categoryService, ExtractSiteInfo siteInfo, LogService logService, ConfigService configService, List<Category> targetCategoryList, ExtractMode extractMode, MailService mailService,
                              ProductRepository productRepository,
@@ -51,7 +53,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                              MakerRepository makerRepository,
                              BrandRepository brandRepository,
                              KeijoRepository keijoRepository,
-                             ObjectMapper objectMapper) {
+                             ObjectMapper objectMapper, Gson gson) {
         this.categoryService = categoryService;
         this.siteInfo = siteInfo;
         this.logService = logService;
@@ -65,12 +67,13 @@ public class DataExtractWorker implements Callable<Boolean> {
         this.brandRepository = brandRepository;
         this.keijoRepository = keijoRepository;
         this.objectMapper = objectMapper;
+        this.gson = gson;
     }
 
     @Override
     public Boolean call() {
         Boolean showExtractView = YongaUtil.getBoolean(this.configService.getConfigValue("CONFIG", "EXTRACT_VIEW"));
-        this.dataExtractor = new DataExtractor(siteInfo, showExtractView);
+        this.dataExtractor = new DataExtractor(siteInfo, showExtractView, this.gson);
         boolean extractedProductList = true;
         Date startDate = new Date();
         AtomicInteger totalExtractNum = new AtomicInteger(0);
@@ -90,8 +93,8 @@ public class DataExtractWorker implements Callable<Boolean> {
                     this.configService.setConfigValue("AUCTION", "INFO", auctionInfoString);
                 }
                 if (YongaUtil.isNull(ConfigConstants.AUCTION_INFO)
-                        && YongaUtil.isNull(ConfigConstants.AUCTION_INFO.getKaisaiKaisu())
-                        && !ConfigConstants.AUCTION_INFO.getKaisaiKaisu().equals(auctionInfo.getKaisaiKaisu())) {
+                        || YongaUtil.isNull(ConfigConstants.AUCTION_INFO.getKaisaiKaisu())
+                        || !ConfigConstants.AUCTION_INFO.getKaisaiKaisu().equals(auctionInfo.getKaisaiKaisu())) {
                     // 저장되어 있는 회차가 다른 경우, 무조건 초기화 한다.
                     this.extractMode = ExtractMode.INITIALIZE;
                     this.logService.addLog(String.format("새로운 Auction 회차[%s]가 확인 되어 초기화를 시도합니다.", auctionInfo.getKaisaiKaisu()));
@@ -226,7 +229,9 @@ public class DataExtractWorker implements Callable<Boolean> {
                             product.setExtractResult(ExtractResult.INITIALIZE);
                             log.info("제품 : maker [{}], brand [{}], keijo [{}]", p.getMakerCd(), p.getBrandTypeCd(), p.getKeijoCd());
                             this.productRepository.save(product);
-                            extractProduct.incrementAndGet();
+                            if (extractProduct.incrementAndGet() == 500) {
+                                this.logService.addLog(String.format("카테고리 [%s] 의 제품 중, 기본정보 500개 처리 중..", category.getKorean()));
+                            }
                         });
                     }
                 });
@@ -249,6 +254,7 @@ public class DataExtractWorker implements Callable<Boolean> {
                             if (!YongaUtil.isNullOrEmpty(productDetail.getProductImage())) {
                                 this.productImageRepository.saveAll(productDetail.getProductImage());
                             }
+                            log.info("product detail [{}]", productDetail);
                             productDetail.setExtractResult(ExtractResult.COMPLETE);
                             this.productRepository.save(productDetail);
                             extractProductNum.incrementAndGet();

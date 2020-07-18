@@ -11,6 +11,7 @@ import com.yonga.auc.data.product.image.ProductImage;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -21,6 +22,7 @@ import java.util.List;
 @Table(name = "product")
 @Data
 @NoArgsConstructor
+@ToString
 public class Product extends CommonBaseDataWithoutKey {
 
     public Product(ProductDto productDto) {
@@ -42,9 +44,23 @@ public class Product extends CommonBaseDataWithoutKey {
         this.kekka = productDto.getKekka();
         this.kekkaKng = productDto.getKekkaKng();
         this.shohin = productDto.getShohin();
-        this.shuppinBiko2 = productDto.getShuppinBiko2();
+        String shuppinBiko2 = "";
+        if (productDto.getShuppinBiko2() != null) {
+            shuppinBiko2 = productDto.getShuppinBiko2().replaceAll(" {2,}", ", ");
+            if (shuppinBiko2.length() > 255) {
+                shuppinBiko2 = shuppinBiko2.substring(0, 255);
+            }
+        }
+        this.shuppinBiko2 = shuppinBiko2;
         this.kata = productDto.getKata();
-        this.biko = productDto.getBiko();
+        String biko = "";
+        if (productDto.getBiko() != null) {
+            biko = productDto.getBiko().replaceAll(" {2,}", ", ");
+            if (biko.length() > 255) {
+                biko = biko.substring(0, 255);
+            }
+        }
+        this.biko = biko;
         this.hyoka = productDto.getHyoka();
         this.hyokaGaiso = productDto.getHyokaGaiso();
         this.hyokaNaiso = productDto.getHyokaNaiso();

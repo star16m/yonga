@@ -1,7 +1,9 @@
 package com.yonga.auc.data.extract;
 
-import com.codeborne.selenide.*;
-import com.codeborne.selenide.ex.ElementNotFound;
+import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.Configuration;
+import com.codeborne.selenide.SelenideElement;
+import com.codeborne.selenide.WebDriverRunner;
 import com.codeborne.selenide.ex.UIAssertionError;
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -30,30 +32,34 @@ import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static com.codeborne.selenide.Condition.text;
-import static com.codeborne.selenide.Selenide.*;
+import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.open;
 
 @Slf4j
 public class DataExtractor {
 
     private ExtractSiteInfo siteInfo;
+    private Gson gson;
 
-    public DataExtractor(ExtractSiteInfo siteInfo, boolean showExtractView) {
+    public DataExtractor(ExtractSiteInfo siteInfo, boolean showExtractView, Gson gson) {
         this.siteInfo = siteInfo;
+        this.gson = gson;
         System.setProperty(ChromeDriverService.CHROME_DRIVER_EXE_PROPERTY, StringUtils.defaultString(this.siteInfo.getExecutor(), "driver/chromedriver.exe"));
         Configuration.browser = WebDriverRunner.CHROME;
         Configuration.savePageSource = false;
         Configuration.screenshots = false;
         Configuration.timeout = 10000;
         ChromeOptions options = new ChromeOptions();
-		options.setHeadless(!showExtractView);
+        options.setHeadless(!showExtractView);
         options.addArguments("disable-infobars");
         options.addArguments("—start-maximized");
         options.addArguments("—disable-application-cache");
@@ -72,9 +78,9 @@ public class DataExtractor {
                 log.error("Error displayed [{}]", errorDetail.text());
                 throw new DataExtractException(ExtractExceptionMessage.LOGIN_FAIL);
             }
-            SelenideElement loginInfoElement = $("div.kaiinInfo");
+            SelenideElement loginInfoElement = $("span.kaiin_info");
             loginInfoElement.shouldHave(text(this.siteInfo.getUid()));
-            loginInfoElement.shouldHave(text("様"));
+//            loginInfoElement.shouldHave(text("様"));
         } catch (DataExtractException e) {
             throw e;
         } catch (UIAssertionError e) {
@@ -96,7 +102,6 @@ public class DataExtractor {
     private <T> T extract(Class<T> classType, String url, Path path) {
         open(url);
         File categoryFile = extractTargetElement(path, $("body"));
-        Gson gson = new Gson();
         try (JsonReader reader = new JsonReader(new FileReader(categoryFile))) {
             return gson.fromJson(reader, classType);
         } catch (IOException e) {
@@ -131,17 +136,19 @@ public class DataExtractor {
         auctionInfo.setExtractDate(LocalDateTime.now());
         return auctionInfo;
     }
+
     public CategoryDetailInfo extractCategoryDetail(Category category) {
         CategoryDetailInfo categoryDetailInfo = extract(CategoryDetailInfo.class,
                 String.format("https://u.brand-auc.com/api/v1/auction/searchHeader/options/previewSearch?genreCds=%s&gamenId=B02-01", category.getId()),
-                Paths.get(this.siteInfo.getWorkRoot(),String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
+                Paths.get(this.siteInfo.getWorkRoot(), String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
         Objects.requireNonNull(categoryDetailInfo);
         // 5.2. 전체 메이커 지정하여 다시 한번 추출.
         categoryDetailInfo = extract(CategoryDetailInfo.class,
                 String.format("https://u.brand-auc.com/api/v1/auction/searchHeader/options/previewSearch?genreCds=%s&makerCds=%s&gamenId=B02-01", category.getId(), categoryDetailInfo.getMakerListInfo().stream().map(maker -> String.valueOf(maker.getMakerCd())).collect(Collectors.joining(","))),
-                Paths.get(this.siteInfo.getWorkRoot(),String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
+                Paths.get(this.siteInfo.getWorkRoot(), String.format("category_detail_info_%s_%s.json", category.getId(), category.getKorean())));
         return categoryDetailInfo;
     }
+
     public boolean extractProductDetail(
             List<Category> targetCategoryList,
             BiFunction<Category, ProductList, List<Product>> extractProductListFunction,
@@ -158,7 +165,6 @@ public class DataExtractor {
         try {
             // 1. 로그인
             login();
-
 
 
             // 3. 카테고리 정보
@@ -191,7 +197,7 @@ public class DataExtractor {
                             if (YongaUtil.isNull(productDto) || YongaUtil.isNull(productDto.getUketsukeBng())) {
                                 String code = YongaUtil.isNull(productDto) ? "" : productDto.getCode();
                                 String message = YongaUtil.isNull(productDto) ? "" : productDto.getMessage();
-                                log.info("제품 추출에 실패하였습니다. code [{}], message [{}], product [{}]", code, message, productDto);
+                                log.info("iuu제품 추출에 실패하였습니다. code [{}], message [{}], product [{}]", code, message, productDto);
                                 failedExtractProductConsumer.accept(category, product);
                                 return;
                             }

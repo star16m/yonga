@@ -31,6 +31,10 @@
 					<td><b th:text="*{uketsukeBng}"></b></td>
 				</tr>
 				<tr>
+					<th class="text-center">채널</th>
+					<td th:text="*{channelKbn}" /></td>
+				</tr>
+				<tr>
 					<th class="text-center">경매순서(세리순:ｾﾘ順)</th>
 					<td><b th:text="*{seriBng}"></b></td>
 				</tr>
@@ -39,8 +43,12 @@
 					<td th:text="*{maker?.name}" /></td>
 				</tr>
 				<tr>
-					<th class="text-center">타입</th>
+					<th class="text-center">라인/타입</th>
 					<td th:text="*{brand?.name}" /></td>
+				</tr>
+				<tr>
+					<th class="text-center">형상</th>
+					<td th:text="*{keijo?.name}" /></td>
 				</tr>
 				<tr>
 					<th class="text-center">상품명</th>
@@ -49,10 +57,6 @@
 				<tr>
 					<th class="text-center">평가</th>
 					<td th:text="*{hyoka}" /></td>
-				</tr>
-				<tr>
-					<th class="text-center">타입</th>
-					<td th:text="*{keijo?.name}" /></td>
 				</tr>
 				<tr>
 					<th class="text-center">개최일</th>
@@ -165,7 +169,10 @@
 		<h2 th:text="${'Product' + (page != null and not #lists.isEmpty(page.content) ? ' [' + page.totalElements + ' 개 제품]' : '')}">Product</h2>
 
 		<div class="checkbox">
-			<label><input type="checkbox" name="checkViewProductImage" id="checkViewProductImage" th:checked="${session.selectsOption != null && session.selectsOption.viewProductImage != null && session.selectsOption.viewProductImage}">제품 이미지 보기</label>
+			<label>
+				<input type="checkbox" name="checkViewProductImage" id="checkViewProductImage" th:checked="${session.selectsOption != null && session.selectsOption.viewProductImage != null && session.selectsOption.viewProductImage}">
+				제품 이미지 보기
+			</label>
 		</div>
 		<table id="product" class="table table-striped">
 			<thead>
@@ -178,7 +185,7 @@
 					<th>타입</th>
 					<th>평가</th>
 					<th>가격</th>
-					<th th:if="${session.viewProductImage}">제품 이미지</th>
+<!--					<th th:if="${session.viewProductImage}">제품 이미지</th>-->
 				</tr>
 			</thead>
 			<tbody>
@@ -202,10 +209,10 @@
 				</tr>
 				<th:block th:if="${session.selectsOption != null && session.selectsOption.viewProductImage != null && session.selectsOption.viewProductImage}">
 					<tr>
-						<td class="text-center" colspan="7">
+						<td class="text-center" colspan="8">
 							<div class="product-image-row" th:classappend="${#lists.size(p.productImage) == 0} ? 'text-center' : 'text-left'">
 								<a th:each="productImg : ${p.productImage}" th:href="@{/product/__${p.category.id}__/__${p.uketsukeBng}__(page=${page.number-1},size=${page.size})}">
-									<img th:src="${productImg.thumbnailImageUrl}" />'
+									<img th:src="${productImg.thumbnailImageUrl}" />
 								</a>
 								<div th:if="${#lists.size(p.productImage) == 0}">
 									제품 이미지가 없습니다.

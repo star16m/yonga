@@ -22,7 +22,7 @@ public class AuctionInfo implements Serializable {
     // 옥션 개최 횟수
     private Integer kaisaiKaisu;
     // 옥션 개최 일자
-    private Long kaisaiYmd;
+    private LocalDateTime kaisaiYmd;
     // 옥션 최저 가격 정보
     private String lowPrice;
     private Integer lowPriceCount;
@@ -50,7 +50,7 @@ public class AuctionInfo implements Serializable {
         return totalProductNum;
     }
     public String getKaisaiYmdFormatted() {
-        return YongaUtil.getString(YongaUtil.parseLocalDateTime(kaisaiYmd), YongaUtil.COMMON_DATE_FORMATTER);
+        return YongaUtil.getString(kaisaiYmd, YongaUtil.COMMON_DATE_FORMATTER);
     }
     public String getExtractDateString() {
         return YongaUtil.getString(extractDate);
