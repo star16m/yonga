@@ -25,9 +25,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeDriverService;
 import org.openqa.selenium.chrome.ChromeOptions;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -102,7 +100,7 @@ public class DataExtractor {
     private <T> T extract(Class<T> classType, String url, Path path) {
         open(url);
         File categoryFile = extractTargetElement(path, $("body"));
-        try (JsonReader reader = new JsonReader(new FileReader(categoryFile))) {
+        try (JsonReader reader = new JsonReader(new InputStreamReader(new FileInputStream(categoryFile), "UTF-8"))) {
             return gson.fromJson(reader, classType);
         } catch (IOException e) {
             log.error("Error occurred while extracting data from [{}]. [{}]", url, e.getMessage(), e);

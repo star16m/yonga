@@ -16,7 +16,7 @@ public interface LogRepository extends JpaRepository<Log, Integer> {
 
 	@Transactional
 	@Modifying
-	@Query(value = "delete from work_log w where w.create_date < CURRENT_TIMESTAMP - INTERVAL '3' DAY", nativeQuery=true)
+	@Query(value = "delete from work_log w where w.create_date < current_date - 3", nativeQuery=true)
 	int deleteOldLog();
 	
 }
