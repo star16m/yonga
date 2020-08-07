@@ -39,7 +39,7 @@
 					<td><b th:text="*{seriBng}"></b></td>
 				</tr>
 				<tr>
-					<th class="text-center">메이커</th>
+					<th class="text-center">브랜드명</th>
 					<td th:text="*{maker?.name}" /></td>
 				</tr>
 				<tr>
@@ -47,7 +47,7 @@
 					<td th:text="*{brand?.name}" /></td>
 				</tr>
 				<tr>
-					<th class="text-center">형상</th>
+					<th class="text-center">형태</th>
 					<td th:text="*{keijo?.name}" /></td>
 				</tr>
 				<tr>
@@ -135,20 +135,20 @@
 	</th:block>
 
 	<th:block th:if="${page != null and page.content != null and makerList != null}">
-		<h2 th:text="${'메이커 [' + (session.selectsOption != null && session.selectsOption.selectsMaker != null ? #lists.size(session.selectsOption.selectsMaker) + '개 선택중' : 'ALL') + ']'}">Maker</h2>
+		<h2 th:text="${'브랜드명 [' + (session.selectsOption != null && session.selectsOption.selectsMaker != null ? #lists.size(session.selectsOption.selectsMaker) + '개 선택중' : 'ALL') + ']'}">Maker</h2>
 		<div class="row">
 			<div class="col-xs-12">
-				<select id="makerSelect" name="makerSelect" class="selectpicker" data-style="btn-primary" data-selected-text-format="count > 3" data-count-selected-text="{0} 개의 메이커 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(makerList) + '개 maker가 있습니다.'}" data-size="10">
+				<select id="makerSelect" name="makerSelect" class="selectpicker" data-style="btn-primary" data-selected-text-format="count > 3" data-count-selected-text="{0} 개의 브랜드 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(makerList) + '개 브랜드가 있습니다.'}" data-size="10">
 					<option th:each="maker : ${makerList}" th:value="${maker.makerCd}" th:text="${maker.name}" th:selected="${session.selectsOption != null && session.selectsOption.selectsMaker != null and #lists.contains(session.selectsOption.selectsMaker, maker.makerCd)}">maker</option>
 				</select>
 			</div>
 		</div>
 		<br />
 		
-		<h2 th:text="${'브랜드 [' + (session.selectsOption != null && session.selectsOption.selectsBrand != null ? #lists.size(session.selectsOption.selectsBrand) + '개 선택중' : 'ALL') + ']'}">BrandType</h2>
+		<h2 th:text="${'라인/타입 [' + (session.selectsOption != null && session.selectsOption.selectsBrand != null ? #lists.size(session.selectsOption.selectsBrand) + '개 선택중' : 'ALL') + ']'}">BrandType</h2>
 		<div class="row">
 			<div class="col-xs-12">
-				<select id="brandSelect" name="brandSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 브랜드 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(brandList) + '개 브랜드가 있습니다.'}" data-size="10">
+				<select id="brandSelect" name="brandSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 라인/타입 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(brandList) + '개 라인/타입이 있습니다.'}" data-size="10">
 					<option th:each="brand : ${brandList}" th:value="${brand.brandCd}" th:text="${brand.name}" th:selected="${session.selectsOption != null && session.selectsOption.selectsBrand != null and #lists.contains(session.selectsOption.selectsBrand, brand.brandCd)}">brand</option>
 					<!--th:attr="data-subtext=${keijo.keijoCount}"-->
 				</select>
@@ -156,10 +156,10 @@
 		</div>
 		<br />
 
-		<h2 th:text="${'타입 [' + (session.selectsOption != null && session.selectsOption.selectsKeijo != null ? #lists.size(session.selectsOption.selectsKeijo) + '개 선택중' : 'ALL') + ']'}">Keijo</h2>
+		<h2 th:text="${'형태 [' + (session.selectsOption != null && session.selectsOption.selectsKeijo != null ? #lists.size(session.selectsOption.selectsKeijo) + '개 선택중' : 'ALL') + ']'}">Keijo</h2>
 		<div class="row">
 			<div class="col-xs-12">
-				<select id="keijoSelect" name="keijoSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 타입 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(keijoList) + '개 타입이 있습니다.'}" data-size="10">
+				<select id="keijoSelect" name="keijoSelect" class="selectpicker" data-selected-text-format="count > 3" data-style="btn-info" data-count-selected-text="{0} 개의 형태 선택중" multiple th:attr="data-current-category=${currentCategory.id}" th:title="${#lists.size(keijoList) + '개 형태가 있습니다.'}" data-size="10">
 					<option th:each="keijo : ${keijoList}" th:value="${keijo.keijoCd}" th:text="${keijo.name}" th:selected="${session.selectsOption != null && session.selectsOption.selectsKeijo != null and #lists.contains(session.selectsOption.selectsKeijo, keijo.keijoCd)}">keijo</option>
 				</select>
 			</div>
@@ -180,9 +180,9 @@
 					<th>카테고리</th>
 					<th>접수번호</th>
 					<th>세리순</th>
-					<th>메이커</th>
-					<th>브랜드타입</th>
-					<th>타입</th>
+					<th>브랜드명</th>
+					<th>라인/타입</th>
+					<th>형태</th>
 					<th>평가</th>
 					<th>가격</th>
 <!--					<th th:if="${session.viewProductImage}">제품 이미지</th>-->

@@ -10,7 +10,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 public interface BrandRepository extends JpaRepository<Brand, Integer> {
-    @Query(value="select k.* from brand k where category_no = :categoryId order by brand_cd asc", nativeQuery=true)
+    @Query(value="select k.* from brand k where category_no = :categoryId order by orders asc", nativeQuery=true)
     List<Brand> findBrand(@Param("categoryId") Integer categoryId) throws DataAccessException;
 
     @Transactional

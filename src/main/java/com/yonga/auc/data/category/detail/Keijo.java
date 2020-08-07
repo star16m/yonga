@@ -23,6 +23,8 @@ public class Keijo extends CommonBaseDataWithoutKey {
     private String nameEn;
     @Column(name = "name_kr")
     private String nameKr;
+    @Column(name = "orders")
+    private Integer order;
     public Integer getKeijoCd() {
         return this.keijoKey.getKeijoCd();
     }

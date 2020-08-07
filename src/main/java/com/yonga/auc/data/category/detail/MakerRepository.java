@@ -10,7 +10,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 public interface MakerRepository extends JpaRepository<Maker, Integer> {
-	@Query(value="select m.* from maker m where category_no = :categoryId order by maker_cd asc", nativeQuery=true)
+	@Query(value="select m.* from maker m where category_no = :categoryId order by orders asc", nativeQuery=true)
     List<Maker> findMaker(@Param("categoryId") Integer categoryId) throws DataAccessException;
 	@Transactional
 	@Modifying

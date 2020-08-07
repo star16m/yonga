@@ -32,6 +32,7 @@ CREATE TABLE MAKER (
     name_kr VARCHAR(255) NULL,
     create_date TIMESTAMP,
     modified_date TIMESTAMP,
+    orders INTEGER,
     CONSTRAINT maker_pk PRIMARY KEY (category_no, maker_cd)
 );
 
@@ -44,6 +45,7 @@ CREATE TABLE brand (
     name_kr VARCHAR(255) NULL,
     create_date TIMESTAMP,
     modified_date TIMESTAMP,
+    orders INTEGER,
     constraint brand_pk primary key(category_no, brand_cd)
 );
 -- 형상
@@ -55,6 +57,7 @@ CREATE TABLE keijo (
     name_kr VARCHAR(255) NULL,
     create_date TIMESTAMP,
     modified_date TIMESTAMP,
+    orders INTEGER,
     constraint keijo_pk primary key (category_no, keijo_cd)
 );
 

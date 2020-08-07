@@ -10,7 +10,7 @@ import javax.transaction.Transactional;
 import java.util.List;
 
 public interface KeijoRepository extends JpaRepository<Keijo, Integer> {
-    @Query(value="select k.* from keijo k where category_no = :categoryId order by keijo_cd asc", nativeQuery=true)
+    @Query(value="select k.* from keijo k where category_no = :categoryId order by orders asc", nativeQuery=true)
     List<Keijo> findKeijo(@Param("categoryId") Integer categoryId) throws DataAccessException;
     @Transactional
     @Modifying

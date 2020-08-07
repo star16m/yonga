@@ -25,6 +25,8 @@ public class Brand extends CommonBaseDataWithoutKey {
     private String nameEn;
     @Column(name = "name_kr")
     private String nameKr;
+    @Column(name = "orders")
+    private Integer order;
 
     public Integer getBrandCd() {
         return this.brandKey.getBrandCd();

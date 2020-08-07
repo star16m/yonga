@@ -132,26 +132,32 @@ public class DataExtractWorker implements Callable<Boolean> {
                     makerMap.put(category.getId(), new ArrayList<>());
                     brandMap.put(category.getId(), new ArrayList<>());
                     keijoMap.put(category.getId(), new ArrayList<>());
+                    AtomicInteger orders = new AtomicInteger(0);
                     if (YongaUtil.isNotEmpty(categoryDetailInfo.getMakerListInfo())) {
                         categoryDetailInfo.getMakerListInfo().stream()
                                 .map(maker -> Maker.valueOf(maker, category))
                                 .forEach(maker -> {
+                                    maker.setOrder(orders.incrementAndGet());
                             makerMap.get(category.getId()).add(maker);
                             this.makerRepository.save(maker);
                         });
                     }
+                    orders.set(0);
                     if (YongaUtil.isNotEmpty(categoryDetailInfo.getBrandTypeListInfo())) {
                         categoryDetailInfo.getBrandTypeListInfo().stream()
                                 .map(brand -> Brand.valueOf(brand, category))
                                 .forEach(brand -> {
+                                    brand.setOrder(orders.incrementAndGet());
                             brandMap.get(category.getId()).add(brand);
                             this.brandRepository.save(brand);
                         });
                     }
+                    orders.set(0);
                     if (YongaUtil.isNotEmpty(categoryDetailInfo.getKeijoListInfo())) {
                         categoryDetailInfo.getKeijoListInfo().stream()
                                 .map(keijo -> Keijo.valueOf(keijo, category))
                                 .forEach(keijo -> {
+                                    keijo.setOrder(orders.incrementAndGet());
                             keijoMap.get(category.getId()).add(keijo);
                             this.keijoRepository.save(keijo);
                         });

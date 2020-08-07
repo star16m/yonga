@@ -26,6 +26,8 @@ public class Maker extends CommonBaseDataWithoutKey {
     private String nameEn;
     @Column(name = "name_kr")
     private String nameKr;
+    @Column(name = "orders")
+    private Integer order;
 
     public Integer getMakerCd() {
         return this.makerKey.getMakerCd();
