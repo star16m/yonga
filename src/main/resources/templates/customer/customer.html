@@ -31,7 +31,19 @@
               </tr>
               </tbody>
           </table>
-          <div class="text-right"><a class="btn btn-default" th:href="@{/customer/NEW}">유저생성</a></div>
+          <div class="text-right">
+              <a class="btn btn-default" th:href="@{/customer/NEW}">유저생성</a>
+              <a class="btn btn-default" th:href="@{/customer/download}">유저 다운로드</a>
+          </div>
+          <h2>고객 업로드</h2>
+          <div class="">
+              <form method="post" th:action="@{/customer/upload}" enctype="multipart/form-data">
+                  <div class="form-group">
+                      <input type="file" name="file" class="form-control-file">
+                  </div>
+                  <button type="submit" class="btn btn-default">Upload File</button>
+              </form>
+          </div>
       </div>
   </body>
 

@@ -6,6 +6,7 @@ app:
     targetProtocol: https
     targetHost: www.brand-auc.com
     executor: ${app.brand-auc.workhome}/driver/chromedriver.exe
+#    executor: /Users/star16m/Downloads/chromedriver
     work.path: ${app.brand-auc.workhome}/data/exportHtmlfiles
     version: 1.0.0-nomoney
     exportPassword: yongababo

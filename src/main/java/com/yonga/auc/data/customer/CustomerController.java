@@ -6,15 +6,26 @@ import com.yonga.auc.data.log.LogService;
 import com.yonga.auc.mail.MailContents;
 import com.yonga.auc.mail.MailService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.*;
 
 @Slf4j
@@ -125,6 +136,82 @@ public class CustomerController {
         model.put("MODE", "SIGNUP");
         return "customer/modifyCustomer";
     }
+    @GetMapping("/customer/download")
+    public void downloadCsv(HttpServletResponse httpServletResponse) throws IOException {
+        httpServletResponse.setContentType("text/csv");
+        httpServletResponse.setHeader("Content-Disposition", "attachment; file=users.csv");
+        httpServletResponse.setCharacterEncoding("UTF-8");
+        PrintWriter writer = httpServletResponse.getWriter();
+        CSVPrinter csvPrinter = new CSVPrinter(writer,
+                CSVFormat.DEFAULT.withHeader("userId", "password", "privilege", "name", "tel", "email", "description", "enabled", "display"));
+        for (Customer customer : this.customerRepository.findAllCustomer()) {
+            csvPrinter.printRecord(Arrays.asList(
+                    customer.getUserId(),
+                    customer.getPassword(),
+                    customer.getPrivilege(),
+                    customer.getName(),
+                    customer.getTel(),
+                    customer.getEmail(),
+                    customer.getDescription(),
+                    customer.getEnabled(),
+                    customer.getDisplay()
+                    ));
+        }
+    }
+
+    @PostMapping("/customer/upload")
+    public String uploadFile(@RequestParam("file") MultipartFile file, RedirectAttributes attributes) throws IOException {
+
+        // check if file is empty
+        if (file.isEmpty()) {
+            attributes.addFlashAttribute("message", "Please select a file to upload.");
+            return "redirect:/";
+        }
+        final Reader reader = new InputStreamReader(file.getInputStream(), "UTF-8");
+        final CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT.withHeader());
+        try {
+            for (final CSVRecord record : parser) {
+                final String userId = record.get("userId");
+                final String password = record.get("password");
+                final String privilege = record.get("privilege");
+                final String name = record.get("name");
+                final String tel = record.get("tel");
+                final String email = record.get("email");
+                final String description = record.get("description");
+                final String enabled = record.get("enabled");
+                final String display = record.get("display");
+                Customer customer = new Customer();
+                customer.setUserId(userId);
+                customer.setPassword(password);
+                customer.setPrivilege(privilege);
+                customer.setName(name);
+                customer.setTel(tel);
+                customer.setEmail(email);
+                customer.setDescription(description);
+                customer.setEnabled(Boolean.valueOf(enabled));
+                customer.setDisplay(Boolean.valueOf(display));
+                this.customerRepository.save(customer);
+//            private String userId;
+//            private String password;
+//            private String privilege;
+//            private String name;
+//            private String tel;
+//            private String email;
+//            private String description;
+//            private Boolean enabled = false;
+//            private Boolean display = true;
+            }
+        } finally {
+            parser.close();
+            reader.close();
+        }
+
+        // return success response
+        attributes.addFlashAttribute("message", "You successfully uploaded !");
+
+        return "redirect:/customer";
+    }
+
     @GetMapping("/customer/{customerId}")
     public String getCustomerById(@PathVariable String customerId, Map<String, Object> model, HttpServletRequest request) {
         log.debug("this is getCustomerById [{}]", customerId);
