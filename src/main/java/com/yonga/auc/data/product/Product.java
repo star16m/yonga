@@ -31,6 +31,8 @@ public class Product extends CommonBaseDataWithoutKey {
         this.kaijoCd = productDto.getKaijoCd();
         this.kaisaiKaisu = productDto.getKaisaiKaisu();
         this.seriBng = productDto.getSeriBng();
+
+        this.productType = "L".equals(productDto.getChannelKbn()) ? "LOW" : productDto.getKaijoCd() == 0 ? "MALL" : "RT";
         this.seiyakuFlg = productDto.getSeiyakuFlg();
         this.makerCd = productDto.getMakerCd();
         this.brandTypeCd = productDto.getBrandTypeCd();
@@ -39,6 +41,9 @@ public class Product extends CommonBaseDataWithoutKey {
         this.channelKbn = productDto.getChannelKbn();
         this.shinpinKbn = productDto.getShinpinKbn();
         this.startKng = productDto.getStartKng();
+        if ("MALL".equals(this.productType)) {
+            this.startKng = productDto.getKingaku();
+        }
         this.kiboKng = productDto.getKiboKng();
         this.kekkaKbn = productDto.getKekkaKbn();
         this.kekka = productDto.getKekka();
@@ -118,6 +123,8 @@ public class Product extends CommonBaseDataWithoutKey {
     private Keijo keijo;
     @Column(name = "keijo_cd")
     private Integer keijoCd;
+    @Column(name = "product_type")
+    private String productType;
     // 상세 정보
     @Column(name = "seizo_bng")
     private String seizoBng;

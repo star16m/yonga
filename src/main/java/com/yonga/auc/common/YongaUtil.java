@@ -122,7 +122,7 @@ public final class YongaUtil {
 
     public static void cleanDirectory(Path path) {
         File targetDirectory = path.toFile();
-        if (!targetDirectory.isDirectory()) {
+        if (targetDirectory != null && targetDirectory.exists() && !targetDirectory.isDirectory()) {
             throw new IllegalArgumentException();
         }
         try {

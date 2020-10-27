@@ -109,10 +109,10 @@ class CategoryController {
         ExtractMode extractMode = ExtractMode.valueOf(extractModeString);
 
         log.info("try data execute");
-        String executorStatus = this.configService.getConfigValue("EXECUTOR", "STATUS");
-        if ("RUNNING".equals(executorStatus)) {
-            return "실행 중입니다.";
-        }
+//        String executorStatus = this.configService.getConfigValue("EXECUTOR", "STATUS");
+//        if ("RUNNING".equals(executorStatus)) {
+//            return "실행 중입니다.";
+//        }
         List<Category> targetCategoryList = this.categoryService.findAll(null).stream().filter(category -> categoryIdList.contains(String.valueOf(category.getId()))).collect(Collectors.toList());
         extract(targetCategoryList, extractMode);
         return "success";

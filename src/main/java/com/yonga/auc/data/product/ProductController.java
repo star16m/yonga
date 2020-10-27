@@ -18,9 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -87,6 +85,19 @@ class ProductController {
 			if (session.getAttribute("selectsOption") != null) {
 				searchOption = (ProductSearchOption) session.getAttribute("selectsOption");
 			}
+
+			List<ProductType> productTypeList = Arrays.asList(
+					ProductType.builder().code("LOW").name("LOW PRICE").build(),
+					ProductType.builder().code("RT").name("RT").build(),
+					ProductType.builder().code("MALL").name("MALL").build()
+			);
+			model.put("productTypeList", productTypeList);
+			List<String> selectsProductTypeList = null;
+			if (!session.isNew() && searchOption != null && searchOption.getSelectsProductType() != null) {
+				selectsProductTypeList = searchOption.getSelectsProductType();
+			} else {
+				selectsProductTypeList = productTypeList.stream().map(ProductType::getCode).collect(Collectors.toList());
+			}
     		List<Integer> selectsMakerList = null;
     		model.put("makerList", makerInfo);
     		if (!session.isNew() && searchOption != null && searchOption.getSelectsMaker() != null) {
@@ -113,7 +124,7 @@ class ProductController {
 				selectsKeijoList = keijoInfo.stream().map(i -> i.getKeijoCd()).collect(Collectors.toList());
 			}
     		// product list
-    		Page<Product> productPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, pageable);
+    		Page<Product> productPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, selectsProductTypeList, pageable);
     		PageWrapper<Product> page = new PageWrapper<> (productPage, "/product/" + categoryId.get());
     		model.put("page", page);
     		// left & right product
@@ -137,7 +148,7 @@ class ProductController {
 						if (!productPage.getPageable().hasPrevious()) {
 							// first page
 						} else {
-							Page<Product> previousProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, pageable.previousOrFirst());
+							Page<Product> previousProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, selectsProductTypeList, pageable.previousOrFirst());
 							Product previousProduct = previousProductPage.getContent().get(pageable.getPageSize() - 1);
 							leftProduct = previousProduct.getUketsukeBng();
 							previousPage = previousProductPage.getPageable().getPageNumber();
@@ -148,7 +159,7 @@ class ProductController {
 						if (productPage.getTotalPages() <= productPage.getPageable().next().getPageNumber()) {
 							// last page
 						} else {
-							Page<Product> nextProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, productPage.getPageable().next());
+							Page<Product> nextProductPage = this.productService.findProductList(categoryId.get(), selectsMakerList, selectsBrandList, selectsKeijoList, selectsProductTypeList, productPage.getPageable().next());
 							Product nextProduct = nextProductPage.getContent().get(0);
 							rightProduct = nextProduct.getUketsukeBng();
 							nextPage = nextProductPage.getPageable().getPageNumber();

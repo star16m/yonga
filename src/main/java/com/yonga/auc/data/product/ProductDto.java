@@ -39,6 +39,7 @@ public class ProductDto {
     private String channelKbn;
     private Integer shinpinKbn;
     private Integer startKng;
+    private Integer kingaku;
     private Integer kiboKng;
     private Integer kekkaKbn;
     private String kekka;

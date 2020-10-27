@@ -71,6 +71,7 @@ CREATE TABLE product (
     maker_cd INTEGER NOT NULL,
     brand_type_cd INTEGER NOT NULL,
     keijo_cd INTEGER NOT NULL,
+    product_type varchar(10) not null,
     -- start of detail
     seizo_bng VARCHAR(255) NULL,
     channel_kbn VARCHAR(255) NULL,

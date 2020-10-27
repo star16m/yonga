@@ -13,7 +13,17 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, String> {
     Boolean existsByUketsukeBng(String uketsukeBng);
 
-    Page<Product> findProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(Integer genreCd, List<Integer> selectsMakerCdList, List<Integer> selectsBrandTypeList, List<Integer> selectsKeijoCdList, Pageable pageable);
+    @Query(value =
+            "select p.* from product p " +
+            " where genre_cd = :genreCd " +
+            "   and maker_cd in :selectsMakerCdList " +
+            "   and brand_type_cd in :selectsBrandTypeList " +
+            "   and keijo_cd in :selectsKeijoCdList " +
+            // rt, low_price, mall 제품 구분
+            "   and product_type in :productTypeList " +
+            " order by maker_cd asc, brand_type_cd asc, keijo_cd asc, product_type asc, uketsuke_bng asc",
+                    nativeQuery = true)
+    Page<Product> findProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(Integer genreCd, List<Integer> selectsMakerCdList, List<Integer> selectsBrandTypeList, List<Integer> selectsKeijoCdList, List<String> productTypeList, Pageable pageable);
 
     Product findProductByUketsukeBng(String uketsukeBng);
 

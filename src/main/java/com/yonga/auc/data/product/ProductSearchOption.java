@@ -10,6 +10,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ProductSearchOption {
+    List<String> selectsProductType;
     List<Integer> selectsMaker;
     List<Integer> selectsKeijo;
     List<Integer> selectsBrand;

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -24,8 +25,8 @@ public class ProductService {
     private ProductRepository productRepository;
     @Autowired
     private ProductImageRepository productImageRepository;
-    public Page<Product> findProductList(Integer categoryId, List<Integer> selectsMakerList, List<Integer> selectsTypeList, List<Integer> selectsKeijoList, Pageable pageable) {
-        return this.productRepository.findProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(categoryId, selectsMakerList, selectsTypeList, selectsKeijoList, pageable);
+    public Page<Product> findProductList(Integer categoryId, List<Integer> selectsMakerList, List<Integer> selectsTypeList, List<Integer> selectsKeijoList, List<String> selectsProductTypeList, Pageable pageable) {
+        return this.productRepository.findProductByGenreCdAndMakerCdInAndBrandTypeCdInAndKeijoCdInOrderByMakerCdAscKeijoCdAscUketsukeBngAsc(categoryId, selectsMakerList, selectsTypeList, selectsKeijoList, selectsProductTypeList, pageable);
     }
     public Product findProductByUketsukeNo(String uketsukeNo) {
         Product product = this.productRepository.findProductByUketsukeBng(uketsukeNo);

@@ -31,7 +31,7 @@ $(document).ready(function() {
         }
     });
     // enable selectpicker
-    $('#categorySelect,#makerSelect,#brandSelect,#keijoSelect').selectpicker({
+    $('#categorySelect,#makerSelect,#brandSelect,#keijoSelect,#productTypeSelect').selectpicker({
 	width: '100%'
     });
 
@@ -66,7 +66,7 @@ $(document).ready(function() {
             }
 	});
     });
-    $('#makerSelect,#brandSelect,#keijoSelect').on('changed.bs.select', function(e, clickedIndex, newValue, oldValue) {
+    $('#makerSelect,#brandSelect,#keijoSelect,#productTypeSelect').on('changed.bs.select', function(e, clickedIndex, newValue, oldValue) {
 //        if (clickedIndex == 0) {
 //            if ($(this) && $(this).val() && $(this).val().includes("0")) {
 //                $(this).selectpicker('selectAll');
@@ -83,9 +83,11 @@ $(document).ready(function() {
     function changeOption() {
 	var categoryId = $('#makerSelect').data('currentCategory');
 	var data = {};
+	data["selectsProductType"] = $('#productTypeSelect').val();
 	data["selectsMaker"] = $('#makerSelect').val() && $('#makerSelect').val().length != 0 ? jQuery.grep($('#makerSelect').val(), v => v != "0") : null;
 	data["selectsKeijo"] = $('#keijoSelect').val();
 	data["selectsBrand"] = $('#brandSelect').val();
+	data["viewProductImage"] = $('input#checkViewProductImage').is(":checked");
 	$.ajax({
             url: "/selects/options",
             type: "patch",
@@ -102,7 +104,7 @@ $(document).ready(function() {
             }
 	});
     }
-    $('#makerSelect,#keijoSelect,#brandSelect').on('hide.bs.select', function (e) {
+    $('#makerSelect,#keijoSelect,#brandSelect,#productTypeSelect').on('hide.bs.select', function (e) {
 	if (!$(this).data('targetchanged')) {
 		return;
 	}
